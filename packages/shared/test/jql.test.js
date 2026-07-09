@@ -90,3 +90,15 @@ describe('fuzzing — never crashes ungracefully', () => {
     );
   });
 });
+
+// LEARN: this test pins TREE SHAPE, not just "does it parse". Precedence bugs
+// parse fine — they build the wrong tree. Review finding on PR #57.
+describe('parser — operator precedence', () => {
+  it('binds AND tighter than OR: "a AND b OR c" is "(a AND b) OR c"', () => {
+    const ast = parseJql('type = bug AND priority = high OR type = story');
+    // top node must be OR, with the AND on its left
+    expect(ast.type).toBe(NODE.OR);
+    expect(ast.left.type).toBe(NODE.AND);
+    expect(ast.right.type).toBe(NODE.CMP);
+  });
+});
