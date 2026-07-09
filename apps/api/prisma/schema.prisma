@@ -43,6 +43,7 @@ model Project {
   members ProjectMember[]
   columns WorkflowColumn[]
   issues  Issue[]
+  sprints Sprint[]
 }
 
 // LEARN: a join table with payload. Many-to-many between User and Project,
@@ -157,6 +158,8 @@ model Issue {
   comments       Comment[]
   activityEvents ActivityEvent[]
   attachments    Attachment[]
+  sprint         Sprint?         @relation(fields: [sprintId], references: [id])
+  sprintId       String?
 
   @@unique([projectId, number])
   @@index([projectId, columnId])
@@ -221,4 +224,26 @@ model SavedFilter {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+enum SprintState {
+  PLANNED
+  ACTIVE
+  COMPLETED
+}
+
+model Sprint {
+  id        String      @id @default(cuid())
+  projectId String
+  name      String
+  goal      String?
+  state     SprintState @default(PLANNED)
+  startAt   DateTime?
+  endAt     DateTime?
+  createdAt DateTime    @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  issues  Issue[]
+
+  @@index([projectId])
 }
