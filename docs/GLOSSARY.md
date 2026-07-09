@@ -55,3 +55,16 @@ Terms in the order the codebase introduces them.
 - **Error boundary** — a React class component that catches render errors in its subtree and shows a fallback.
 - **Skeleton loader** — a shaped placeholder shown while data loads; calmer than a spinner.
 - **Optimistic concurrency** — (foreshadow) detecting conflicting edits via a version/timestamp rather than locking.
+
+## Sprint 06
+
+- **Tokenizer / lexer** — turns a string into a list of typed tokens; step 1 of parsing.
+- **Recursive-descent parser** — one function per grammar rule; builds an AST. Step 2.
+- **AST (Abstract Syntax Tree)** — a tree that captures the structure of parsed input.
+- **Precedence** — which operator binds tighter (AND over OR); encoded by which parse rule calls which.
+- **Compiler / evaluator** — walks the AST to produce output (here, a Prisma where). Step 3.
+- **tsvector / tsquery** — Postgres's searchable text form and query form for full-text search.
+- **GIN index** — inverted index mapping words → rows; makes full-text search fast.
+- **Debounce** — wait until input stops for N ms, then act once (vs throttle: at most once per N ms).
+- **AbortSignal** — cancels an in-flight fetch so a stale response can't overwrite fresh data.
+- **Fuzz testing** — throwing random inputs at code to assert it fails gracefully, never crashes.
