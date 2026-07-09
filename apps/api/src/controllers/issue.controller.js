@@ -4,6 +4,7 @@ import {
   getIssue,
   updateIssue,
   deleteIssue,
+  moveIssue,
 } from '../services/issue.service.js';
 
 export async function create(req, res) {
@@ -50,4 +51,9 @@ export async function update(req, res) {
 export async function remove(req, res) {
   await deleteIssue(req.params.key, Number(req.params.number), req.user.id);
   res.status(204).end();
+}
+
+export async function move(req, res) {
+  const issue = await moveIssue(req.params.key, Number(req.params.number), req.user.id, req.body);
+  res.json({ issue });
 }
