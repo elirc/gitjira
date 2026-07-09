@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 — Sprint 06 (PR #57)
+### Added
+- JQL-lite query language (type = bug AND assignee = me): hand-written tokenizer + recursive-descent parser + Prisma compiler in packages/shared
+- Postgres full-text search on title+description (generated tsvector + GIN index)
+- Saved filters per user; global Cmd+K command palette (jump by key or project); debounced search with request cancellation
+- docs/concepts/parsing.md — how to build a small language
+### Changed
+- Filtering is fully server-side; the client-side type filter was removed
+### Fixed
+- AND now binds tighter than OR (parser precedence); full-text query parameterized (no SQL injection surface)
+
 ## 0.1.0 — MVP (Sprint 05, PR #49)
 
 ### Added
