@@ -231,3 +231,129 @@ body {
   border-radius: 4px;
   font-family: inherit;
 }
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.view-switch {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.view-switch button {
+  background: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: var(--text);
+}
+.view-switch button.active {
+  background: var(--brand);
+  color: white;
+}
+.board-toolbar {
+  margin-bottom: 8px;
+}
+.dev-toggle {
+  font-size: 12px;
+  color: var(--text-subtle);
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.board {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 12px;
+}
+.board-column {
+  background: var(--bg-subtle);
+  border-radius: 8px;
+  width: 272px;
+  flex: 0 0 auto;
+}
+.board-column-header {
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  display: flex;
+  gap: 8px;
+}
+.board-column-header .count {
+  background: #dfe1e6;
+  border-radius: 10px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+.board-column-body {
+  padding: 4px 8px 8px;
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.board-column-body.is-over {
+  background: #e9f2ff;
+  border-radius: 6px;
+}
+.board-empty {
+  color: var(--text-subtle);
+  font-size: 12px;
+  text-align: center;
+  padding: 16px 0;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+}
+.issue-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: grab;
+  box-shadow: 0 1px 1px rgba(9, 30, 66, 0.15);
+}
+.issue-card:active {
+  cursor: grabbing;
+}
+.issue-card-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.issue-card-title {
+  font-size: 14px;
+  margin: 4px 0;
+}
+.issue-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.assignee-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
