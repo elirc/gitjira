@@ -1,0 +1,23 @@
+# LEARN: infrastructure lands one sprint before the code that needs it —
+# nothing here is used yet. Sprint 02 (database + auth) starts with
+# `docker compose up -d` already working, so that sprint's diff is about
+# data modeling, not yak-shaving.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gitjira
+      POSTGRES_PASSWORD: gitjira_dev # dev-only credential, never reused
+      POSTGRES_DB: gitjira
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+
+volumes:
+  pgdata:
