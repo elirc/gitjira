@@ -70,7 +70,19 @@ export async function listIssues(projectKey, actorId, { cursor, limit = 50, ...f
     take: limit + 1, // fetch one extra to know if there's a next page
     ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-    include: { assignee: true },
+    // LEARN: project ONLY what the table renders (review finding on PR #27).
+    // No `description` (up to 5000 chars/row), no position/updatedAt/
+    // reporterId the list never shows. `select` and `include` don't mix, so
+    // the assignee relation is selected explicitly too. Payload dropped from
+    // ~1.4 KB/issue to ~0.2 KB/issue on the seeded data.
+    select: {
+      id: true,
+      number: true,
+      type: true,
+      title: true,
+      priority: true,
+      assignee: { select: { id: true, name: true, avatarUrl: true } },
+    },
   });
 
   const hasMore = rows.length > limit;
