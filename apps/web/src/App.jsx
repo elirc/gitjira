@@ -4,6 +4,7 @@ import { Sidebar } from './components/Sidebar.jsx';
 import { Footer } from './components/Footer.jsx';
 import { HomePage } from './pages/HomePage.jsx';
 import { ProjectsPage } from './pages/ProjectsPage.jsx';
+import { ProjectBoardPage } from './pages/ProjectBoardPage.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { RegisterPage } from './pages/RegisterPage.jsx';
 import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
@@ -25,6 +26,7 @@ export function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/projects" element={<ProjectsPage />} />
+              <Route path="/projects/:key" element={<ProjectBoardPage />} />
             </Route>
           </Routes>
         </main>

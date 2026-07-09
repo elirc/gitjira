@@ -25,3 +25,14 @@ Terms in the order the codebase introduces them.
 - **Account enumeration** — an endpoint whose errors reveal whether an email exists; login must answer identically either way.
 - **Integration test** — drives the real stack (HTTP → service → real Postgres); green means it works, not that mocks agree.
 - **Idempotent** — safe to run twice; seeds and (sprint 09) job handlers must be.
+
+## Sprint 03
+
+- **Cursor pagination** — "give me the page after this row"; stable and fast at any depth. Opposite of offset pagination.
+- **Offset pagination** — `LIMIT/OFFSET`; simple but slows down and can skip/duplicate rows under insertion.
+- **N+1 query** — fetching a list, then one query per row for related data; the classic ORM performance trap.
+- **Transaction** — a group of DB writes that all succeed or all roll back; the tool for "never half-done".
+- **Race condition** — a bug that only appears when operations interleave in time (e.g. two creates reading the same counter).
+- **PATCH semantics** — partial update; an omitted field means "leave alone", not "clear".
+- **IDOR** — Insecure Direct Object Reference: reaching another user's data by guessing an id, when the server forgot to check ownership.
+- **Authorization** — "may this authenticated user do this?"; distinct from authentication ("who are they?").
