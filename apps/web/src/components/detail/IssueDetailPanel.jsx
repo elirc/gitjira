@@ -18,6 +18,16 @@ export function IssueDetailPanel({ projectKey, number, onClose }) {
     if (issue) setDescDraft(issue.description ?? '');
   }, [issue?.id, issue?.description]);
 
+  // LEARN: dirty-state guard (review finding). Closing the panel while editing
+  // the description used to discard the edit silently — a trust-breaker. If
+  // there are unsaved changes, confirm before closing. window.confirm is fine
+  // for v1; a nicer dialog is sprint 14. Both the ✕ and the backdrop call this.
+  const requestClose = () => {
+    const dirty = editingDesc && descDraft !== (issue?.description ?? '');
+    if (dirty && !window.confirm('Discard unsaved description changes?')) return;
+    onClose();
+  };
+
   if (isLoading || !issue) {
     return (
       <aside className="detail-panel">
@@ -31,13 +41,15 @@ export function IssueDetailPanel({ projectKey, number, onClose }) {
     if (e.actor) usersById[e.actor.id] = e.actor;
   });
 
-  const progressPct = Math.round((issue.progress.done / issue.progress.total) * 100);
+  // Guard the zero case: 0/0 would be NaN% (review finding).
+  const { done, total } = issue.progress;
+  const progressPct = total === 0 ? 0 : Math.round((done / total) * 100);
 
   return (
     <aside className="detail-panel" role="dialog" aria-label={`Issue ${issue.key}`}>
       <div className="detail-header">
         <span className="mono">{issue.key}</span>
-        <button className="link-button" onClick={onClose} aria-label="Close">
+        <button className="link-button" onClick={requestClose} aria-label="Close">
           ✕
         </button>
       </div>
