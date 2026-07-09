@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma.js';
-import { AuthError } from './auth.service.js';
+import { unauthenticated } from '../lib/errors.js';
 
 const ACCESS_TTL = '15m';
 const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -25,7 +25,7 @@ export function verifyAccessToken(token) {
   try {
     return jwt.verify(token, secret());
   } catch {
-    throw new AuthError('Invalid or expired access token');
+    throw unauthenticated('Invalid or expired access token');
   }
 }
 
@@ -56,7 +56,7 @@ export async function rotateRefreshToken(raw) {
   });
 
   if (!record || record.expiresAt < new Date()) {
-    throw new AuthError('Invalid refresh token');
+    throw unauthenticated('Invalid refresh token');
   }
 
   // LEARN: replay detection. A refresh token is single-use; seeing a
@@ -66,7 +66,7 @@ export async function rotateRefreshToken(raw) {
   // optimism.
   if (record.revokedAt) {
     await revokeFamily(record.familyId);
-    throw new AuthError('Refresh token reuse detected — session revoked');
+    throw unauthenticated('Refresh token reuse detected — session revoked');
   }
 
   await prisma.refreshToken.update({
