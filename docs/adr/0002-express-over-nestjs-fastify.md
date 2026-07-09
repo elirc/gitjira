@@ -3,13 +3,16 @@
 **Status:** accepted · **Sprint:** 01
 
 ## Context
+
 The API needs an HTTP framework. NestJS offers structure and DI out of the box; Fastify
 offers better raw throughput; Express offers ubiquity and minimal abstraction.
 
 ## Decision
+
 Express, with the layering (routes → controllers → services) built by hand.
 
 ## Consequences
+
 - ✅ Nothing is magic: every pattern in this codebase is visible, greppable code —
   which is the point of a teaching codebase.
 - ✅ Largest ecosystem and hiring surface; skills transfer everywhere.

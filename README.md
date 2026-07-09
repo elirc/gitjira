@@ -17,14 +17,14 @@ Open http://localhost:5173 — the footer shows a live health check from the API
 
 ## Where things live
 
-| Path | What |
-|---|---|
-| `apps/web` | React + Vite frontend |
-| `apps/api` | Express API (`src/README.md` explains the layering) |
-| `packages/shared` | Code both sides import |
-| `docs/adr/` | Architecture Decision Records — why things are the way they are |
-| `docs/sprints/` | Per-sprint learning briefs with exercises |
-| `docs/state/` | Snapshot of the system after each sprint |
+| Path              | What                                                            |
+| ----------------- | --------------------------------------------------------------- |
+| `apps/web`        | React + Vite frontend                                           |
+| `apps/api`        | Express API (`src/README.md` explains the layering)             |
+| `packages/shared` | Code both sides import                                          |
+| `docs/adr/`       | Architecture Decision Records — why things are the way they are |
+| `docs/sprints/`   | Per-sprint learning briefs with exercises                       |
+| `docs/state/`     | Snapshot of the system after each sprint                        |
 
 ## How to study this repo
 
@@ -36,9 +36,9 @@ Open http://localhost:5173 — the footer shows a live health check from the API
 
 ## Scripts
 
-| Command | What |
-|---|---|
-| `npm run dev` | API + web, concurrently |
-| `npm run lint` / `npm run format` | ESLint / Prettier |
-| `npm test` | Test suite (arrives sprint 02) |
-| `npm run build` | Production builds |
+| Command                           | What                           |
+| --------------------------------- | ------------------------------ |
+| `npm run dev`                     | API + web, concurrently        |
+| `npm run lint` / `npm run format` | ESLint / Prettier              |
+| `npm test`                        | Test suite (arrives sprint 02) |
+| `npm run build`                   | Production builds              |

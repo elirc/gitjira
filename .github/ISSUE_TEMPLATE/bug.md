@@ -4,8 +4,7 @@ about: Something is wrong
 labels: bug
 ---
 
-**Steps to reproduce**
-1.
+**Steps to reproduce** 1.
 
 **Expected:**
 

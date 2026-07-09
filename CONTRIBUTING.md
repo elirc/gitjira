@@ -8,7 +8,7 @@ part of what the repo teaches.
 - **Branches:** `sprint/NN-short-name` for sprint work, `fix/short-name` for follow-ups.
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org)
   (`feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`, `perf:`, `ci:`), enforced by
-  commitlint. Write a body: 1–3 sentences on the *why*. Commits should tell a story —
+  commitlint. Write a body: 1–3 sentences on the _why_. Commits should tell a story —
   each must build and pass lint on its own.
 - **Merges:** merge commits, never squash. History is curriculum here: the fix-after-review
   commits are the most instructive ones, and squashing would erase them.
@@ -19,7 +19,7 @@ part of what the repo teaches.
 - One PR per sprint, from the sprint branch to `main`, using the PR template.
 - Open as **draft** early so CI runs on every push; mark ready when the story is complete.
 - The author self-reviews first: inline comments walking a reviewer through the diff.
-- Review comments must explain *why*, and disagreement is expected — resolve threads with
+- Review comments must explain _why_, and disagreement is expected — resolve threads with
   reasoning or code, not silence.
 
 ## Quality gates

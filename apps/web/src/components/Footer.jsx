@@ -13,7 +13,11 @@ export function Footer() {
 
   return (
     <footer className="footer">
-      {health && <span>api v{health.version} · up {health.uptimeSeconds}s</span>}
+      {health && (
+        <span>
+          api v{health.version} · up {health.uptimeSeconds}s
+        </span>
+      )}
       {error && <span>api unreachable</span>}
       {!health && !error && <span>checking api…</span>}
     </footer>

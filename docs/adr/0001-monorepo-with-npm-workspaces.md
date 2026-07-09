@@ -3,14 +3,17 @@
 **Status:** accepted · **Sprint:** 01
 
 ## Context
+
 Web app, API, and (soon) shared validation schemas need to evolve together. Options:
 separate repos, a monorepo with plain npm workspaces, or a monorepo with build
 orchestration (Turborepo/Nx).
 
 ## Decision
+
 One repository, npm workspaces, no orchestrator.
 
 ## Consequences
+
 - ✅ Cross-cutting changes (API contract + client) are one atomic, reviewable PR.
 - ✅ One `npm install`, local packages linked by name — no publishing dance.
 - ✅ Nothing to learn beyond npm itself.
