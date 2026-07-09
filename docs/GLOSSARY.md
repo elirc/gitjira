@@ -36,3 +36,13 @@ Terms in the order the codebase introduces them.
 - **PATCH semantics** — partial update; an omitted field means "leave alone", not "clear".
 - **IDOR** — Insecure Direct Object Reference: reaching another user's data by guessing an id, when the server forgot to check ownership.
 - **Authorization** — "may this authenticated user do this?"; distinct from authentication ("who are they?").
+
+## Sprint 04
+
+- **Fractional indexing** — storing order as keys that always have room for a new key between any two; a move writes one row.
+- **LexoRank** — Jira's real fractional-ranking scheme; ours is a small cousin.
+- **Optimistic update** — apply a change to the UI immediately, before the server confirms; roll back if it rejects.
+- **Snapshot / rollback** — capture cache state before an optimistic change so you can restore it on failure.
+- **Property-based testing** — assert invariants over generated inputs; the tool shrinks failures to a minimal reproducer.
+- **Live region** — an ARIA element screen readers announce when its content changes.
+- **DnD sensor** — dnd-kit's input adapter (pointer, keyboard); the keyboard sensor is what makes drag accessible.
