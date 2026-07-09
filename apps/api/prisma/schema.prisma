@@ -27,6 +27,7 @@ model User {
   comments       Comment[]
   activityEvents ActivityEvent[]
   attachments    Attachment[]
+  savedFilters   SavedFilter[]
 }
 
 model Project {
@@ -140,6 +141,13 @@ model Issue {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // LEARN: Prisma has no native tsvector type, so we declare it as Unsupported
+  // (Prisma tracks the column but won't let JS read/write it directly). The
+  // actual column is a GENERATED STORED tsvector defined in the migration SQL
+  // — Postgres recomputes it automatically whenever title/description change,
+  // so there's nothing to keep in sync in app code.
+  searchVector Unsupported("tsvector")?
+
   project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
   column         WorkflowColumn  @relation(fields: [columnId], references: [id])
   assignee       User?           @relation("Assignee", fields: [assigneeId], references: [id])
@@ -201,4 +209,16 @@ model Attachment {
   uploader User  @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
 
   @@index([issueId])
+}
+
+model SavedFilter {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  jql       String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

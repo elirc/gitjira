@@ -10,7 +10,8 @@
     "./issue-schemas": "./src/issue-schemas.js",
     "./query-keys": "./src/query-keys.js",
     "./fractional-index": "./src/fractional-index.js",
-    "./activity": "./src/activity.js"
+    "./activity": "./src/activity.js",
+    "./jql": "./src/jql/index.js"
   },
   "dependencies": {
     "zod": "^4.4.3"

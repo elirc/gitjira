@@ -8,6 +8,7 @@ import {
   commentSchema,
 } from '@gitjira/shared/issue-schemas';
 import * as issues from '../controllers/issue.controller.js';
+import * as searchCtl from '../controllers/search.controller.js';
 import * as comments from '../controllers/comment.controller.js';
 import * as attachments from '../controllers/attachment.controller.js';
 import multer from 'multer';
@@ -18,6 +19,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 export const issueRoutes = Router({ mergeParams: true });
 
 issueRoutes.get('/', asyncHandler(issues.list));
+issueRoutes.get('/search', asyncHandler(searchCtl.search));
 issueRoutes.post('/', validate(createIssueSchema), asyncHandler(issues.create));
 issueRoutes.get('/:number', asyncHandler(issues.getOne));
 issueRoutes.get('/:number/detail', asyncHandler(issues.detail));
