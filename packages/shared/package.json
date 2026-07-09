@@ -6,7 +6,9 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js",
-    "./auth-schemas": "./src/auth-schemas.js"
+    "./auth-schemas": "./src/auth-schemas.js",
+    "./issue-schemas": "./src/issue-schemas.js",
+    "./query-keys": "./src/query-keys.js"
   },
   "dependencies": {
     "zod": "^4.4.3"
