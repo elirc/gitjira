@@ -11,6 +11,9 @@ git clone https://github.com/elirc/gitjira.git
 cd gitjira
 npm install          # one install for all workspaces
 npm run dev          # boots API (:3000) and web (:5173) together
+docker compose up -d # postgres + redis
+npm run db:migrate -w @gitjira/api   # apply migrations
+npm run db:seed -w @gitjira/api      # demo data (ana@gitjira.dev / demo-password-1)
 ```
 
 Open http://localhost:5173 — the footer shows a live health check from the API.
