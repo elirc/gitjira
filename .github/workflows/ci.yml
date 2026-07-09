@@ -8,23 +8,43 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+
+    # LEARN: a service container is a real Postgres booted next to the job —
+    # integration tests in CI hit the same database engine as production.
+    # Mock-free confidence, ~5 seconds of startup.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gitjira
+          POSTGRES_PASSWORD: gitjira_dev
+          POSTGRES_DB: gitjira_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gitjira"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://gitjira:gitjira_dev@localhost:5432/gitjira_test
+      JWT_SECRET: ci-test-secret
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          # LEARN: caches the npm download cache keyed on the lockfile —
-          # dependencies only re-download when the lockfile changes.
           cache: npm
 
       - name: Install
-        # LEARN: `npm ci` = clean install of exactly what the lockfile says,
-        # failing loudly if lockfile and package.json disagree. `npm install`
-        # in CI silently re-resolves version ranges: green today, red
-        # tomorrow, no code change. Reproducibility is what makes CI's
-        # verdict meaningful.
         run: npm ci
+
+      - name: Generate prisma client
+        run: npx prisma generate
+        working-directory: apps/api
 
       - name: Lint
         run: npm run lint

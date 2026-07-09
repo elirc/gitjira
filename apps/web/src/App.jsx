@@ -5,6 +5,8 @@ import { Footer } from './components/Footer.jsx';
 import { HomePage } from './pages/HomePage.jsx';
 import { ProjectsPage } from './pages/ProjectsPage.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
+import { RegisterPage } from './pages/RegisterPage.jsx';
+import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
 
 export function App() {
   return (
@@ -13,14 +15,17 @@ export function App() {
       <div className="app-body">
         <Sidebar />
         <main className="content">
-          {/* LEARN: client-side routing — the server sends the same HTML for
-              every URL; React Router swaps components based on location.
-              The URL becomes application state you can bookmark and share,
-              a property we will lean on hard in sprint 05. */}
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            {/* LEARN: everything inside ProtectedRoute requires a session.
+                Public routes are the explicit exception, not the default —
+                a new page added tomorrow is protected unless someone
+                deliberately moves it out. Safe by default. */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/projects" element={<ProjectsPage />} />
+            </Route>
           </Routes>
         </main>
       </div>

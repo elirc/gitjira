@@ -1,0 +1,77 @@
+// LEARN: the schema file is the single source of truth for the database.
+// Change it, generate a migration, review the SQL in the PR like any other
+// code. "What does the database look like?" is answered here, in version
+// control — never by poking at a live server.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+
+  memberships   ProjectMember[]
+  refreshTokens RefreshToken[]
+  ledProjects   Project[]       @relation("ProjectLead")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  key         String   @unique // e.g. "GJ" — short, human, used in issue keys
+  name        String
+  description String?
+  leadId      String
+  createdAt   DateTime @default(now())
+
+  lead    User            @relation("ProjectLead", fields: [leadId], references: [id])
+  members ProjectMember[]
+}
+
+// LEARN: a join table with payload. Many-to-many between User and Project,
+// but the *relationship itself* has data (the role). Modeling the
+// relationship as its own entity is what makes per-project roles possible.
+model ProjectMember {
+  projectId String
+  userId    String
+  role      Role     @default(MEMBER)
+  joinedAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// LEARN: we store a HASH of the refresh token, never the token itself.
+// If this table leaks, the attacker holds fingerprints, not keys — same
+// reasoning as password hashing. `familyId` groups tokens descended from
+// one login, so detecting a replayed (already-rotated) token lets us
+// revoke the entire session lineage at once.
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  familyId  String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+}

@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { requestLogger } from './middleware/request-logger.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { routes } from './routes/index.js';
@@ -8,6 +9,7 @@ export function createApp() {
   const app = express();
 
   app.use(express.json());
+  app.use(cookieParser());
   app.use(requestLogger);
   app.use(API_PREFIX, routes);
 
