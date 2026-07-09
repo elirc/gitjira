@@ -153,3 +153,37 @@ export function usePatchIssueField(projectKey, number) {
     },
   });
 }
+
+// LEARN: search takes an AbortSignal so a stale request can be cancelled. When
+// you type fast, request N+1 fires before request N returns; without
+// cancellation, N's slower response can land AFTER N+1's and overwrite fresh
+// results with stale ones (a classic out-of-order-response bug). TanStack
+// Query passes `signal` for exactly this — we forward it to fetch.
+export function useSearch(projectKey, { jql, text }) {
+  return useQuery({
+    queryKey: ['projects', projectKey, 'search', { jql, text }],
+    queryFn: ({ signal }) => {
+      const qs = new URLSearchParams();
+      if (jql) qs.set('jql', jql);
+      if (text) qs.set('text', text);
+      return api(`/projects/${projectKey}/issues/search?${qs}`, { signal });
+    },
+    enabled: Boolean(projectKey && (jql || text)),
+    placeholderData: (prev) => prev, // keep old results visible while refetching
+  });
+}
+
+export function useSavedFilters() {
+  return useQuery({
+    queryKey: ['me', 'filters'],
+    queryFn: () => api('/me/filters').then((r) => r.filters),
+  });
+}
+
+export function useSaveFilter() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body) => api('/me/filters', { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['me', 'filters'] }),
+  });
+}
