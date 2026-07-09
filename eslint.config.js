@@ -3,6 +3,7 @@
 // directory tree. What you see here is the entire lint policy.
 import js from '@eslint/js';
 import globals from 'globals';
+import react from 'eslint-plugin-react';
 
 export default [
   { ignores: ['**/dist/**', '**/node_modules/**'] },
@@ -18,9 +19,17 @@ export default [
   },
   {
     files: ['apps/web/**/*.{js,jsx}'],
+    plugins: { react },
     languageOptions: {
       globals: { ...globals.browser },
       parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    rules: {
+      // LEARN: core ESLint doesn't know JSX — `<Foo />` doesn't count as
+      // "using" Foo, so every component import looked unused. These two
+      // rules teach it. Found the honest way: a red CI run on this PR.
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-uses-react': 'error',
     },
   },
   {
