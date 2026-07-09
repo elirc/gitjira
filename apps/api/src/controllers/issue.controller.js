@@ -15,12 +15,26 @@ export async function list(req, res) {
   const { cursor, limit, type, assigneeId, columnId } = req.query;
   const result = await listIssues(req.params.key, req.user.id, {
     cursor,
-    limit: limit ? Number(limit) : undefined,
+    limit: parseLimit(limit),
     type,
     assigneeId,
     columnId,
   });
   res.json(result);
+}
+
+const DEFAULT_LIMIT = 50;
+const MAX_LIMIT = 100;
+
+// LEARN: query strings are untrusted input too — the zod body validation
+// (sprint 02) never covered them. `Number('abc')` is NaN, which crashed the
+// Prisma query (bug #29). Coerce to a positive integer, fall back to the
+// default for anything invalid, and cap the maximum so a client can't ask
+// for the whole table.
+function parseLimit(raw) {
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isInteger(n) || n < 1) return DEFAULT_LIMIT;
+  return Math.min(n, MAX_LIMIT);
 }
 
 export async function getOne(req, res) {
