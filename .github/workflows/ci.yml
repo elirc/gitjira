@@ -14,9 +14,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
+          # LEARN: caches the npm download cache keyed on the lockfile —
+          # dependencies only re-download when the lockfile changes.
+          cache: npm
 
       - name: Install
-        run: npm install
+        # LEARN: `npm ci` = clean install of exactly what the lockfile says,
+        # failing loudly if lockfile and package.json disagree. `npm install`
+        # in CI silently re-resolves version ranges: green today, red
+        # tomorrow, no code change. Reproducibility is what makes CI's
+        # verdict meaningful.
+        run: npm ci
 
       - name: Lint
         run: npm run lint
