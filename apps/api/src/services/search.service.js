@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { parseJql, compileJql, JqlSyntaxError } from '@gitjira/shared/jql';
 import { notFound, ApiError } from '../lib/errors.js';
@@ -72,14 +73,19 @@ export async function searchIssues(projectKey, actorId, { jql, text, cursor, lim
 
 // Run the full-text query and return matching issue ids, ranked.
 async function fullTextIssueIds(projectId, term) {
-  // Turn the user's words into a tsquery. websearch_to_tsquery understands
-  // "quoted phrases" and OR and -negation the way a search box user expects.
-  const rows = await prisma.$queryRawUnsafe(
-    `SELECT id FROM "Issue"
-     WHERE "projectId" = '${projectId}'
-       AND "searchVector" @@ websearch_to_tsquery('english', '${term}')
-     ORDER BY ts_rank("searchVector", websearch_to_tsquery('english', '${term}')) DESC
-     LIMIT 200`
+  // LEARN: PARAMETERIZED query (review finding on PR #57). The `${...}` in a
+  // Prisma.sql tagged template are NOT string interpolation — Prisma sends them
+  // to Postgres as bound parameters, separate from the query text, so a value
+  // like O'Brien or "'; DROP TABLE" is treated as data and can never become
+  // SQL. This is the only safe way to put user input in a raw query. The rule
+  // is absolute: never concatenate user input into SQL.
+  const rows = await prisma.$queryRaw(
+    Prisma.sql`
+      SELECT id FROM "Issue"
+      WHERE "projectId" = ${projectId}
+        AND "searchVector" @@ websearch_to_tsquery('english', ${term})
+      ORDER BY ts_rank("searchVector", websearch_to_tsquery('english', ${term})) DESC
+      LIMIT 200`
   );
   return rows.map((r) => r.id);
 }

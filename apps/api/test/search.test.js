@@ -90,3 +90,27 @@ describe('saved filters', () => {
     expect(list.body.filters).toHaveLength(1);
   });
 });
+
+describe('full-text search — injection safety (review finding)', () => {
+  it('treats a malicious term as data, not SQL (no error, no rows)', async () => {
+    const { ana } = await seed();
+    const evil = "'; DROP TABLE \"Issue\"; --";
+    const res = await request(app)
+      .get(`/api/projects/GJ/issues/search?text=${encodeURIComponent(evil)}`)
+      .set('Authorization', ana.auth);
+    expect(res.status).toBe(200); // parameterized: the string is just a search term
+    expect(res.body.issues).toHaveLength(0);
+
+    // and the table still exists — a follow-up query works
+    const still = await request(app).get('/api/projects/GJ/issues/search?text=login').set('Authorization', ana.auth);
+    expect(still.status).toBe(200);
+  });
+
+  it("handles an apostrophe in the search term (O'Brien)", async () => {
+    const { ana } = await seed();
+    const res = await request(app)
+      .get(`/api/projects/GJ/issues/search?text=${encodeURIComponent("O'Brien")}`)
+      .set('Authorization', ana.auth);
+    expect(res.status).toBe(200); // would have been a 500 with string interpolation
+  });
+});
