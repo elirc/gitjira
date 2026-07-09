@@ -11,3 +11,9 @@
 - **Went well:** the replay-detection test drove the design; both review findings were pattern-level (serializer, cookie armor) rather than typo-level — review is earning its cost.
 - **Was hard:** the same unserialized-user pattern had already spread to three endpoints before review caught it. Copy-paste propagates bugs faster than review catches them.
 - **Watch next sprint:** issue-key allocation is a textbook race condition; write the concurrency test BEFORE feeling confident.
+
+## Sprint 03 — Projects & Issues
+
+- **Went well:** the authz matrix and the red→green concurrency fix are the sprint highlights; the self-flagged counter ("does this look right?") turned into the best teaching moment so far.
+- **Was hard:** a self-inflicted bug (zod defaults leaking into PATCH) surfaced only when the tests were written — reinforcing that "looks obviously correct" is not evidence.
+- **Watch next sprint:** the board introduces ordering (fractional indexing) and optimistic updates; the authz-follows-the-transport theme means the new move endpoint needs its own authz test.

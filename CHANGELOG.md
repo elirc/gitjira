@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.3 — Sprint 03 (PR #27)
+
+### Added
+
+- Projects: CRUD, membership with roles, auto-seeded workflow columns
+- Issues: CRUD with per-project atomic key allocation (GJ-1), cursor pagination, type/assignee/column filters
+- Standard error contract { error: { code, message, details } } with an error catalog
+- Web: projects list, project view with filterable issue table, create modals, TanStack Query
+
+### Fixed
+
+- Issue-key race condition (atomic increment); PATCH schema no longer resets omitted fields; issue-list over-fetch (85% smaller payload)
+
 ## 0.0.2 — Sprint 02 (PR #17)
 
 ### Added
