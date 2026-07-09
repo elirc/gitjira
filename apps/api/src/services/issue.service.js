@@ -1,5 +1,6 @@
 import { prisma } from '../lib/prisma.js';
 import { notFound } from '../lib/errors.js';
+import { keyBetween } from '@gitjira/shared/fractional-index';
 import { requireMembership } from './project.service.js';
 
 // LEARN: the display key "GJ-101" is assembled here from parts, never
@@ -15,7 +16,16 @@ export async function createIssue(projectKey, actorId, input) {
   if (!project) throw notFound('Project');
   await requireMembership(project.id, actorId);
 
-  const firstColumn = project.columns[0];
+  const columnId = input.columnId ?? project.columns[0].id;
+
+  // New issues append to the bottom of their column: find the current last
+  // position and place a fractional key after it (keyBetween(last, null)).
+  const last = await prisma.issue.findFirst({
+    where: { columnId },
+    orderBy: { position: 'desc' },
+    select: { position: true },
+  });
+  const position = keyBetween(last?.position ?? null, null);
 
   // LEARN: number allocation + issue create in ONE transaction, and the
   // allocation is an ATOMIC increment — `{ increment: 1 }` compiles to
@@ -38,7 +48,8 @@ export async function createIssue(projectKey, actorId, input) {
         title: input.title,
         description: input.description,
         priority: input.priority,
-        columnId: input.columnId ?? firstColumn.id,
+        columnId,
+        position,
         assigneeId: input.assigneeId ?? null,
         reporterId: actorId,
         labels: input.labels ?? [],
@@ -81,6 +92,10 @@ export async function listIssues(projectKey, actorId, { cursor, limit = 50, ...f
       type: true,
       title: true,
       priority: true,
+      // columnId + position are tiny and the board groups/sorts by them.
+      // Still no `description` — the over-fetch fix (PR #27) stands.
+      columnId: true,
+      position: true,
       assignee: { select: { id: true, name: true, avatarUrl: true } },
     },
   });
@@ -136,4 +151,40 @@ export async function updateIssue(projectKey, number, actorId, patch) {
 export async function deleteIssue(projectKey, number, actorId) {
   const { issue } = await loadIssueForActor(projectKey, number, actorId);
   await prisma.issue.delete({ where: { id: issue.id } });
+}
+
+// LEARN: the board's write path. A move sets the issue's column and a new
+// fractional position between its target neighbors. The client computes the
+// position (it knows the visual order); the server persists it. Note this is
+// a NEW way to mutate an issue — every new mutation path needs its own authz
+// check (the recurring theme). See the move test.
+export async function moveIssue(projectKey, number, actorId, { columnId, position }) {
+  const { project, issue } = await loadIssueForActor(projectKey, number, actorId);
+
+  // LEARN: columnId is a client-supplied foreign key — an authorization
+  // question, not just data (review finding on PR #39). Without this check a
+  // member of GJ could move a GJ issue into another project's column,
+  // corrupting both boards. Verify the target column belongs to THIS project.
+  const targetColumn = await prisma.workflowColumn.findFirst({
+    where: { id: columnId, projectId: project.id },
+    select: { id: true },
+  });
+  if (!targetColumn) throw notFound('Column');
+
+  const updated = await prisma.issue.update({
+    where: { id: issue.id },
+    data: { columnId, position },
+    select: {
+      id: true,
+      number: true,
+      type: true,
+      title: true,
+      priority: true,
+      columnId: true,
+      position: true,
+      assignee: { select: { id: true, name: true, avatarUrl: true } },
+    },
+  });
+
+  return { ...updated, key: `${project.key}-${updated.number}` };
 }

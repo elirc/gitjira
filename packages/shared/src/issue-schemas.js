@@ -40,3 +40,8 @@ export const addMemberSchema = z.object({
   userId: z.string().min(1),
   role: z.enum(['ADMIN', 'MEMBER', 'VIEWER']).default('MEMBER'),
 });
+
+export const moveIssueSchema = z.object({
+  columnId: z.string().min(1),
+  position: z.string().min(1),
+});

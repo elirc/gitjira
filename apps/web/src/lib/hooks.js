@@ -65,3 +65,56 @@ export function useUpdateIssue(projectKey) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects', projectKey, 'issues'] }),
   });
 }
+
+// LEARN: the optimistic-update contract, in four beats:
+//   onMutate  — snapshot the cache, then apply the change immediately
+//   (mutationFn) — fire the request
+//   onError   — put the snapshot back
+//   onSettled — refetch to reconcile with the server's truth
+// The card moves the instant you drop it (the stakeholder's "instant"); if the
+// server rejects, it snaps back. Getting the rollback right is the subtle part.
+export function useMoveIssue(projectKey, filters = {}) {
+  const qc = useQueryClient();
+  const key = queryKeys.issues(projectKey, filters);
+
+  return useMutation({
+    mutationFn: ({ number, columnId, position, _fail }) => {
+      // dev-only forced failure (the "fail next move" toggle) to exercise the
+      // rollback path — see lib/devFlags.js
+      if (_fail) return Promise.reject(new Error('Forced move failure (dev toggle)'));
+      return api(`/projects/${projectKey}/issues/${number}/move`, {
+        method: 'PATCH',
+        body: JSON.stringify({ columnId, position }),
+      });
+    },
+
+    onMutate: async ({ number, columnId, position }) => {
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData(key);
+
+      qc.setQueryData(key, (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          // LEARN: return a NEW object per moved issue — never mutate the
+          // cached one. The snapshot above holds references to these same
+          // objects; mutating in place would corrupt the snapshot and make
+          // rollback a no-op (review finding on PR #39). Immutability is the
+          // whole reason the snapshot can restore anything.
+          issues: old.issues.map((issue) =>
+            issue.number === number ? { ...issue, columnId, position } : issue
+          ),
+        };
+      });
+
+      return { previous };
+    },
+
+    onError: (_err, _vars, context) => {
+      // roll back to the snapshot
+      if (context?.previous) qc.setQueryData(key, context.previous);
+    },
+
+    onSettled: () => qc.invalidateQueries({ queryKey: key }),
+  });
+}

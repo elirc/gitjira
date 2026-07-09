@@ -8,9 +8,17 @@
     ".": "./src/index.js",
     "./auth-schemas": "./src/auth-schemas.js",
     "./issue-schemas": "./src/issue-schemas.js",
-    "./query-keys": "./src/query-keys.js"
+    "./query-keys": "./src/query-keys.js",
+    "./fractional-index": "./src/fractional-index.js"
   },
   "dependencies": {
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "fast-check": "^4.9.0",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "test": "vitest run"
   }
 }

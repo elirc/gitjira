@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useProject, useIssues, useCreateIssue } from '../lib/hooks.js';
 import { IssueTable } from '../components/IssueTable.jsx';
+import { Board } from '../components/board/Board.jsx';
 import { CreateIssueModal } from '../components/CreateIssueModal.jsx';
 
 const TYPE_FILTERS = ['', 'EPIC', 'STORY', 'TASK', 'BUG', 'SUBTASK'];
@@ -10,7 +11,9 @@ export function ProjectBoardPage() {
   const { key } = useParams();
   const { data: project, isLoading: projectLoading } = useProject(key);
   const [typeFilter, setTypeFilter] = useState('');
-  const { data, isLoading, isError, error } = useIssues(key, { type: typeFilter });
+  const [view, setView] = useState('board');
+  const filters = { type: typeFilter };
+  const { data, isLoading, isError, error } = useIssues(key, filters);
   const [modalOpen, setModalOpen] = useState(false);
   const createIssue = useCreateIssue(key);
 
@@ -20,12 +23,20 @@ export function ProjectBoardPage() {
   return (
     <>
       <div className="page-header">
-        <div>
-          <h1>
-            <span className="project-key">{project?.key}</span> {project?.name}
-          </h1>
+        <h1>
+          <span className="project-key">{project?.key}</span> {project?.name}
+        </h1>
+        <div className="header-actions">
+          <div className="view-switch">
+            <button className={view === 'board' ? 'active' : ''} onClick={() => setView('board')}>
+              Board
+            </button>
+            <button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')}>
+              Table
+            </button>
+          </div>
+          <button onClick={() => setModalOpen(true)}>New issue</button>
         </div>
-        <button onClick={() => setModalOpen(true)}>New issue</button>
       </div>
 
       <div className="filter-bar">
@@ -41,7 +52,13 @@ export function ProjectBoardPage() {
         </label>
       </div>
 
-      {isLoading ? <p>Loading issues…</p> : <IssueTable issues={data.issues} />}
+      {isLoading ? (
+        <p>Loading issues…</p>
+      ) : view === 'board' ? (
+        <Board projectKey={key} columns={project.columns} issues={data.issues} filters={filters} />
+      ) : (
+        <IssueTable issues={data.issues} />
+      )}
 
       {modalOpen && project && (
         <CreateIssueModal
