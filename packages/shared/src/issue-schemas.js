@@ -13,20 +13,28 @@ export const createProjectSchema = z.object({
   description: z.string().trim().max(500).optional(),
 });
 
-export const createIssueSchema = z.object({
-  type: z.enum(ISSUE_TYPES).default('TASK'),
+// LEARN: field shapes live in one place (no drift), but defaults do NOT.
+// A default is a create-time concept — "if you didn't say, use MEDIUM". On a
+// PATCH, `.default()` would fire for every omitted field and silently rewrite
+// it, turning "leave this alone" into "reset this". So create ADDS defaults
+// on top of the bare shapes; update just makes the bare shapes optional.
+const issueFields = {
+  type: z.enum(ISSUE_TYPES),
   title: z.string().trim().min(1, 'Title is required').max(200),
   description: z.string().trim().max(5000).optional(),
-  priority: z.enum(PRIORITIES).default('MEDIUM'),
+  priority: z.enum(PRIORITIES),
   columnId: z.string().optional(),
   assigneeId: z.string().nullish(),
   labels: z.array(z.string().trim().min(1)).max(20).optional(),
+};
+
+export const createIssueSchema = z.object({
+  ...issueFields,
+  type: issueFields.type.default('TASK'),
+  priority: issueFields.priority.default('MEDIUM'),
 });
 
-// LEARN: PATCH schema = the create schema with everything optional. `.partial()`
-// generates it — one schema stays the source of truth, the update variant is
-// derived, not hand-maintained (and can't drift).
-export const updateIssueSchema = createIssueSchema.partial();
+export const updateIssueSchema = z.object(issueFields).partial();
 
 export const addMemberSchema = z.object({
   userId: z.string().min(1),
