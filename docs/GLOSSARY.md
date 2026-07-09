@@ -46,3 +46,12 @@ Terms in the order the codebase introduces them.
 - **Property-based testing** — assert invariants over generated inputs; the tool shrinks failures to a minimal reproducer.
 - **Live region** — an ARIA element screen readers announce when its content changes.
 - **DnD sensor** — dnd-kit's input adapter (pointer, keyboard); the keyboard sensor is what makes drag accessible.
+
+## Sprint 05
+
+- **URL as state** — encoding UI state (which issue is open) in the URL so links, refresh, and the back button work.
+- **Event sourcing (lite)** — appending immutable records of what happened, not just the current state.
+- **Service-layer hook** — capturing domain events where the business logic runs, so they carry intent.
+- **Error boundary** — a React class component that catches render errors in its subtree and shows a fallback.
+- **Skeleton loader** — a shaped placeholder shown while data loads; calmer than a spinner.
+- **Optimistic concurrency** — (foreshadow) detecting conflicting edits via a version/timestamp rather than locking.
