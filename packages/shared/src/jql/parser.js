@@ -16,10 +16,11 @@ import { tokenize, TOKEN, JqlSyntaxError } from './tokenizer.js';
 //   primary    = "(" orExpr ")" | comparison
 //   comparison = FIELD OP VALUE
 //
-// GOTCHA: notice orExpr calls andExpr, not the other way round. That ordering
-// is what encodes precedence — the operator parsed LOWER in the call stack
-// binds TIGHTER. Get it backwards and `a OR b AND c` groups wrong. (This
-// exact ordering is the subject of a review finding on this PR — read on.)
+// GOTCHA: notice orExpr calls andExpr, and andExpr calls primary (NOT back up
+// to orExpr). That downward-only call chain is what encodes precedence — the
+// operator parsed LOWER in the chain binds TIGHTER, so AND binds tighter than
+// OR. An earlier version of this file had andExpr recurse into orExpr, which
+// flattened the precedence; the fix and its test are in this PR's history.
 
 export const NODE = { AND: 'and', OR: 'or', CMP: 'comparison' };
 
@@ -59,15 +60,16 @@ class Parser {
     return left;
   }
 
-  // 🎯 PLANTED: this looks like andExpr but it recurses into orExpr, giving
-  // AND and OR the SAME precedence (whatever appears first wins). The correct
-  // version recurses into `primary`. The bug is caught in review with a
-  // disambiguation test.
+  // andExpr = primary ( "AND" primary )*
+  // WHY primary and not orExpr: an AND operand must be a single primary (a
+  // comparison or a parenthesized group), NOT another OR expression. Recursing
+  // into orExpr here would let a bare OR sneak in under an AND and flatten the
+  // precedence — the review finding on PR #57. This now matches the grammar.
   andExpr() {
     let left = this.primary();
     while (this.peek().type === TOKEN.AND) {
       this.next();
-      const right = this.orExpr();
+      const right = this.primary();
       left = { type: NODE.AND, left, right };
     }
     return left;
