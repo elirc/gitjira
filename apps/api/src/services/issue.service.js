@@ -1,7 +1,8 @@
 import { prisma } from '../lib/prisma.js';
-import { notFound } from '../lib/errors.js';
+import { notFound, conflict } from '../lib/errors.js';
 import { keyBetween } from '@gitjira/shared/fractional-index';
 import { requireMembership } from './project.service.js';
+import { recordActivity } from './activity.service.js';
 
 // LEARN: the display key "GJ-101" is assembled here from parts, never
 // stored. One source of truth (project.key + issue.number) can't disagree
@@ -17,6 +18,18 @@ export async function createIssue(projectKey, actorId, input) {
   await requireMembership(project.id, actorId);
 
   const columnId = input.columnId ?? project.columns[0].id;
+
+  // LEARN: sub-tasks are max depth 1 — a sub-task can't have sub-tasks. We
+  // enforce it here (the parent must not itself have a parent) rather than
+  // trusting the client, so the checklist stays a flat list, not a tree.
+  if (input.parentId) {
+    const parent = await prisma.issue.findFirst({
+      where: { id: input.parentId, projectId: project.id },
+      select: { parentId: true },
+    });
+    if (!parent) throw notFound('Parent issue');
+    if (parent.parentId) throw conflict('Sub-tasks cannot have sub-tasks (max depth 1)');
+  }
 
   // New issues append to the bottom of their column: find the current last
   // position and place a fractional key after it (keyBetween(last, null)).
@@ -40,7 +53,7 @@ export async function createIssue(projectKey, actorId, input) {
       select: { issueCounter: true },
     });
 
-    return tx.issue.create({
+    const created = await tx.issue.create({
       data: {
         projectId: project.id,
         number: issueCounter,
@@ -50,11 +63,19 @@ export async function createIssue(projectKey, actorId, input) {
         priority: input.priority,
         columnId,
         position,
+        parentId: input.parentId ?? null,
         assigneeId: input.assigneeId ?? null,
         reporterId: actorId,
         labels: input.labels ?? [],
       },
     });
+    await recordActivity(tx, {
+      issueId: created.id,
+      actorId,
+      kind: 'issue.created',
+      payload: { title: created.title },
+    });
+    return created;
   });
 
   return { ...issue, key: `${project.key}-${issue.number}` };
@@ -140,11 +161,36 @@ export async function updateIssue(projectKey, number, actorId, patch) {
   }
   if ('assigneeId' in patch) data.assigneeId = patch.assigneeId; // null clears
 
-  const updated = await prisma.issue.update({
-    where: { id: issue.id },
-    data,
-    include: { assignee: true },
+  // LEARN: record the domain events in the SAME transaction as the update.
+  // If the update rolls back, its history entry rolls back too — the activity
+  // trail can never claim something that didn't happen.
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.issue.update({
+      where: { id: issue.id },
+      data,
+      include: { assignee: true },
+    });
+
+    if (data.priority !== undefined && data.priority !== issue.priority) {
+      await recordActivity(tx, {
+        issueId: issue.id,
+        actorId,
+        kind: 'priority.changed',
+        payload: { from: issue.priority, to: data.priority },
+      });
+    }
+    if ('assigneeId' in data && data.assigneeId !== issue.assigneeId) {
+      await recordActivity(tx, {
+        issueId: issue.id,
+        actorId,
+        kind: 'assignee.changed',
+        payload: { from: issue.assigneeId, to: data.assigneeId },
+      });
+    }
+
+    return result;
   });
+
   return { ...updated, key: `${project.key}-${updated.number}` };
 }
 
@@ -171,20 +217,81 @@ export async function moveIssue(projectKey, number, actorId, { columnId, positio
   });
   if (!targetColumn) throw notFound('Column');
 
-  const updated = await prisma.issue.update({
-    where: { id: issue.id },
-    data: { columnId, position },
-    select: {
-      id: true,
-      number: true,
-      type: true,
-      title: true,
-      priority: true,
-      columnId: true,
-      position: true,
-      assignee: { select: { id: true, name: true, avatarUrl: true } },
-    },
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.issue.update({
+      where: { id: issue.id },
+      data: { columnId, position },
+      select: {
+        id: true,
+        number: true,
+        type: true,
+        title: true,
+        priority: true,
+        columnId: true,
+        position: true,
+        assignee: { select: { id: true, name: true, avatarUrl: true } },
+      },
+    });
+    if (columnId !== issue.columnId) {
+      // record a status change using column names for a readable trail
+      const [from, to] = await Promise.all([
+        tx.workflowColumn.findUnique({ where: { id: issue.columnId }, select: { name: true } }),
+        tx.workflowColumn.findUnique({ where: { id: columnId }, select: { name: true } }),
+      ]);
+      await recordActivity(tx, {
+        issueId: issue.id,
+        actorId,
+        kind: 'status.changed',
+        payload: { from: from?.name, to: to?.name },
+      });
+    }
+    return result;
   });
 
   return { ...updated, key: `${project.key}-${updated.number}` };
+}
+
+// The full issue for the detail panel: description, sub-tasks, comments,
+// activity trail, attachments — everything the panel shows, one query set.
+export async function getIssueDetail(projectKey, number, actorId) {
+  const { project, issue } = await loadIssueForActor(projectKey, number, actorId);
+  const columns = await prisma.workflowColumn.findMany({
+    where: { projectId: project.id },
+    select: { id: true, name: true, category: true },
+  });
+
+  const full = await prisma.issue.findUnique({
+    where: { id: issue.id },
+    include: {
+      assignee: { select: { id: true, name: true, avatarUrl: true } },
+      children: {
+        select: { id: true, number: true, title: true, columnId: true },
+        orderBy: { position: 'asc' },
+      },
+      comments: {
+        include: { author: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'asc' },
+      },
+      activityEvents: {
+        include: { actor: { select: { id: true, name: true } } },
+        orderBy: { createdAt: 'desc' },
+      },
+      attachments: {
+        select: { id: true, filename: true, size: true, mimeType: true, createdAt: true },
+      },
+    },
+  });
+
+  const column = columns.find((c) => c.id === full.columnId);
+  const doneChildren = full.children.filter((c) => {
+    const col = columns.find((pc) => pc.id === c.columnId);
+    return col?.category === 'DONE';
+  }).length;
+
+  return {
+    ...full,
+    key: `${project.key}-${full.number}`,
+    columnName: column?.name,
+    progress: { done: doneChildren, total: full.children.length },
+  };
 }

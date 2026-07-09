@@ -15,7 +15,7 @@ import { setFailNextMove, shouldFailNextMove } from '../../lib/devFlags.js';
 import { BoardColumn } from './BoardColumn.jsx';
 import { IssueCard } from './IssueCard.jsx';
 
-export function Board({ projectKey, columns, issues, filters }) {
+export function Board({ projectKey, columns, issues, filters, onSelectIssue }) {
   const move = useMoveIssue(projectKey, filters);
   const [activeId, setActiveId] = useState(null);
   const [announcement, setAnnouncement] = useState('');
@@ -87,7 +87,12 @@ export function Board({ projectKey, columns, issues, filters }) {
       >
         <div className="board">
           {columns.map((column) => (
-            <BoardColumn key={column.id} column={column} issues={grouped.get(column.id) ?? []} />
+            <BoardColumn
+              key={column.id}
+              column={column}
+              issues={grouped.get(column.id) ?? []}
+              onSelectIssue={onSelectIssue}
+            />
           ))}
         </div>
 

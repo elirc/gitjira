@@ -24,6 +24,9 @@ model User {
   ledProjects    Project[]       @relation("ProjectLead")
   assignedIssues Issue[]         @relation("Assignee")
   reportedIssues Issue[]         @relation("Reporter")
+  comments       Comment[]
+  activityEvents ActivityEvent[]
+  attachments    Attachment[]
 }
 
 model Project {
@@ -132,15 +135,70 @@ model Issue {
   assigneeId  String?
   reporterId  String
   labels      String[]  @default([])
+  parentId    String?
   position    String    @default("U")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  project  Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  column   WorkflowColumn @relation(fields: [columnId], references: [id])
-  assignee User?          @relation("Assignee", fields: [assigneeId], references: [id])
-  reporter User           @relation("Reporter", fields: [reporterId], references: [id])
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  column         WorkflowColumn  @relation(fields: [columnId], references: [id])
+  assignee       User?           @relation("Assignee", fields: [assigneeId], references: [id])
+  reporter       User            @relation("Reporter", fields: [reporterId], references: [id])
+  parent         Issue?          @relation("SubTasks", fields: [parentId], references: [id], onDelete: Cascade)
+  children       Issue[]         @relation("SubTasks")
+  comments       Comment[]
+  activityEvents ActivityEvent[]
+  attachments    Attachment[]
 
   @@unique([projectId, number])
   @@index([projectId, columnId])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  issueId   String
+  authorId  String
+  body      String
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+
+  issue  Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+}
+
+// LEARN: event-sourcing-lite. Rather than only storing the CURRENT state, we
+// append an immutable record every time something notable happens. It powers
+// the activity feed now, and it is the exact seam sprint 08 (emit to sockets)
+// and sprint 09 (fan out notifications) attach to. `payload` is JSON so new
+// event kinds don't need a migration.
+model ActivityEvent {
+  id        String   @id @default(cuid())
+  issueId   String
+  actorId   String
+  kind      String
+  payload   Json
+  createdAt DateTime @default(now())
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  actor User  @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  issueId    String
+  uploaderId String
+  filename   String
+  size       Int
+  mimeType   String
+  storageKey String
+  createdAt  DateTime @default(now())
+
+  issue    Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  uploader User  @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
 }

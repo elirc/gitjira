@@ -118,3 +118,38 @@ export function useMoveIssue(projectKey, filters = {}) {
     onSettled: () => qc.invalidateQueries({ queryKey: key }),
   });
 }
+
+export function useIssueDetail(projectKey, number) {
+  return useQuery({
+    queryKey: queryKeys.issue(projectKey, number),
+    queryFn: () => api(`/projects/${projectKey}/issues/${number}/detail`).then((r) => r.issue),
+    enabled: Boolean(projectKey && number),
+  });
+}
+
+export function useAddComment(projectKey, number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body) =>
+      api(`/projects/${projectKey}/issues/${number}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ body }),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.issue(projectKey, number) }),
+  });
+}
+
+export function usePatchIssueField(projectKey, number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (patch) =>
+      api(`/projects/${projectKey}/issues/${number}`, {
+        method: 'PATCH',
+        body: JSON.stringify(patch),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.issue(projectKey, number) });
+      qc.invalidateQueries({ queryKey: ['projects', projectKey, 'issues'] });
+    },
+  });
+}

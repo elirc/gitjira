@@ -32,6 +32,9 @@ export const createIssueSchema = z.object({
   ...issueFields,
   type: issueFields.type.default('TASK'),
   priority: issueFields.priority.default('MEDIUM'),
+  // parentId is a create-time concept (a new sub-task under a parent) — not a
+  // PATCH field, so it lives on create only.
+  parentId: z.string().optional(),
 });
 
 export const updateIssueSchema = z.object(issueFields).partial();
@@ -44,4 +47,12 @@ export const addMemberSchema = z.object({
 export const moveIssueSchema = z.object({
   columnId: z.string().min(1),
   position: z.string().min(1),
+});
+
+export const commentSchema = z.object({
+  body: z.string().trim().min(1, 'Comment cannot be empty').max(5000),
+});
+
+export const subtaskSchema = z.object({
+  title: z.string().trim().min(1).max(200),
 });

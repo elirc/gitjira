@@ -2,6 +2,7 @@ import {
   createIssue,
   listIssues,
   getIssue,
+  getIssueDetail,
   updateIssue,
   deleteIssue,
   moveIssue,
@@ -55,5 +56,10 @@ export async function remove(req, res) {
 
 export async function move(req, res) {
   const issue = await moveIssue(req.params.key, Number(req.params.number), req.user.id, req.body);
+  res.json({ issue });
+}
+
+export async function detail(req, res) {
+  const issue = await getIssueDetail(req.params.key, Number(req.params.number), req.user.id);
   res.json({ issue });
 }
