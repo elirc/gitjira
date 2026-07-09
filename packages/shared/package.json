@@ -9,7 +9,8 @@
     "./auth-schemas": "./src/auth-schemas.js",
     "./issue-schemas": "./src/issue-schemas.js",
     "./query-keys": "./src/query-keys.js",
-    "./fractional-index": "./src/fractional-index.js"
+    "./fractional-index": "./src/fractional-index.js",
+    "./activity": "./src/activity.js"
   },
   "dependencies": {
     "zod": "^4.4.3"

@@ -1,7 +1,7 @@
 const TYPE_ICON = { EPIC: '🟣', STORY: '🟢', TASK: '🔵', BUG: '🔴', SUBTASK: '⚪' };
 const PRIORITY_LABEL = { LOWEST: '▽', LOW: '⌄', MEDIUM: '=', HIGH: '⌃', HIGHEST: '△' };
 
-export function IssueTable({ issues }) {
+export function IssueTable({ issues, onSelectIssue }) {
   if (issues.length === 0) {
     return <p className="empty-state">No issues match. Create one, or change the filter.</p>;
   }
@@ -19,7 +19,7 @@ export function IssueTable({ issues }) {
       </thead>
       <tbody>
         {issues.map((issue) => (
-          <tr key={issue.id}>
+          <tr key={issue.id} onClick={() => onSelectIssue?.(issue)} className="clickable-row">
             <td className="mono">{issue.key}</td>
             <td>{TYPE_ICON[issue.type]}</td>
             <td>{issue.title}</td>
