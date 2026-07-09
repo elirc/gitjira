@@ -56,3 +56,8 @@ export const commentSchema = z.object({
 export const subtaskSchema = z.object({
   title: z.string().trim().min(1).max(200),
 });
+
+export const savedFilterSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  jql: z.string().trim().min(1).max(500),
+});
