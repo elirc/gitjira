@@ -1,0 +1,72 @@
+:root {
+  --nav-height: 48px;
+  --sidebar-width: 220px;
+  --border: #dfe1e6;
+  --text: #172b4d;
+  --text-subtle: #6b778c;
+  --bg-subtle: #f4f5f7;
+  --brand: #0052cc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: var(--nav-height) 1fr auto;
+  min-height: 100vh;
+}
+.app-body {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--brand);
+  color: white;
+}
+.top-nav .logo {
+  font-weight: 700;
+}
+
+.sidebar {
+  border-right: 1px solid var(--border);
+  background: var(--bg-subtle);
+  padding: 16px 8px;
+}
+.sidebar a {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: var(--text);
+  text-decoration: none;
+}
+.sidebar a.active {
+  background: #e9f2ff;
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.content {
+  padding: 24px;
+}
+
+.footer {
+  grid-column: 1 / -1;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-subtle);
+}

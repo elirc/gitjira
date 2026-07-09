@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          # LEARN: caches the npm download cache keyed on the lockfile —
+          # dependencies only re-download when the lockfile changes.
+          cache: npm
+
+      - name: Install
+        # LEARN: `npm ci` = clean install of exactly what the lockfile says,
+        # failing loudly if lockfile and package.json disagree. `npm install`
+        # in CI silently re-resolves version ranges: green today, red
+        # tomorrow, no code change. Reproducibility is what makes CI's
+        # verdict meaningful.
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
