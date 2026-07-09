@@ -96,13 +96,14 @@ export function useMoveIssue(projectKey, filters = {}) {
         if (!old) return old;
         return {
           ...old,
-          issues: old.issues.map((issue) => {
-            if (issue.number !== number) return issue;
-            // apply the optimistic move
-            issue.columnId = columnId;
-            issue.position = position;
-            return issue;
-          }),
+          // LEARN: return a NEW object per moved issue — never mutate the
+          // cached one. The snapshot above holds references to these same
+          // objects; mutating in place would corrupt the snapshot and make
+          // rollback a no-op (review finding on PR #39). Immutability is the
+          // whole reason the snapshot can restore anything.
+          issues: old.issues.map((issue) =>
+            issue.number === number ? { ...issue, columnId, position } : issue
+          ),
         };
       });
 
