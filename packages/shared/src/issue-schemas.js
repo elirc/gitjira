@@ -32,6 +32,9 @@ export const createIssueSchema = z.object({
   ...issueFields,
   type: issueFields.type.default('TASK'),
   priority: issueFields.priority.default('MEDIUM'),
+  // parentId is a create-time concept (a new sub-task under a parent) — not a
+  // PATCH field, so it lives on create only.
+  parentId: z.string().optional(),
 });
 
 export const updateIssueSchema = z.object(issueFields).partial();
