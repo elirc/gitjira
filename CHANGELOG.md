@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.4 — Sprint 04 (PR #39)
+
+### Added
+
+- Kanban board: drag-and-drop across and within columns, board/table views
+- Fractional-index ordering utility (property-tested) so a move writes one row
+- PATCH /issues/:number/move; optimistic updates with snapshot rollback; dev fail-toggle
+- Keyboard drag (dnd-kit sensor) + live-region announcements
+
+### Fixed
+
+- Move endpoint now rejects cross-project columns; optimistic rollback made immutable; seed now creates workflow columns
+
 ## 0.0.3 — Sprint 03 (PR #27)
 
 ### Added
