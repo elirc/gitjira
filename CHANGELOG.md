@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.2 — Sprint 02 (PR #17)
+
+### Added
+
+- Postgres + Prisma: User, Project, ProjectMember (roles), RefreshToken
+- Auth: register/login/refresh/logout/me with rotating refresh tokens, replay containment, allowlist serialization, hardened cookies
+- Shared Zod schemas validating on client and server
+- Web: auth context (in-memory tokens), protected routes, silent single-flight refresh, login/register pages
+- Tests: Vitest + Supertest harness with real Postgres (13 api) + Testing Library (3 web)
+- Seed script with demo users/projects
+
 ## 0.0.1 — Sprint 01 (PR #8)
 
 ### Added
