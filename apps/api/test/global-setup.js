@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client';
 
 const TEST_URL =
@@ -20,7 +21,9 @@ export default async function () {
     await admin.$disconnect();
   }
 
+  const apiDir = fileURLToPath(new URL('..', import.meta.url));
   execSync('npx prisma migrate deploy', {
+    cwd: apiDir,
     env: { ...process.env, DATABASE_URL: TEST_URL },
     stdio: 'inherit',
   });
