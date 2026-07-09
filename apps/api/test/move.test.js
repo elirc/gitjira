@@ -38,3 +38,23 @@ describe('move endpoint', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('move endpoint — cross-project column (review finding)', () => {
+  it('rejects moving an issue into another project’s column', async () => {
+    const ana = await makeUser('crossmove@t.dev');
+    await makeProject(ana.auth, 'GJ');
+    const web = await makeProject(ana.auth, 'WEB', 'Web');
+    const created = await request(app)
+      .post('/api/projects/GJ/issues')
+      .set('Authorization', ana.auth)
+      .send({ title: 'stays put' });
+
+    const webColumn = web.columns[0];
+    const res = await request(app)
+      .patch(`/api/projects/GJ/issues/${created.body.issue.number}/move`)
+      .set('Authorization', ana.auth)
+      .send({ columnId: webColumn.id, position: 'n' });
+
+    expect(res.status).toBe(404); // the WEB column isn't in GJ
+  });
+});

@@ -161,6 +161,16 @@ export async function deleteIssue(projectKey, number, actorId) {
 export async function moveIssue(projectKey, number, actorId, { columnId, position }) {
   const { project, issue } = await loadIssueForActor(projectKey, number, actorId);
 
+  // LEARN: columnId is a client-supplied foreign key — an authorization
+  // question, not just data (review finding on PR #39). Without this check a
+  // member of GJ could move a GJ issue into another project's column,
+  // corrupting both boards. Verify the target column belongs to THIS project.
+  const targetColumn = await prisma.workflowColumn.findFirst({
+    where: { id: columnId, projectId: project.id },
+    select: { id: true },
+  });
+  if (!targetColumn) throw notFound('Column');
+
   const updated = await prisma.issue.update({
     where: { id: issue.id },
     data: { columnId, position },
