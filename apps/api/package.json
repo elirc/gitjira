@@ -1,0 +1,17 @@
+{
+  "name": "@gitjira/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@gitjira/shared": "*",
+    "express": "^4.21.2",
+    "pino": "^9.6.0",
+    "pino-http": "^10.4.0"
+  }
+}

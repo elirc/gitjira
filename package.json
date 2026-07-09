@@ -1,0 +1,18 @@
+{
+  "name": "gitjira",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm:dev -w @gitjira/api\" \"npm:dev -w @gitjira/web\"",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "echo \"no test runner yet - the first code worth testing arrives in sprint 02\" && exit 0",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
