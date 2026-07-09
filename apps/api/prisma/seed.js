@@ -8,6 +8,16 @@ const prisma = new PrismaClient();
 // design — upserts keyed on stable unique fields, safe to run twice.
 const PASSWORD = 'demo-password-1';
 
+// LEARN: seeded projects need the same default columns the API creates on
+// real project creation — otherwise the board (sprint 04) has nowhere to put
+// cards and issue creation (which places into columns[0]) fails. The seed must
+// mirror the app's invariants, not just its tables.
+const DEFAULT_COLUMNS = [
+  { name: 'To Do', category: 'TODO', position: 0 },
+  { name: 'In Progress', category: 'IN_PROGRESS', position: 1 },
+  { name: 'Done', category: 'DONE', position: 2 },
+];
+
 const USERS = [
   { email: 'ana@gitjira.dev', name: 'Ana Petrov' },
   { email: 'ben@gitjira.dev', name: 'Ben Okafor' },
@@ -45,6 +55,7 @@ async function main() {
           { userId: cho.id, role: 'VIEWER' },
         ],
       },
+      columns: { create: DEFAULT_COLUMNS },
     },
   });
 
@@ -61,6 +72,7 @@ async function main() {
           { userId: cho.id, role: 'MEMBER' },
         ],
       },
+      columns: { create: DEFAULT_COLUMNS },
     },
   });
 
