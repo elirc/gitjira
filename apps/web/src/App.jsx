@@ -10,10 +10,12 @@ import { RegisterPage } from './pages/RegisterPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { ProtectedRoute } from './auth/ProtectedRoute.jsx';
 import { ErrorBoundary } from './components/ErrorBoundary.jsx';
+import { CommandPalette } from './components/CommandPalette.jsx';
 
 export function App() {
   return (
     <div className="app-shell">
+      <CommandPalette />
       <TopNav />
       <div className="app-body">
         <Sidebar />
