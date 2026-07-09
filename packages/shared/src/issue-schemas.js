@@ -45,3 +45,11 @@ export const moveIssueSchema = z.object({
   columnId: z.string().min(1),
   position: z.string().min(1),
 });
+
+export const commentSchema = z.object({
+  body: z.string().trim().min(1, 'Comment cannot be empty').max(5000),
+});
+
+export const subtaskSchema = z.object({
+  title: z.string().trim().min(1).max(200),
+});
