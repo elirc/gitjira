@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.0 — MVP (Sprint 05, PR #49)
+
+### Added
+
+- Issue detail panel addressed by URL (?selected=GJ-42): deep-linking, back button, shareable links
+- Comments (add/edit-own/delete-own); activity events recorded at the service layer (the seam for real-time + notifications)
+- Sub-tasks with parent progress; attachments (upload + download)
+- Production polish: skeleton loaders, empty states, route error boundary, 404 page
+- docs/DEMO.md walkthrough
+
+### Fixed
+
+- Dirty-state guard on panel close (no more silent lost edits); zero-safe sub-task progress (no NaN%)
+
+### Milestone
+
+- **v0.1.0 — the MVP.** Auth → projects → board → issue detail → collaboration.
+
 ## 0.0.4 — Sprint 04 (PR #39)
 
 ### Added
