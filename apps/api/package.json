@@ -13,5 +13,8 @@
     "express": "^4.21.2",
     "pino": "^9.6.0",
     "pino-http": "^10.4.0"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.0.0"
   }
 }
