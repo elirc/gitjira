@@ -7,17 +7,6 @@ import { requireMembership } from './project.service.js';
 // with itself.
 export const issueKey = (project, issue) => `${project.key}-${issue.number}`;
 
-async function allocateNumber(projectId) {
-  // Read the current counter, add one, write it back.
-  const project = await prisma.project.findUnique({ where: { id: projectId } });
-  const next = project.issueCounter + 1;
-  await prisma.project.update({
-    where: { id: projectId },
-    data: { issueCounter: next },
-  });
-  return next;
-}
-
 export async function createIssue(projectKey, actorId, input) {
   const project = await prisma.project.findUnique({
     where: { key: projectKey },
@@ -26,22 +15,35 @@ export async function createIssue(projectKey, actorId, input) {
   if (!project) throw notFound('Project');
   await requireMembership(project.id, actorId);
 
-  const number = await allocateNumber(project.id);
   const firstColumn = project.columns[0];
 
-  const issue = await prisma.issue.create({
-    data: {
-      projectId: project.id,
-      number,
-      type: input.type,
-      title: input.title,
-      description: input.description,
-      priority: input.priority,
-      columnId: input.columnId ?? firstColumn.id,
-      assigneeId: input.assigneeId ?? null,
-      reporterId: actorId,
-      labels: input.labels ?? [],
-    },
+  // LEARN: number allocation + issue create in ONE transaction, and the
+  // allocation is an ATOMIC increment — `{ increment: 1 }` compiles to
+  // `UPDATE ... SET issueCounter = issueCounter + 1 RETURNING issueCounter`,
+  // which the database serializes per row. No read-then-write gap means no
+  // race (review finding on PR #27). The transaction ensures a failed
+  // create can't burn a number.
+  const issue = await prisma.$transaction(async (tx) => {
+    const { issueCounter } = await tx.project.update({
+      where: { id: project.id },
+      data: { issueCounter: { increment: 1 } },
+      select: { issueCounter: true },
+    });
+
+    return tx.issue.create({
+      data: {
+        projectId: project.id,
+        number: issueCounter,
+        type: input.type,
+        title: input.title,
+        description: input.description,
+        priority: input.priority,
+        columnId: input.columnId ?? firstColumn.id,
+        assigneeId: input.assigneeId ?? null,
+        reporterId: actorId,
+        labels: input.labels ?? [],
+      },
+    });
   });
 
   return { ...issue, key: `${project.key}-${issue.number}` };
