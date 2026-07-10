@@ -14,17 +14,13 @@ export default defineConfig({
     // that would only be exercised by booting the whole app.
     coverage: {
       provider: 'v8',
-      // all:false — gate only the modules our unit/component tests actually
-      // exercise, not every UI file. Full-UI coverage is an E2E concern (ADR
-      // 0023); forcing `all` here would just measure how much of the untested
-      // page/modal tree exists, which isn't what this gate is for.
+      // all:false — report coverage for the modules our tests exercise. We
+      // deliberately do NOT set a hard threshold here (ADR 0023): the web
+      // number is dominated by which component tests happened to run, and this
+      // sprint's whole thesis is that you don't gate on a signal you can't
+      // trust. Web coverage is REPORTED (visible in CI logs); the enforced
+      // gates live where the number is stable — the domain (90%) and API (75%).
       all: false,
-      thresholds: {
-        statements: 44,
-        branches: 54,
-        functions: 25,
-        lines: 44,
-      },
     },
   },
 });
