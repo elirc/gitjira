@@ -80,3 +80,42 @@ describe('notification fan-out', () => {
     expect(after.body.unread).toBe(0);
   });
 });
+
+describe('idempotency + mark-all-read bounding (review findings)', () => {
+  it('running the same job twice notifies once (idempotent)', async () => {
+    const { ana, ben } = await seed();
+    const issue = (
+      await request(app)
+        .post('/api/projects/GJ/issues')
+        .set('Authorization', ana.auth)
+        .send({ title: 'once', assigneeId: ben.id })
+    ).body.issue;
+    // a job WITH a stable id (BullMQ assigns one; we pass it explicitly)
+    const job = {
+      id: 'job-1',
+      data: { kind: 'issue.assigned', issueId: issue.id, actorId: ana.id },
+    };
+
+    await handleNotificationJob(job);
+    await handleNotificationJob(job); // redelivery
+
+    const count = await prisma.notification.count({ where: { userId: ben.id } });
+    expect(count).toBe(1);
+  });
+
+  it('mark-all-read leaves a notification that arrives after the cutoff unread', async () => {
+    const { ben } = await seed();
+    // an existing unread notification
+    await prisma.notification.create({
+      data: { userId: ben.id, kind: 'issue.assigned', payload: {}, dedupeKey: 'old:ben' },
+    });
+    // mark all read
+    await request(app).post('/api/me/notifications/read-all').set('Authorization', ben.auth);
+    // a NEW notification arrives afterward
+    await prisma.notification.create({
+      data: { userId: ben.id, kind: 'comment.mention', payload: {}, dedupeKey: 'new:ben' },
+    });
+    const after = await request(app).get('/api/me/notifications').set('Authorization', ben.auth);
+    expect(after.body.unread).toBe(1); // the new one is still unread
+  });
+});

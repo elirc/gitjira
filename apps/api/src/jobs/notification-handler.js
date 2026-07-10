@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 
 // LEARN: the fan-out handler. Given a domain event, figure out WHO should be
@@ -29,27 +29,36 @@ export async function handleNotificationJob(job) {
   const data = job.data ?? job; // accept a raw payload in tests
   const recipients = await resolveRecipients(data);
 
-  for (const userId of recipients) {
-    // GOTCHA (planted): dedupeKey is a fresh random UUID per run. It looks
-    // "unique per notification", but it defeats the whole point — a RETRIED
-    // job (BullMQ is at-least-once) generates a NEW uuid and inserts a SECOND
-    // notification for the same event. The key must be derived from the event
-    // identity (stable across retries), and the unique-violation must be caught
-    // as "already delivered". As written, run this job twice and the user gets
-    // notified twice.
-    const dedupeKey = crypto.randomUUID();
+  // LEARN: the event identity for dedup. Prefer an explicit eventId; fall back
+  // to the job id. Either way it's STABLE across retries — the same job that
+  // runs twice produces the same key, unlike a random UUID (review finding).
+  const eventId = data.eventId ?? job.id ?? `${data.kind}:${data.issueId}`;
 
-    await prisma.notification.create({
-      data: {
-        userId,
-        kind: data.kind,
-        issueId: data.issueId ?? null,
-        actorId: data.actorId ?? null,
-        payload: data.payload ?? {},
-        dedupeKey,
-      },
-    });
+  let notified = 0;
+  for (const userId of recipients) {
+    // dedupeKey = event + recipient. A redelivered job produces the SAME key,
+    // hits the UNIQUE constraint, and we treat that as "already delivered"
+    // (not an error). This is what makes at-least-once delivery safe.
+    const dedupeKey = `${eventId}:${userId}`;
+    try {
+      await prisma.notification.create({
+        data: {
+          userId,
+          kind: data.kind,
+          issueId: data.issueId ?? null,
+          actorId: data.actorId ?? null,
+          payload: data.payload ?? {},
+          dedupeKey,
+        },
+      });
+      notified += 1;
+    } catch (e) {
+      // P2002 = unique violation = this notification already exists from a
+      // prior (successful) run of this same job. Idempotent success, not error.
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') continue;
+      throw e;
+    }
   }
 
-  return { notified: recipients.length };
+  return { notified };
 }

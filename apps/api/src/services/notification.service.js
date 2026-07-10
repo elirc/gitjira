@@ -17,15 +17,15 @@ export async function markRead(userId, id) {
 }
 
 export async function markAllRead(userId) {
-  // GOTCHA (planted): this marks EVERY unread notification read with no time
-  // bound. A notification that arrives WHILE this runs (the fan-out worker is
-  // concurrent) can be marked read before the user ever saw it — and the
-  // unread badge, computed separately, can briefly disagree. The fix is to
-  // bound the update to notifications created at/before the moment the user
-  // clicked (a timestamp precondition), so in-flight arrivals are untouched.
+  // LEARN: bound "mark all read" to notifications that existed when the request
+  // arrived (review finding). The fan-out worker is concurrent — without the
+  // `createdAt <= now` bound, a notification inserted mid-operation could be
+  // marked read before the user ever saw it. Anything arriving after `now`
+  // stays unread.
+  const now = new Date();
   await prisma.notification.updateMany({
-    where: { userId, readAt: null },
-    data: { readAt: new Date() },
+    where: { userId, readAt: null, createdAt: { lte: now } },
+    data: { readAt: now },
   });
 }
 
