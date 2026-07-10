@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 — Sprint 08 (PR #74)
+
+### Added
+
+- Real-time: Socket.IO with per-project rooms, JWT handshake auth, membership-gated joins
+- Live board updates via the activity seam; presence (who is viewing)
+- Optimistic concurrency: stale-write 409 with a reload prompt
+- docs/concepts/websockets.md
+
+### Fixed
+
+- Room joins require membership (was: any authed user); useLiveProject cleans up its listeners
+
 ## 0.2.0 — Sprint 06 (PR #57)
 
 ### Added

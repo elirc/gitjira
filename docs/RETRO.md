@@ -47,3 +47,9 @@ Five sprints, five reviewed PRs, v0.1.0. The recurring themes so far: authz foll
 - **Went well:** the state machine + partial-index split is the cleanest where-do-rules-live illustration in the repo; the pure domain tests run in milliseconds. Both planted findings were self-flagged before review.
 - **Was hard:** a hand-written migration got a timestamp that sorted before init, so a fresh CI DB failed where the incremental local DB passed - a great real-world reminder of why CI uses a clean database. Also the CRLF/Prettier friction finally earned a .gitattributes.
 - **Watch next sprint:** real-time - the activity-event seam from sprint 05 gets wrapped to emit socket events, and the authz-follows-the-transport theme returns on room joins.
+
+## Sprint 08 — Real-time (v0.4.0)
+
+- **Went well:** the activity seam from sprint 05 paid off exactly as designed - real-time plugged in with one function change. Real socket tests (client on a real server) gave genuine confidence.
+- **Was hard:** test isolation bit me - beforeAll setup does not survive the per-test truncate, so socket data had to be created inside each test. Both planted findings self-flagged.
+- **Watch next sprint:** notifications and background jobs - the same seam gets its second consumer (a job queue), and idempotency becomes the theme.
