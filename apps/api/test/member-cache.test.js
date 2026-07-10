@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 import request from 'supertest';
 import { app, makeUser, makeProject } from './helpers.js';
 
