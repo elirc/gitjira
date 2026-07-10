@@ -687,3 +687,12 @@ body {
   margin-left: -6px;
   border: 2px solid white;
 }
+
+.conflict-banner {
+  background: #fffae6;
+  border: 1px solid #ffab00;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-size: 14px;
+}
