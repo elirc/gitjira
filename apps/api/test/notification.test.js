@@ -1,3 +1,8 @@
+// Opts out of transaction-rollback isolation: the idempotency test relies on a
+// caught unique-constraint (dedupeKey) violation, which aborts a shared
+// transaction. Constraint-error behavior needs real commits (see ADR 0022).
+globalThis.__NO_ROLLBACK__ = true;
+
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app, makeUser, makeProject } from './helpers.js';

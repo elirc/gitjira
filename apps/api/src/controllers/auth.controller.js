@@ -6,6 +6,8 @@ import {
   revokeByRawToken,
 } from '../services/token.service.js';
 import { toPublicUser } from '../serializers/user.serializer.js';
+import { prisma } from '../lib/prisma.js';
+import { unauthenticated } from '../lib/errors.js';
 
 const REFRESH_COOKIE = 'gj_refresh';
 
@@ -59,5 +61,13 @@ export async function logout(req, res) {
 }
 
 export async function me(req, res) {
-  res.json({ user: req.user });
+  // LEARN (sprint 11): a contract test caught this returning the raw JWT claims
+  // ({ id, email, name }) — thinner than the { id, email, name, avatarUrl } that
+  // /login and /register return. Clients that read `user.avatarUrl` after a
+  // page reload got `undefined`. Fetch + serialize so /me speaks the SAME
+  // public-user contract as every other endpoint. The schema was the lie
+  // detector: one shape, enforced everywhere.
+  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+  if (!user) throw unauthenticated();
+  res.json({ user: toPublicUser(user) });
 }

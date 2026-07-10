@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.7.0 — Sprint 11 (PR #100)
+
+### Added
+
+- `docs/TESTING.md` — the layered test strategy (where each test goes, and what each layer must NOT do)
+- `@gitjira/test-factories` — intent-revealing factories for every model
+- Transaction-rollback test isolation (`apps/api/test/tx.js`) — API test execution 196s → 32s
+- Contract tests: `packages/shared/src/response-schemas.js` parsed against real API responses
+- MSW at the network boundary for web component tests (`apps/web/test/msw`)
+- Playwright E2E harness + journeys (`e2e/`), run nightly via `.github/workflows/e2e.yml`
+- Per-package coverage gates (domain 90 / api 75 / web 44) and a parallel CI matrix
+- ADRs 0022 (rollback isolation), 0023 (unequal coverage gates), 0024 (E2E nightly); sprint-11 brief + glossary
+
+### Fixed
+
+- Two real API-shape drifts caught by contract tests: `/auth/me` now returns the full public user (was: JWT claims only); project schema documents embedded `columns`
+- Two flakes: the auth suite's timeout-under-load (bcrypt cost now test-configurable) and the untested clock-dependent `timeAgo` (fake timers)
+
 ## 0.6.0 — Sprint 10 (PR #89)
 
 ### Added

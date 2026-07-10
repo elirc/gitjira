@@ -4,3 +4,9 @@ dist/
 .env
 .DS_Store
 coverage/
+
+# Playwright E2E artifacts
+/e2e/.auth/
+/test-results/
+/playwright-report/
+/playwright/.cache/

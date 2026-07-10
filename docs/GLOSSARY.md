@@ -109,3 +109,16 @@ Terms in the order the codebase introduces them.
 - **Ratchet** — a check that a metric may only improve (here, type-checked file count).
 - **any vs unknown** — `any` disables checking; `unknown` forces you to narrow before use.
 - **Discriminated union** — a union of types distinguished by a shared literal field (e.g. `kind`).
+
+## Sprint 11
+
+- **Test pyramid** — many fast unit tests, some integration, few slow E2E; push each test to the lowest layer that catches the bug.
+- **Factory (vs fixture)** — a function that builds fresh valid test data with intent-revealing overrides, instead of a shared constant that drifts.
+- **Transaction-rollback isolation** — run each test in a DB transaction that's rolled back after, instead of truncating tables.
+- **Contract test** — parse a real API response through the shared schema, so server and schema can't drift.
+- **MSW (Mock Service Worker)** — mock the network boundary (fetch), so real client code runs against a fake server.
+- **Storage state** — saved browser session (cookies) reused across E2E tests so they don't each re-authenticate.
+- **Flake** — a test that passes/fails non-deterministically; a bug in the test or the code, never "just re-run it".
+- **Trace** — a Playwright recording of a run you can step through frame by frame to debug a failure.
+- **Coverage ratchet / floor** — a per-package threshold that only moves up; catches whole-file gaps, not assertion quality.
+- **Determinism** — a test whose result depends only on its inputs (frozen clock, own data), not on time/order/machine speed.
