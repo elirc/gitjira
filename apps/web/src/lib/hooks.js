@@ -232,3 +232,20 @@ export function useSprintAction(projectKey) {
     }),
   };
 }
+
+export function useNotifications() {
+  return useQuery({
+    queryKey: ['me', 'notifications'],
+    queryFn: () => api('/me/notifications'),
+    // LEARN: poll as a fallback so the badge updates even if the socket missed
+    // an event. 30s is gentle; the socket makes it feel instant when connected.
+    refetchInterval: 30_000,
+  });
+}
+export function useMarkAllRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api('/me/notifications/read-all', { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['me', 'notifications'] }),
+  });
+}

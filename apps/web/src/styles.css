@@ -696,3 +696,58 @@ body {
   margin: 8px 0;
   font-size: 14px;
 }
+
+.bell-wrap {
+  position: relative;
+}
+.bell {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  position: relative;
+}
+.bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: #de350b;
+  color: white;
+  border-radius: 10px;
+  font-size: 10px;
+  padding: 0 5px;
+}
+.bell-panel {
+  position: absolute;
+  right: 0;
+  top: 32px;
+  width: 320px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(9, 30, 66, 0.2);
+  z-index: 100;
+  color: var(--text);
+}
+.bell-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.bell-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+.bell-list li {
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+.bell-list li.unread {
+  background: #e9f2ff;
+}
