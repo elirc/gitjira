@@ -5,6 +5,7 @@ import { Footer } from './components/Footer.jsx';
 import { HomePage } from './pages/HomePage.jsx';
 import { ProjectsPage } from './pages/ProjectsPage.jsx';
 import { ProjectBoardPage } from './pages/ProjectBoardPage.jsx';
+import { BacklogPage } from './pages/BacklogPage.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { RegisterPage } from './pages/RegisterPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
@@ -34,6 +35,7 @@ export function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/projects" element={<ProjectsPage />} />
                 <Route path="/projects/:key" element={<ProjectBoardPage />} />
+                <Route path="/projects/:key/backlog" element={<BacklogPage />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

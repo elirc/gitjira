@@ -187,3 +187,48 @@ export function useSaveFilter() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['me', 'filters'] }),
   });
 }
+
+export function useSprints(projectKey) {
+  return useQuery({
+    queryKey: ['projects', projectKey, 'sprints'],
+    queryFn: () => api(`/projects/${projectKey}/sprints`).then((r) => r.sprints),
+    enabled: Boolean(projectKey),
+  });
+}
+export function useCreateSprint(projectKey) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body) =>
+      api(`/projects/${projectKey}/sprints`, { method: 'POST', body: JSON.stringify(body) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects', projectKey, 'sprints'] }),
+  });
+}
+export function useSprintAction(projectKey) {
+  const qc = useQueryClient();
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['projects', projectKey, 'sprints'] });
+    qc.invalidateQueries({ queryKey: ['projects', projectKey, 'issues'] });
+  };
+  return {
+    start: useMutation({
+      mutationFn: (id) => api(`/projects/${projectKey}/sprints/${id}/start`, { method: 'POST' }),
+      onSuccess: invalidate,
+    }),
+    complete: useMutation({
+      mutationFn: ({ id, moveUnfinishedTo }) =>
+        api(`/projects/${projectKey}/sprints/${id}/complete`, {
+          method: 'POST',
+          body: JSON.stringify({ moveUnfinishedTo }),
+        }),
+      onSuccess: invalidate,
+    }),
+    assign: useMutation({
+      mutationFn: ({ number, sprintId }) =>
+        api(`/projects/${projectKey}/issues/${number}/sprint`, {
+          method: 'PATCH',
+          body: JSON.stringify({ sprintId }),
+        }),
+      onSuccess: invalidate,
+    }),
+  };
+}

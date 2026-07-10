@@ -599,3 +599,81 @@ body {
   color: var(--text-subtle);
   border-top: 1px solid var(--border);
 }
+
+.create-sprint {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+.create-sprint input {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.sprint-section {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.sprint-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--bg-subtle);
+}
+.sprint-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.sprint-actions button,
+.create-sprint button {
+  padding: 5px 12px;
+  background: var(--brand);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.sprint-actions button:disabled {
+  background: #a5adba;
+  cursor: not-allowed;
+}
+.badge {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #dfe1e6;
+}
+.badge.state-ACTIVE {
+  background: #36b37e;
+  color: white;
+}
+.badge.state-PLANNED {
+  background: #ffab00;
+  color: #172b4d;
+}
+.backlog-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.backlog-list li {
+  display: grid;
+  grid-template-columns: 60px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+.backlog-title {
+  color: var(--text);
+}
+.backlog-list select {
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}

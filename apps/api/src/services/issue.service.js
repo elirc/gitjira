@@ -117,6 +117,8 @@ export async function listIssues(projectKey, actorId, { cursor, limit = 50, ...f
       // Still no `description` — the over-fetch fix (PR #27) stands.
       columnId: true,
       position: true,
+      sprintId: true,
+      storyPoints: true,
       assignee: { select: { id: true, name: true, avatarUrl: true } },
     },
   });
@@ -156,7 +158,15 @@ export async function updateIssue(projectKey, number, actorId, patch) {
   // is different from `null` ("clear it"). Conflating those two is a
   // classic source of "why did my assignee vanish" bugs.
   const data = {};
-  for (const field of ['type', 'title', 'description', 'priority', 'columnId', 'labels']) {
+  for (const field of [
+    'type',
+    'title',
+    'description',
+    'priority',
+    'columnId',
+    'labels',
+    'storyPoints',
+  ]) {
     if (patch[field] !== undefined) data[field] = patch[field];
   }
   if ('assigneeId' in patch) data.assigneeId = patch.assigneeId; // null clears

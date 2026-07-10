@@ -26,6 +26,7 @@ const issueFields = {
   columnId: z.string().optional(),
   assigneeId: z.string().nullish(),
   labels: z.array(z.string().trim().min(1)).max(20).optional(),
+  storyPoints: z.number().int().min(0).max(100).nullish(),
 };
 
 export const createIssueSchema = z.object({
@@ -60,4 +61,15 @@ export const subtaskSchema = z.object({
 export const savedFilterSchema = z.object({
   name: z.string().trim().min(1).max(80),
   jql: z.string().trim().min(1).max(500),
+});
+
+export const createSprintSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  goal: z.string().trim().max(200).optional(),
+});
+export const completeSprintSchema = z.object({
+  moveUnfinishedTo: z.string().nullish(), // a sprint id, or 'backlog', or null
+});
+export const assignSprintSchema = z.object({
+  sprintId: z.string().nullish(),
 });

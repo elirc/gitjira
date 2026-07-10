@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useProject, useIssues, useSearch, useCreateIssue } from '../lib/hooks.js';
 import { useDebounced } from '../lib/useDebounced.js';
 import { IssueTable } from '../components/IssueTable.jsx';
@@ -58,6 +58,9 @@ export function ProjectBoardPage() {
           <span className="project-key">{project?.key}</span> {project?.name}
         </h1>
         <div className="header-actions">
+          <Link className="chip" to={`/projects/${key}/backlog`}>
+            Backlog
+          </Link>
           <div className="view-switch">
             <button className={view === 'board' ? 'active' : ''} onClick={() => setView('board')}>
               Board

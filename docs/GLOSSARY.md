@@ -68,3 +68,12 @@ Terms in the order the codebase introduces them.
 - **Debounce** — wait until input stops for N ms, then act once (vs throttle: at most once per N ms).
 - **AbortSignal** — cancels an in-flight fetch so a stale response can't overwrite fresh data.
 - **Fuzz testing** — throwing random inputs at code to assert it fails gracefully, never crashes.
+
+## Sprint 07
+
+- **State machine** — an object is in one of a fixed set of states; only certain transitions are legal.
+- **Transition guard** — a precondition that must hold for a transition (e.g. "sprint must have issues to start").
+- **Partial unique index** — a uniqueness constraint that applies only to rows matching a condition (`WHERE state = 'ACTIVE'`).
+- **Backlog** — issues not assigned to any sprint; modeled as the absence of a sprintId, not a status.
+- **Velocity** — completed story points per sprint; the raw material for estimation.
+- **Check-then-act** — reading state then acting on it; unsafe under concurrency (the DB constraint is the fix).
