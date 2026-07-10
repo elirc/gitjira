@@ -9,9 +9,10 @@ import { useEffect, useRef } from 'react';
 // - Return focus to the element that opened it when it closes — otherwise the
 //   keyboard user is dumped at the top of the page with no idea where they are.
 //
-// GOTCHA (planted): the focus-RETURN is missing below. We save the trigger in
-// `previouslyFocused` but never restore it on close — a WCAG 2.4.3 (Focus Order)
-// failure the review is meant to catch.
+// LEARN (sprint 14 review fix): the focus-RETURN. We save the trigger when the
+// dialog opens and restore focus to it on close (WCAG 2.4.3). Without it the
+// keyboard user is dumped on <body> at the top of the page — the review caught
+// exactly that.
 export function Modal({ open, onClose, title, children }) {
   const dialogRef = useRef(null);
   const previouslyFocused = useRef(null);
@@ -49,9 +50,9 @@ export function Modal({ open, onClose, title, children }) {
     document.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('keydown', onKeyDown);
-      // BUG (planted, sprint 14 review): we should restore focus here —
-      //   previouslyFocused.current?.focus();
-      // Without it, closing the dialog drops focus to <body>.
+      // Restore focus to whatever opened the dialog (WCAG 2.4.3). Guard with
+      // optional chaining in case the trigger was removed while the modal was up.
+      previouslyFocused.current?.focus();
     };
   }, [open, onClose]);
 

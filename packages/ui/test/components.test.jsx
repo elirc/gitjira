@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { useState } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Button } from '../src/Button.jsx';
 import { Modal } from '../src/Modal.jsx';
@@ -59,5 +60,27 @@ describe('Modal', () => {
       </Modal>
     );
     expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('returns focus to the trigger when it closes (WCAG 2.4.3)', () => {
+    function Harness() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen(true)}>Open</button>
+          <Modal open={open} title="Dlg" onClose={() => setOpen(false)}>
+            <button>inside</button>
+          </Modal>
+        </>
+      );
+    }
+    render(<Harness />);
+    const trigger = screen.getByRole('button', { name: 'Open' });
+    trigger.focus();
+    fireEvent.click(trigger); // open (focus moves into the dialog)
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'inside' }));
+    fireEvent.keyDown(document, { key: 'Escape' }); // close
+    // Focus must return to the trigger, not vanish to <body>.
+    expect(document.activeElement).toBe(trigger);
   });
 });
