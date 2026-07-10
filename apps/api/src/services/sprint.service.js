@@ -1,5 +1,6 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
-import { notFound } from '../lib/errors.js';
+import { notFound, conflict } from '../lib/errors.js';
 import { requireMembership } from './project.service.js';
 import { assertTransition } from '../domain/sprint-state-machine.js';
 
@@ -35,15 +36,24 @@ export async function startSprint(projectKey, actorId, sprintId) {
   // Per-sprint guards live in the state machine (must be PLANNED, must have issues).
   const nextState = assertTransition('start', sprint.state, { issueCount: sprint._count.issues });
 
-  // GOTCHA (planted): we only checked the state machine's guards. The "one
-  // active sprint per project" rule is enforced by the DB partial unique index,
-  // and this code does NOT catch the constraint violation — so two concurrent
-  // starts race, and the loser gets a raw 500 from Postgres instead of a clean
-  // 409. The state machine passed; the database still says no.
-  return prisma.sprint.update({
-    where: { id: sprint.id },
-    data: { state: nextState, startAt: new Date() },
-  });
+  // LEARN: the state machine's guards passed, but the "one active sprint per
+  // project" rule is the DB partial unique index — and under concurrency it is
+  // the ONLY thing that can enforce it (two starts can both pass the guard).
+  // So we must catch the DB's "no": a unique violation is Prisma error P2002.
+  // We translate it into a clean 409 instead of leaking a raw 500 (review
+  // finding). Check-then-act is a lie under concurrency; the constraint is
+  // the truth, and catching its rejection is how you honor it.
+  try {
+    return await prisma.sprint.update({
+      where: { id: sprint.id },
+      data: { state: nextState, startAt: new Date() },
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      throw conflict('Another sprint is already active in this project');
+    }
+    throw e;
+  }
 }
 
 export async function completeSprint(projectKey, actorId, sprintId, { moveUnfinishedTo }) {
@@ -60,27 +70,30 @@ export async function completeSprint(projectKey, actorId, sprintId, { moveUnfini
       select: { id: true },
     })
   ).map((c) => c.id);
-  const unfinished = await prisma.issue.findMany({
+  const unfinishedCount = await prisma.issue.count({
     where: { sprintId: sprint.id, columnId: { notIn: doneColumnIds } },
-    select: { id: true },
   });
 
-  // Complete the sprint.
-  await prisma.sprint.update({
-    where: { id: sprint.id },
-    data: { state: nextState, endAt: new Date() },
-  });
-
-  // GOTCHA (planted): the bulk move of unfinished issues happens OUTSIDE any
-  // transaction, one update per issue in a loop. If the process dies mid-loop,
-  // the sprint is COMPLETED but half its unfinished issues are stranded in it.
-  // The complete + move should be one atomic unit.
   const destination = moveUnfinishedTo === 'backlog' ? null : (moveUnfinishedTo ?? null);
-  for (const issue of unfinished) {
-    await prisma.issue.update({ where: { id: issue.id }, data: { sprintId: destination } });
-  }
 
-  return { sprint: { ...sprint, state: nextState }, movedCount: unfinished.length };
+  // LEARN: complete + move in ONE transaction (review finding). Either the
+  // sprint completes AND every unfinished issue moves, or nothing changes — a
+  // crash mid-way can no longer leave a COMPLETED sprint with issues stranded
+  // in it. The N-update loop also collapses into one `updateMany`, which is
+  // faster too. Atomicity is a transaction's entire reason for existing; ask
+  // it of every operation that writes more than once.
+  await prisma.$transaction([
+    prisma.sprint.update({
+      where: { id: sprint.id },
+      data: { state: nextState, endAt: new Date() },
+    }),
+    prisma.issue.updateMany({
+      where: { sprintId: sprint.id, columnId: { notIn: doneColumnIds } },
+      data: { sprintId: destination },
+    }),
+  ]);
+
+  return { sprint: { ...sprint, state: nextState }, movedCount: unfinishedCount };
 }
 
 export async function assignIssueToSprint(projectKey, actorId, number, sprintId) {

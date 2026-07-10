@@ -86,3 +86,60 @@ describe('sprint lifecycle', () => {
     expect(report.body.committed).toBe(8);
   });
 });
+
+describe('sprint concurrency + atomicity (review findings)', () => {
+  it('concurrent starts yield exactly one 200 and one 409, never a 500', async () => {
+    const ana = await makeUser('spc@t.dev');
+    await makeProject(ana.auth, 'GJ');
+    const mk = (body) =>
+      request(app).post('/api/projects/GJ/issues').set('Authorization', ana.auth).send(body);
+    const i1 = (await mk({ title: 'a' })).body.issue;
+    const i2 = (await mk({ title: 'b' })).body.issue;
+    const s1 = (await createSprint({ auth: ana.auth }, { name: 'S1' })).body.sprint;
+    const s2 = (await createSprint({ auth: ana.auth }, { name: 'S2' })).body.sprint;
+    await request(app)
+      .patch(`/api/projects/GJ/issues/${i1.number}/sprint`)
+      .set('Authorization', ana.auth)
+      .send({ sprintId: s1.id });
+    await request(app)
+      .patch(`/api/projects/GJ/issues/${i2.number}/sprint`)
+      .set('Authorization', ana.auth)
+      .send({ sprintId: s2.id });
+
+    // fire both starts at once
+    const [r1, r2] = await Promise.all([
+      request(app).post(`/api/projects/GJ/sprints/${s1.id}/start`).set('Authorization', ana.auth),
+      request(app).post(`/api/projects/GJ/sprints/${s2.id}/start`).set('Authorization', ana.auth),
+    ]);
+    const statuses = [r1.status, r2.status].sort();
+    expect(statuses).toEqual([200, 409]); // one wins, one gets a clean conflict — never 500
+  });
+
+  it('completing a sprint moves unfinished issues atomically (none stranded)', async () => {
+    const ana = await makeUser('spa@t.dev');
+    await makeProject(ana.auth, 'GJ');
+    const mk = (body) =>
+      request(app).post('/api/projects/GJ/issues').set('Authorization', ana.auth).send(body);
+    const i1 = (await mk({ title: 'x' })).body.issue;
+    const sprint = (await createSprint({ auth: ana.auth }, { name: 'S1' })).body.sprint;
+    await request(app)
+      .patch(`/api/projects/GJ/issues/${i1.number}/sprint`)
+      .set('Authorization', ana.auth)
+      .send({ sprintId: sprint.id });
+    await request(app)
+      .post(`/api/projects/GJ/sprints/${sprint.id}/start`)
+      .set('Authorization', ana.auth);
+
+    const done = await request(app)
+      .post(`/api/projects/GJ/sprints/${sprint.id}/complete`)
+      .set('Authorization', ana.auth)
+      .send({ moveUnfinishedTo: 'backlog' });
+    expect(done.body.movedCount).toBe(1);
+
+    // the issue must be back in the backlog (no sprintId), not stranded
+    const detail = await request(app)
+      .get(`/api/projects/GJ/issues/${i1.number}/detail`)
+      .set('Authorization', ana.auth);
+    expect(detail.body.issue.sprintId ?? null).toBeNull();
+  });
+});
