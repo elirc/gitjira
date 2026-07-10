@@ -35,6 +35,14 @@ COPY --from=build /app/packages ./packages
 COPY --from=build /app/apps/api ./apps/api
 COPY --from=build /app/package.json ./package.json
 
+# LEARN (sprint 15 review): run as a NON-ROOT user. A container escape or a
+# compromised dependency running as uid 0 has root in the host namespace — a far
+# worse incident. Least privilege (the sprint-13 defense-in-depth thread): create
+# an unprivileged user, own the app dir, drop to it. Verify:
+#   docker inspect --format '{{.Config.User}}' <image>  →  app
+RUN useradd --system --uid 10001 app && chown -R app /app
+USER app
+
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node -e "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"

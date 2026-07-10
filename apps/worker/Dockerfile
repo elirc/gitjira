@@ -28,5 +28,16 @@ COPY --from=build /app/apps/api ./apps/api
 COPY --from=build /app/apps/worker ./apps/worker
 COPY --from=build /app/package.json ./package.json
 
+# Non-root user (sprint 15 review): least privilege, same as the API image.
+RUN useradd --system --uid 10001 app && chown -R app /app
+USER app
+
+# LEARN (sprint 15 review): the worker has no HTTP port, but the platform still
+# needs a LIVENESS signal — "is this process actually working, or just running?"
+# This checks the process can reach Redis (its one hard dependency); a worker
+# that can't reach Redis is up-but-useless and should be restarted.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "const {Redis}=require('ioredis');const r=new Redis({host:process.env.REDIS_HOST||'localhost',port:+(process.env.REDIS_PORT||6379),maxRetriesPerRequest:1,lazyConnect:true});r.connect().then(()=>r.ping()).then(()=>{r.quit();process.exit(0)}).catch(()=>process.exit(1))"
+
 WORKDIR /app/apps/worker
 CMD ["node", "src/index.js"]

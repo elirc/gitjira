@@ -13,9 +13,18 @@ primary_region = "iad"
   NODE_ENV = "production"
   PORT = "3000"
 
-# The process that runs on every instance. Runs DB migrations, then the server.
+# LEARN (sprint 15 review): migrations run in a RELEASE PHASE — ONCE, before any
+# new instance serves — NOT in the per-instance start command. With 2+ instances,
+# a start-command migration means every instance races to migrate; advisory-lock
+# luck at best, partial application or deadlock at worst, discovered mid-deploy.
+# release_command runs a single throwaway machine first; if it FAILS, the deploy
+# aborts and the OLD version keeps serving (no half-migrated state — see runbook).
+[deploy]
+  release_command = "npx prisma migrate deploy --schema apps/api/prisma/schema.prisma"
+
+# The process on every instance now just serves — no migration here.
 [processes]
-  app = "sh -c 'npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && node src/server.js'"
+  app = "node src/server.js"
 
 [http_service]
   internal_port = 3000

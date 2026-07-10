@@ -13,9 +13,12 @@
 
 - **Staging:** auto on push to `main` (deploy.yml → staging).
 - **Prod:** push a `vX.Y.Z` tag → approve in the `production` GitHub Environment.
-- Migrations run in the **release phase** (once, before instances swap), NOT per
-  instance. If the release phase fails, the deploy aborts and the OLD version
-  keeps serving — no half-migrated state.
+- Migrations run in the **release phase** (`[deploy] release_command` in
+  fly.toml) — ONCE, before instances swap, NOT per instance (which would race
+  with `min_machines_running = 2`). **If the release phase FAILS: the deploy
+  aborts, no new instances start, and the OLD version keeps serving** — you are
+  in a safe, known state. Read the release-command logs, fix the migration
+  (fix-forward — see below), and re-deploy. Never hand-patch `_prisma_migrations`.
 
 ## Rollback
 
