@@ -304,15 +304,32 @@ export async function moveIssue(projectKey, number, actorId, { columnId, positio
 
 // The full issue for the detail panel: description, sub-tasks, comments,
 // activity trail, attachments — everything the panel shows, one query set.
+// How many recent activity events the detail panel shows. The feed used to be
+// UNBOUNDED — an issue with thousands of events fetched every one of them on
+// every detail load (measured at scale, sprint 12). The panel only shows the
+// recent tail; older history is a separate paginated concern.
+const ACTIVITY_FEED_LIMIT = 20;
+
 export async function getIssueDetail(projectKey, number, actorId) {
-  const { project, issue } = await loadIssueForActor(projectKey, number, actorId);
+  // LEARN (sprint 12): this used to call loadIssueForActor (which fetches the
+  // project + membership + the issue-with-assignee) and THEN re-fetch the full
+  // issue by id — loading the issue TWICE. At scale the measurement showed 12
+  // queries/request. Here we do the authz (project + membership) and then ONE
+  // findUnique with everything the panel needs, keyed on (projectId, number).
+  const project = await prisma.project.findUnique({
+    where: { key: projectKey },
+    select: { id: true, key: true },
+  });
+  if (!project) throw notFound('Project');
+  await requireMembership(project.id, actorId);
+
   const columns = await prisma.workflowColumn.findMany({
     where: { projectId: project.id },
     select: { id: true, name: true, category: true },
   });
 
   const full = await prisma.issue.findUnique({
-    where: { id: issue.id },
+    where: { projectId_number: { projectId: project.id, number } },
     include: {
       assignee: { select: { id: true, name: true, avatarUrl: true } },
       children: {
@@ -324,6 +341,8 @@ export async function getIssueDetail(projectKey, number, actorId) {
         orderBy: { createdAt: 'asc' },
       },
       activityEvents: {
+        // Bounded feed: newest ACTIVITY_FEED_LIMIT only, not the whole history.
+        take: ACTIVITY_FEED_LIMIT,
         include: { actor: { select: { id: true, name: true } } },
         orderBy: { createdAt: 'desc' },
       },
@@ -332,6 +351,7 @@ export async function getIssueDetail(projectKey, number, actorId) {
       },
     },
   });
+  if (!full) throw notFound('Issue');
 
   const column = columns.find((c) => c.id === full.columnId);
   const doneChildren = full.children.filter((c) => {
