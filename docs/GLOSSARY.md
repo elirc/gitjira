@@ -90,6 +90,7 @@ Terms in the order the codebase introduces them.
 - **Subscription leak** — an event listener added on mount but never removed, so it stacks across remounts.
 
 ## Sprint 09
+
 - **Job queue** — a durable list of work; producers enqueue, workers consume (BullMQ on Redis).
 - **Worker** — a separate process that consumes and runs jobs, scaled independently of the API.
 - **At-least-once delivery** — a job is guaranteed to run but may run more than once (retries).
