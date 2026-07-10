@@ -42,7 +42,7 @@
   --color-bg: #1d2125;
   --color-surface: #22272b; /* a raised surface, lighter than bg */
   --color-text: #e6edf3;
-  --color-text-muted: #7d8590; /* ⚠ see the contrast audit — this pairing is suspect */
+  --color-text-muted: #96a0af; /* 5.3:1 on --color-surface (AA), fixed in review */
   --color-primary: #579dff;
   --color-primary-text: #1d2125;
   --color-border: #2d333b;
@@ -56,7 +56,7 @@
     --color-bg: #1d2125;
     --color-surface: #22272b;
     --color-text: #e6edf3;
-    --color-text-muted: #7d8590;
+    --color-text-muted: #96a0af;
     --color-primary: #579dff;
     --color-primary-text: #1d2125;
     --color-border: #2d333b;
