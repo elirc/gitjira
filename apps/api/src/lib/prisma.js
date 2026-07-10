@@ -6,12 +6,14 @@ import { PrismaClient } from '@prisma/client';
 const realClient = new PrismaClient();
 
 // LEARN (sprint 11): `prisma` is a thin Proxy over "whichever client is active
-// right now." In production that's always the singleton above — the Proxy is
-// invisible. In tests, setup.js swaps in a *transaction-bound* client so every
-// query the code makes joins ONE transaction we then roll back — instant
-// isolation with no TRUNCATE (ADR 0022). Services do `import { prisma }` and
-// never learn which client they're talking to; that's the whole point of the
-// seam. ESM makes this cheap: the binding is stable, only the target moves.
+// right now." This is dependency inversion, not a test hack — a swappable client
+// is where a read-replica or a per-tenant client would one day plug in. Services
+// do `import { prisma }` and never learn which client they're talking to.
+// BREADCRUMB: today the ONLY caller that swaps it is the test setup — it installs
+// a transaction-bound client so every query joins ONE transaction we then roll
+// back, for instant isolation with no TRUNCATE (ADR 0022). Nothing in production
+// calls __setActiveClient yet, so don't go hunting for a runtime swap that isn't
+// there. ESM makes this cheap: the binding is stable, only the target moves.
 let activeClient = realClient;
 
 export const prisma = new Proxy(/** @type {PrismaClient} */ ({}), {
