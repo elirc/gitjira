@@ -70,6 +70,7 @@ Terms in the order the codebase introduces them.
 - **Fuzz testing** — throwing random inputs at code to assert it fails gracefully, never crashes.
 
 ## Sprint 07
+
 - **State machine** — an object is in one of a fixed set of states; only certain transitions are legal.
 - **Transition guard** — a precondition that must hold for a transition (e.g. "sprint must have issues to start").
 - **Partial unique index** — a uniqueness constraint that applies only to rows matching a condition (`WHERE state = 'ACTIVE'`).
