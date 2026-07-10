@@ -47,6 +47,8 @@ jobs:
       - run: npm ci
       - name: Shared (domain) tests + coverage gate
         run: npm test -w @gitjira/shared -- --coverage
+      - name: UI (design system) component tests
+        run: npm test -w @gitjira/ui
       - name: Web (component) tests + coverage gate
         run: npm test -w @gitjira/web -- --coverage
 
