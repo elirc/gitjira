@@ -6,9 +6,11 @@ import {
   updateIssueSchema,
   moveIssueSchema,
   commentSchema,
+  assignSprintSchema,
 } from '@gitjira/shared/issue-schemas';
 import * as issues from '../controllers/issue.controller.js';
 import * as searchCtl from '../controllers/search.controller.js';
+import * as sprintCtl from '../controllers/sprint.controller.js';
 import * as comments from '../controllers/comment.controller.js';
 import * as attachments from '../controllers/attachment.controller.js';
 import multer from 'multer';
@@ -25,6 +27,7 @@ issueRoutes.get('/:number', asyncHandler(issues.getOne));
 issueRoutes.get('/:number/detail', asyncHandler(issues.detail));
 issueRoutes.patch('/:number', validate(updateIssueSchema), asyncHandler(issues.update));
 issueRoutes.patch('/:number/move', validate(moveIssueSchema), asyncHandler(issues.move));
+issueRoutes.patch('/:number/sprint', validate(assignSprintSchema), asyncHandler(sprintCtl.assignIssue));
 issueRoutes.delete('/:number', asyncHandler(issues.remove));
 
 // comments

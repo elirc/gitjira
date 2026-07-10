@@ -160,6 +160,7 @@ model Issue {
   attachments    Attachment[]
   sprint         Sprint?         @relation(fields: [sprintId], references: [id])
   sprintId       String?
+  storyPoints    Int?
 
   @@unique([projectId, number])
   @@index([projectId, columnId])
