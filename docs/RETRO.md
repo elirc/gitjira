@@ -59,3 +59,15 @@ Five sprints, five reviewed PRs, v0.1.0. The recurring themes so far: authz foll
 - **Went well:** the activity seam fed a third consumer with zero new plumbing; verifying the worker through real Redis (not just the handler) gave real confidence. The idempotency red→green is the clearest lesson in the repo.
 - **Was hard:** the migration-timestamp trap bit AGAIN (env clock returns an early time), caught only by CI's fresh DB. Worth a helper next time. --no-verify under load kept needing prettier catch-up.
 - **Watch next sprint:** the TypeScript migration - incremental, strangler-fig, no big bang; the migration itself is the senior skill.
+
+## Sprint 10 — TypeScript Migration (v0.6.0)
+
+- **Went well:** checkJs + JSDoc delivered real type safety with zero build step; the ratchet made progress monotonic. The planted `any` earned its keep — replacing it with a discriminated union made tsc immediately flag an unnarrowed payload access (`TS2339`), a genuine latent fragility, fixed red→green with a regression test.
+- **Was hard:** ecosystem types (Express req/res) need `@types/*` and more setup, so those files were deferred. Deciding what counts in the ratchet (files vs `any`-occurrences) turned into a real review debate; resolution: file-count is the CI ratchet, `no-explicit-any` a per-file lint (filed #90).
+- **Watch next sprint:** the suite is slow (~275s) and occasionally flaky — the testing sprint should measure before/after and treat every flake as a bug, not a re-run.
+
+## Sprint 11 — Testing Depth & E2E (v0.7.0)
+
+- **Went well:** transaction-rollback isolation cut API test execution 196s→32s (~6×) with the same guarantee — the single highest-leverage change in the sprint. Contract tests caught two real response-shape drifts (`/auth/me`, project `columns`) on their very first run. The review turned a planted `waitForTimeout` into locator-based waits — the "never wait for time, wait for state" lesson landed on a real diff.
+- **Was hard:** rollback isolation fought the code-under-test's own `$transaction` calls (solved by flattening) and genuinely can't coexist with suites that test constraint/rollback behavior (three opt out — an honest boundary, ADR 0022). Web coverage turned out too jittery to gate, so it's reported not gated (#101) — on-thesis: don't gate a signal you can't trust. Concurrent local test runs kept deadlocking the shared DB; CI (single suite) was the clean signal.
+- **Watch next sprint:** performance. Scale the seed data, hunt N+1s, add indexes and caching, set perf budgets — and the new rollback isolation makes the perf tests affordable to run.
