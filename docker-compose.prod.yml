@@ -1,0 +1,55 @@
+# LEARN (sprint 15): a PROD-PARITY compose — run the whole system locally the
+# way it runs in production (built images, non-dev config, Postgres + Redis).
+# It closes the "works on my machine" gap for everything EXCEPT the managed
+# platform bits (TLS, autoscaling, secrets manager), which are documented in the
+# runbook. Parity you can run beats parity you assume.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gitjira
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gitjira_dev}
+      POSTGRES_DB: gitjira
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'gitjira']
+      interval: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      retries: 10
+
+  api:
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    environment:
+      DATABASE_URL: postgresql://gitjira:${POSTGRES_PASSWORD:-gitjira_dev}@postgres:5432/gitjira
+      REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      NODE_ENV: production
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    ports: ['3000:3000']
+
+  worker:
+    build: { context: ., dockerfile: apps/worker/Dockerfile }
+    environment:
+      DATABASE_URL: postgresql://gitjira:${POSTGRES_PASSWORD:-gitjira_dev}@postgres:5432/gitjira
+      REDIS_HOST: redis
+      NODE_ENV: production
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  web:
+    build: { context: ., dockerfile: apps/web/Dockerfile }
+    depends_on: [api]
+    ports: ['8080:8080']
+
+volumes:
+  pgdata:
