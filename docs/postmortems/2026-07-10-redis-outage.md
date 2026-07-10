@@ -15,14 +15,14 @@ minutes**. Two real gaps surfaced and became action items.
 
 ## Timeline (UTC)
 
-| Time  | Event |
-| ----- | ----- |
-| 14:02 | Redis container stopped (`docker kill staging-redis`). |
-| 14:03 | Worker logs fill with connection-refused; queue-depth gauge flatlines (nothing consumed). |
-| 14:03 | **No alert fired.** We only noticed because we were watching. (Action item 1.) |
-| 14:05 | On-call opens RUNBOOK.md → "Queue backlog" section; confirms API is healthy (`/api/health` 200) — the blast radius is notifications only. |
-| 14:06 | Confirms enqueue failures are logged and requests still succeed (graceful degradation held — sprint 9's design paid off). |
-| 14:07 | Restart Redis (`docker start staging-redis`). Worker reconnects automatically. |
+| Time  | Event                                                                                                                                                |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 14:02 | Redis container stopped (`docker kill staging-redis`).                                                                                               |
+| 14:03 | Worker logs fill with connection-refused; queue-depth gauge flatlines (nothing consumed).                                                            |
+| 14:03 | **No alert fired.** We only noticed because we were watching. (Action item 1.)                                                                       |
+| 14:05 | On-call opens RUNBOOK.md → "Queue backlog" section; confirms API is healthy (`/api/health` 200) — the blast radius is notifications only.            |
+| 14:06 | Confirms enqueue failures are logged and requests still succeed (graceful degradation held — sprint 9's design paid off).                            |
+| 14:07 | Restart Redis (`docker start staging-redis`). Worker reconnects automatically.                                                                       |
 | 14:08 | Queue drains; notifications delivered. Because jobs are idempotent (sprint 9), the retried backlog did not double-notify. Verified counts. Resolved. |
 
 ## Impact
@@ -33,7 +33,7 @@ minutes**. Two real gaps surfaced and became action items.
 
 ## Root cause
 
-Intended: Redis was killed on purpose. The *interesting* finding is what the
+Intended: Redis was killed on purpose. The _interesting_ finding is what the
 outage revealed about our observability and dependency handling.
 
 ## What went well
