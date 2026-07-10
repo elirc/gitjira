@@ -12,7 +12,8 @@
     "./fractional-index": "./src/fractional-index.js",
     "./activity": "./src/activity.js",
     "./jql": "./src/jql/index.js",
-    "./mentions": "./src/mentions.js"
+    "./mentions": "./src/mentions.js",
+    "./response-schemas": "./src/response-schemas.js"
   },
   "dependencies": {
     "zod": "^4.4.3"
