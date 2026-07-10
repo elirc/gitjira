@@ -12,7 +12,9 @@
     "db:reset": "prisma migrate reset --force",
     "db:seed": "node prisma/seed.js",
     "db:generate": "prisma generate",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:seed:scale": "node prisma/seed-scale.js",
+    "perf:measure": "node prisma/measure.mjs"
   },
   "dependencies": {
     "@gitjira/shared": "*",
@@ -26,7 +28,8 @@
     "pino": "^9.6.0",
     "pino-http": "^10.4.0",
     "prisma": "^6.19.3",
-    "socket.io": "^4.8.3"
+    "socket.io": "^4.8.3",
+    "ioredis": "^5.10.1"
   },
   "devDependencies": {
     "pino-pretty": "^13.0.0",

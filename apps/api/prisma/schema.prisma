@@ -167,6 +167,13 @@ model Issue {
 
   @@unique([projectId, number])
   @@index([projectId, columnId])
+  // LEARN (sprint 12): the board list filters by projectId and orders by
+  // createdAt DESC, id DESC. Without this the planner filters on the
+  // projectId+columnId index and then TOP-N HEAPSORTs the result (measured:
+  // Sort node in EXPLAIN). A composite index whose column order MATCHES the
+  // query (equality column first, then the sort columns in sort order) lets
+  // Postgres walk the index already-ordered and stop at LIMIT — no sort step.
+  @@index([projectId, createdAt(sort: Desc), id(sort: Desc)])
 }
 
 model Comment {
@@ -199,7 +206,10 @@ model ActivityEvent {
   issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
   actor User  @relation(fields: [actorId], references: [id], onDelete: Cascade)
 
-  @@index([issueId])
+  // LEARN (sprint 12): the feed reads one issue's events newest-first. The
+  // plain issueId index found the rows but still sorted them by createdAt.
+  // (issueId, createdAt DESC) serves the filter AND the order in one walk.
+  @@index([issueId, createdAt(sort: Desc)])
 }
 
 model Attachment {

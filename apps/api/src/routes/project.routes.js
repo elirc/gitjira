@@ -19,6 +19,7 @@ projectRoutes.post(
   validate(addMemberSchema),
   asyncHandler(projects.addProjectMember)
 );
+projectRoutes.delete('/:id/members/:userId', asyncHandler(projects.removeProjectMember));
 
 // LEARN: issues are nested under a project's key — the URL encodes the
 // ownership. /projects/GJ/issues/101 reads like the domain talks.

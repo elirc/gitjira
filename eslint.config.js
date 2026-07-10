@@ -14,7 +14,7 @@ export default [
   js.configs.recommended,
 
   {
-    files: ['apps/api/**/*.js', 'apps/worker/**/*.js'],
+    files: ['apps/api/**/*.{js,mjs}', 'apps/worker/**/*.{js,mjs}'],
     languageOptions: { globals: { ...globals.node } },
   },
   {

@@ -122,3 +122,15 @@ Terms in the order the codebase introduces them.
 - **Trace** — a Playwright recording of a run you can step through frame by frame to debug a failure.
 - **Coverage ratchet / floor** — a per-package threshold that only moves up; catches whole-file gaps, not assertion quality.
 - **Determinism** — a test whose result depends only on its inputs (frozen clock, own data), not on time/order/machine speed.
+
+## Sprint 12
+
+- **p50 / p95 / p99** — latency percentiles; p95 = "95% of requests were at least this fast". Tail latency matters more than the average.
+- **N+1 query** — fetching a list, then one query per row for related data; collapse into one query with a join/include.
+- **EXPLAIN / heapsort** — Postgres's query plan; a top-N heapsort means it sorted results in memory instead of walking an ordered index.
+- **Composite index** — a multi-column index; column order must match the query's equality-then-sort shape to avoid a sort step.
+- **Read-through cache** — the cache loads on a miss and returns; callers never touch the store directly.
+- **Cache stampede / single-flight** — many simultaneous misses on one key; single-flight makes them share one loader.
+- **TTL** — time-to-live; how long a cache entry is trusted before it expires.
+- **Code splitting** — emitting each route/page as its own chunk, loaded on demand, so the initial download is smaller.
+- **Perf budget** — a CI ceiling (e.g., bundle gzip size) that fails the build when crossed, so performance can't rot silently.

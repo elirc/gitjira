@@ -98,3 +98,5 @@ jobs:
         working-directory: apps/api
       - name: Build
         run: npm run build
+      - name: Bundle-size budget (perf ratchet)
+        run: npm run perf:budget
