@@ -1,13 +1,13 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { notFound, conflict } from '../lib/errors.js';
-import { requireMembership } from './project.service.js';
+import { authorize } from './project.service.js';
 import { assertTransition } from '../domain/sprint-state-machine.js';
 
-async function loadProject(projectKey, actorId) {
+async function loadProject(projectKey, actorId, action = 'sprint:read') {
   const project = await prisma.project.findUnique({ where: { key: projectKey } });
   if (!project) throw notFound('Project');
-  await requireMembership(project.id, actorId);
+  await authorize(project.id, actorId, action);
   return project;
 }
 
@@ -21,12 +21,12 @@ export async function listSprints(projectKey, actorId) {
 }
 
 export async function createSprint(projectKey, actorId, { name, goal }) {
-  const project = await loadProject(projectKey, actorId);
+  const project = await loadProject(projectKey, actorId, 'sprint:manage');
   return prisma.sprint.create({ data: { projectId: project.id, name, goal } });
 }
 
 export async function startSprint(projectKey, actorId, sprintId) {
-  const project = await loadProject(projectKey, actorId);
+  const project = await loadProject(projectKey, actorId, 'sprint:manage');
   const sprint = await prisma.sprint.findFirst({
     where: { id: sprintId, projectId: project.id },
     include: { _count: { select: { issues: true } } },
@@ -57,7 +57,7 @@ export async function startSprint(projectKey, actorId, sprintId) {
 }
 
 export async function completeSprint(projectKey, actorId, sprintId, { moveUnfinishedTo }) {
-  const project = await loadProject(projectKey, actorId);
+  const project = await loadProject(projectKey, actorId, 'sprint:manage');
   const sprint = await prisma.sprint.findFirst({ where: { id: sprintId, projectId: project.id } });
   if (!sprint) throw notFound('Sprint');
 
@@ -97,7 +97,7 @@ export async function completeSprint(projectKey, actorId, sprintId, { moveUnfini
 }
 
 export async function assignIssueToSprint(projectKey, actorId, number, sprintId) {
-  const project = await loadProject(projectKey, actorId);
+  const project = await loadProject(projectKey, actorId, 'sprint:manage');
   const issue = await prisma.issue.findUnique({
     where: { projectId_number: { projectId: project.id, number } },
   });

@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma.js';
 import { notFound, forbidden, conflict } from '../lib/errors.js';
 import { cached, invalidate, cacheKeys } from '../lib/cache.js';
+import { can } from '@gitjira/shared/policy';
 
 // TTL for the cached member map. Short enough that a missed invalidation heals
 // on its own quickly; long enough to absorb the burst of membership checks that
@@ -54,6 +55,21 @@ export async function createProject({ key, name, description }, creatorId) {
 // deliberate: 403 confirms the project exists, which is information a
 // stranger should not get. "You can't see this" and "this isn't here" look
 // identical from outside.
+// LEARN (sprint 13): the two-layer authorization choke-point. Every protected
+// service action calls this: requireMembership answers "may you touch THIS
+// object" (object-level — you're a member of its project), and can() answers
+// "may your ROLE do this action" (action-level, from the shared matrix). BOTH
+// must pass. Routing all authz through here means one place to audit, and a new
+// endpoint can't forget the role check — it's not optional plumbing, it's the
+// signature. Returns the role for callers that need it.
+export async function authorize(projectId, userId, action) {
+  const { role } = await requireMembership(projectId, userId);
+  if (!can(role, action)) {
+    throw forbidden(`Your role (${role}) is not permitted to ${action}`);
+  }
+  return role;
+}
+
 export async function requireMembership(projectId, userId, roles = null) {
   // Read the member map through the cache — this is the hot read the cache
   // exists for. NOTE (security-relevant): because authz reads this cache, ANY
@@ -87,7 +103,7 @@ export async function getProjectByKey(key, userId) {
 }
 
 export async function addMember(projectId, actorId, { userId, role }) {
-  await requireMembership(projectId, actorId, ['ADMIN']);
+  await authorize(projectId, actorId, 'member:add');
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) throw notFound('User');
   const member = await prisma.projectMember.upsert({
@@ -102,7 +118,7 @@ export async function addMember(projectId, actorId, { userId, role }) {
 }
 
 export async function removeMember(projectId, actorId, userId) {
-  await requireMembership(projectId, actorId, ['ADMIN']);
+  await authorize(projectId, actorId, 'member:remove');
   await prisma.projectMember.delete({
     where: { projectId_userId: { projectId, userId } },
   });

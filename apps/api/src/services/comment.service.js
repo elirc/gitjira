@@ -1,7 +1,7 @@
 import { prisma } from '../lib/prisma.js';
 import { notFound, forbidden } from '../lib/errors.js';
 import { extractMentions } from '@gitjira/shared/mentions';
-import { requireMembership } from './project.service.js';
+import { authorize } from './project.service.js';
 import { recordActivity } from './activity.service.js';
 import { autoWatch } from './notification.service.js';
 import { enqueueNotification } from '../jobs/queue.js';
@@ -21,7 +21,7 @@ async function resolveMentions(projectId, handles) {
 async function loadIssue(projectKey, number, actorId) {
   const project = await prisma.project.findUnique({ where: { key: projectKey } });
   if (!project) throw notFound('Project');
-  await requireMembership(project.id, actorId);
+  await authorize(project.id, actorId, 'comment:create');
   const issue = await prisma.issue.findUnique({
     where: { projectId_number: { projectId: project.id, number } },
   });
