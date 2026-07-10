@@ -134,3 +134,16 @@ Terms in the order the codebase introduces them.
 - **TTL** — time-to-live; how long a cache entry is trusted before it expires.
 - **Code splitting** — emitting each route/page as its own chunk, loaded on demand, so the initial download is smaller.
 - **Perf budget** — a CI ceiling (e.g., bundle gzip size) that fails the build when crossed, so performance can't rot silently.
+
+## Sprint 13
+
+- **RBAC / ABAC** — role-based vs attribute-based access control; we use RBAC (roles × actions).
+- **IDOR** — Insecure Direct Object Reference: reaching an object by id without checking you're allowed to (broken object-level authz).
+- **Object-level vs action-level authz** — "may you touch THIS object" vs "may your role do this action"; both must pass.
+- **CSP** — Content-Security-Policy; restricts what a page may load/run, limiting XSS blast radius.
+- **CSRF** — Cross-Site Request Forgery; a malicious site making authenticated requests on your behalf.
+- **User enumeration** — an app leaking which emails/usernames exist via differing responses.
+- **STRIDE** — a threat-modeling checklist: Spoofing, Tampering, Repudiation, Info disclosure, DoS, Elevation.
+- **Defense in depth** — layered independent controls, so one failing isn't a breach.
+- **Sliding window (rate limit)** — count requests within the last N ms by timestamp, avoiding fixed-window burst bugs.
+- **gitleaks / secret scanning** — scanning diffs for committed credentials before they merge.
