@@ -25,11 +25,16 @@ export function useLiveProject(projectId) {
     socket.on('activity', onActivity);
     socket.on('presence', onPresence);
 
-    // GOTCHA (planted): this effect subscribes but returns NO cleanup. Every
-    // time the component mounts (navigate away and back, filter change,
-    // StrictMode double-mount) it adds ANOTHER 'activity' listener and never
-    // removes the old ones. After three visits, one server event fires the
-    // handler three times — a subscription leak. The fix is a cleanup return.
+    // LEARN: cleanup (review finding). Every subscription an effect starts must
+    // be torn down when the effect re-runs or the component unmounts, or the
+    // listeners stack across remounts and one event fires the handler N times.
+    // Returning this function is the whole fix — same lesson as the sprint-06
+    // Cmd+K global listener.
+    return () => {
+      socket.off('activity', onActivity);
+      socket.off('presence', onPresence);
+      socket.emit('leave-project', { projectId });
+    };
   }, [projectId, qc]);
 
   return { viewers };

@@ -1,16 +1,20 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createServer } from 'node:http';
 import { io as ioClient } from 'socket.io-client';
+import request from 'supertest';
 import { createApp } from '../src/app.js';
 import { initSocketServer } from '../src/realtime/socket-server.js';
 import { emitToProject } from '../src/realtime/emit.js';
 import { makeUser } from './helpers.js';
 
-let httpServer, url, ana;
+// NOTE: the shared beforeEach (test/setup.js) truncates tables before EACH
+// test, so we create the user + project INSIDE each test, not in beforeAll —
+// beforeAll data wouldn't survive the truncation.
+let httpServer, url;
+const app = createApp();
 
 beforeAll(async () => {
-  ana = await makeUser('sock@t.dev');
-  httpServer = createServer(createApp());
+  httpServer = createServer(app);
   initSocketServer(httpServer);
   await new Promise((r) => httpServer.listen(0, r));
   url = `http://localhost:${httpServer.address().port}`;
@@ -19,6 +23,13 @@ afterAll(() => new Promise((r) => httpServer.close(r)));
 
 function connect(token) {
   return ioClient(url, { auth: { token }, transports: ['websocket'], forceNew: true });
+}
+async function setupProject(auth) {
+  await request(app)
+    .post('/api/projects')
+    .set('Authorization', auth)
+    .send({ key: 'RT', name: 'RT' });
+  return (await request(app).get('/api/projects/RT').set('Authorization', auth)).body.project;
 }
 
 // LEARN: real socket tests — a real client connects to a real server. The
@@ -32,16 +43,47 @@ describe('socket server', () => {
     sock.close();
   });
 
-  it("an authenticated client in a project room receives that project's events", async () => {
+  it("a member in a project room receives that project's events", async () => {
+    const ana = await makeUser('sock@t.dev');
+    const project = await setupProject(ana.auth);
+
     const sock = connect(ana.token);
     await new Promise((resolve) => sock.on('connect', resolve));
-    sock.emit('join-project', { projectId: 'proj-1' });
-    await new Promise((r) => setTimeout(r, 50)); // let the join settle
+    sock.emit('join-project', { projectId: project.id });
+    await new Promise((r) => setTimeout(r, 120)); // membership check + join settle
 
     const received = new Promise((resolve) => sock.on('activity', resolve));
-    emitToProject('proj-1', 'activity', { kind: 'issue.moved', issueId: 'i1' });
+    emitToProject(project.id, 'activity', { kind: 'issue.moved', issueId: 'i1' });
     const evt = await received;
     expect(evt.kind).toBe('issue.moved');
     sock.close();
+  });
+});
+
+// LEARN: authz follows the transport. The handshake authenticated the user;
+// joining a project's room is a separate authorization check.
+describe('socket room authorization (review finding)', () => {
+  it('a non-member is refused the join and receives none of the room events', async () => {
+    const ana = await makeUser('sockana@t.dev');
+    const project = await setupProject(ana.auth);
+    const ben = await makeUser('bensock@t.dev'); // NOT a member of RT
+
+    const benSock = connect(ben.token);
+    await new Promise((r) => benSock.on('connect', r));
+
+    let benGotError = false;
+    let benGotActivity = false;
+    benSock.on('join-error', () => (benGotError = true));
+    benSock.on('activity', () => (benGotActivity = true));
+
+    benSock.emit('join-project', { projectId: project.id });
+    await new Promise((r) => setTimeout(r, 120));
+    expect(benGotError).toBe(true); // refused because not a member
+
+    emitToProject(project.id, 'activity', { kind: 'issue.moved', issueId: 'x' });
+    await new Promise((r) => setTimeout(r, 80));
+    expect(benGotActivity).toBe(false); // never in the room, never hears it
+
+    benSock.close();
   });
 });

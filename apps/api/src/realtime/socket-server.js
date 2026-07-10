@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import { verifyAccessToken } from '../services/token.service.js';
+import { prisma } from '../lib/prisma.js';
 import { logger } from '../middleware/request-logger.js';
 
 // LEARN: Socket.IO rides on the same HTTP server as the REST API. A WebSocket
@@ -35,15 +36,20 @@ export function initSocketServer(httpServer) {
     const user = socket.data.user;
     logger.info({ userId: user.id, socketId: socket.id }, 'socket connected');
 
-    // GOTCHA (planted): a client asks to join a project room and we join it
-    // WITHOUT checking they're a member of that project. Any authenticated
-    // user can `join('project:<anyId>')` and receive another team's live
-    // events — the handshake authenticated the USER but not their MEMBERSHIP.
-    // authz follows the transport: the new transport (sockets) needs the same
-    // membership check the REST endpoints have.
+    // LEARN: authorize the room join (review finding). The handshake proved
+    // WHO the user is; it did NOT prove they may see THIS project. A socket is
+    // just a new transport, and authz follows the transport — the same
+    // membership check the REST endpoints run must gate the room join, or any
+    // authenticated user could subscribe to any team's live events.
     socket.on('join-project', async ({ projectId }) => {
+      const membership = await prisma.projectMember.findUnique({
+        where: { projectId_userId: { projectId, userId: user.id } },
+      });
+      if (!membership) {
+        socket.emit('join-error', { projectId, message: 'Not a member of this project' });
+        return;
+      }
       socket.join(`project:${projectId}`);
-      // announce presence to the room
       io.to(`project:${projectId}`).emit('presence', await presenceFor(projectId));
     });
 
