@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.9.0 — Sprint 13 (PR #119)
+
+### Added
+
+- Permission matrix (docs/SECURITY.md) + central can(role, action) policy module with a doc/code drift-guard test
+- All endpoint authz routed through authorize() (object-level + action-level); helmet security headers; sliding-window login rate limiting (dual-key)
+- gitleaks secret scanning + dependabot; OWASP self-audit; STRIDE threat model; ADRs 0026-0027
+
+### Fixed
+
+- **Security (IDOR):** attachment download now enforces object-level authz (was: any authenticated user could download any project’s attachments)
+- Closed the VIEWER-can-edit gap the permission matrix surfaced
+- Login rate limiting keyed on IP AND account (was: IP only)
+
 ## 0.8.0 — Sprint 12 (PR #110)
 
 ### Added
