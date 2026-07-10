@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.8.0 — Sprint 12 (PR #110)
+
+### Added
+
+- Deterministic scale seed (50 projects / 20k issues / 100k events) + measurement harness
+- Composite indexes (board list, activity feed); Redis read-through cache (single-flight) for the member map
+- Route-level code splitting (initial bundle 137kB→72kB gzip); CI bundle-size budget (ADR 0025)
+- docs/performance.md (before/after brief); ADR 0025
+
+### Fixed
+
+- Issue detail loaded the issue twice + fetched the whole activity history (12q/74ms → 9q/55ms)
+- Board list top-N heapsort → index scan (8.7ms → 1.9ms)
+- Stale-authz: removing a member now invalidates the authz cache (was: removed user kept access for the TTL)
+
 ## 0.7.0 — Sprint 11 (PR #100)
 
 ### Added
