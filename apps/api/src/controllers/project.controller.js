@@ -3,6 +3,7 @@ import {
   listProjectsForUser,
   getProjectByKey,
   addMember,
+  removeMember,
 } from '../services/project.service.js';
 
 export async function create(req, res) {
@@ -23,4 +24,9 @@ export async function getOne(req, res) {
 export async function addProjectMember(req, res) {
   const member = await addMember(req.params.id, req.user.id, req.body);
   res.status(201).json({ member });
+}
+
+export async function removeProjectMember(req, res) {
+  await removeMember(req.params.id, req.user.id, req.params.userId);
+  res.status(204).end();
 }
