@@ -147,3 +147,14 @@ Terms in the order the codebase introduces them.
 - **Defense in depth** — layered independent controls, so one failing isn't a breach.
 - **Sliding window (rate limit)** — count requests within the last N ms by timestamp, avoiding fixed-window burst bugs.
 - **gitleaks / secret scanning** — scanning diffs for committed credentials before they merge.
+
+## Sprint 14
+
+- **Design token** — a named design value (color/space/type) as a variable; the API between design and code.
+- **Controlled vs uncontrolled component** — state owned by the parent (value+onChange) vs by the component itself.
+- **Focus trap** — keeping keyboard focus inside a dialog while it's open, so Tab can't escape behind it.
+- **Focus return** — restoring focus to the trigger element when a dialog closes (WCAG 2.4.3).
+- **Live region** — an ARIA region a screen reader announces when its content changes (aria-live).
+- **WCAG AA / contrast ratio** — accessibility conformance level; AA needs 4.5:1 for normal text, per color pairing.
+- **prefers-reduced-motion** — an OS setting to minimize animation; honor it to avoid vestibular harm.
+- **sr-only** — visually hidden but present in the accessibility tree (announced, not seen).
