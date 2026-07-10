@@ -24,6 +24,26 @@ describe('keyBetween — examples', () => {
     expect(() => keyBetween('Z', 'A')).toThrow();
     expect(() => keyBetween('M', 'M')).toThrow();
   });
+
+  // LEARN (workflow-hardening): these targeted cases were added to KILL surviving
+  // mutants that Stryker found (evidence/mutation-testing.txt). The random
+  // property test is MID-seeded, so it never generated inputs with adjacent LOW
+  // first-digits — the exact branch where the midpoint "is there room between
+  // digits?" check lives. keyBetween('1','2') exercises it: correct code returns
+  // '1V' (strictly between); the mutant `digitB + digitA > 1` returns '1' (== a),
+  // which the `a < k` assertion below catches. Mutation testing pointed here.
+  it('inserts strictly between keys with adjacent low first-digits', () => {
+    for (const [a, b] of [
+      ['1', '2'],
+      ['0', '1'],
+      ['A', 'B'],
+      ['a', 'b'],
+    ]) {
+      const k = keyBetween(a, b);
+      expect(a < k, `${a} < ${k}`).toBe(true);
+      expect(k < b, `${k} < ${b}`).toBe(true);
+    }
+  });
 });
 
 // LEARN: property-based testing. Instead of hand-picking examples, fast-check

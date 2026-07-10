@@ -1,0 +1,51 @@
+# Mutation testing (Stryker) — REAL run, packages/shared
+# Command: cd packages/shared && npx stryker run   (mutate fractional-index.js + activity.js)
+# Ran 1.63 tests per mutant on average. Done in ~1 minute.
+
+--------------------|----------------|--------|---------|----------|---------|----------|
+File                | Mutation score | killed | timeout | survived | no-cov  | errors   |
+--------------------|----------------|--------|---------|----------|---------|----------|
+All files           |     82.93 %    |   99   |    3    |    18    |    3    |    0     |
+ activity.js        |     90.91 %    |   30   |    0    |     1    |    2    |    0     |
+ fractional-index.js|     80.00 %    |   69   |    3    |    17    |    1    |    0     |
+--------------------|----------------|--------|---------|----------|---------|----------|
+
+## Why this matters
+
+Line coverage on fractional-index.js is ~100% (the property + example tests run
+every line). Yet the MUTATION score is 80% — 17 mutants survived, meaning there
+are code changes the tests do NOT detect. Coverage says "the line ran";
+mutation testing says "the tests would notice if the line were wrong". Only the
+second is what you actually want.
+
+## Notable surviving mutants (real gaps, not equivalents at a glance)
+
+- `src/fractional-index.js:71`  `if (digitB - digitA > 1)` → `digitB + digitA > 1`
+  SURVIVED. The "room between two digits" check is the heart of midpoint(); the
+  property test ("never collides and stays sorted") never generated an input that
+  distinguishes `-` from `+` here. A genuine assertion gap.
+- `src/fractional-index.js:69`  `b.length > 0` → `b.length >= 0`  SURVIVED.
+- Several `EqualityOperator` mutants in the prefix-walk survived.
+
+## Honest status
+
+This is a real finding, not a fix. The surviving mutants are FLAGGED for a
+follow-up that strengthens the property test's input distribution (or adds
+targeted example cases) until the score climbs and these specific mutants are
+killed. Not claiming the gap is closed — claiming it is now VISIBLE, which it
+never was before. That is the point of adding mutation testing.
+
+## The kill loop (demonstrated, not just described)
+
+Added targeted example tests for adjacent low first-digits (keyBetween('1','2')
+etc.) — the branch the MID-seeded property test never reached. Re-ran Stryker:
+
+  fractional-index.js:  80.00% -> 81.11%   (killed 69 -> 70, survived 17 -> 16)
+  All files:            82.93% -> 83.74%
+
+The marquee mutant (`digitB - digitA > 1` -> `+`) is now KILLED and no longer in
+the survivor list. HONEST: 16 mutants still survive in fractional-index (e.g. the
+`b.length > 0` -> `>= 0` / `-> true` pair at line 69). I killed ONE, traced from
+a real finding; I did NOT close the whole gap. The remaining survivors stay
+flagged for follow-up. Loop shown: Stryker finds -> trace -> targeted test ->
+mutant dies -> score rises.
