@@ -117,6 +117,8 @@ export async function listIssues(projectKey, actorId, { cursor, limit = 50, ...f
       // Still no `description` — the over-fetch fix (PR #27) stands.
       columnId: true,
       position: true,
+      sprintId: true,
+      storyPoints: true,
       assignee: { select: { id: true, name: true, avatarUrl: true } },
     },
   });
