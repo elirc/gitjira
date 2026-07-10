@@ -13,7 +13,8 @@
     "./activity": "./src/activity.js",
     "./jql": "./src/jql/index.js",
     "./mentions": "./src/mentions.js",
-    "./response-schemas": "./src/response-schemas.js"
+    "./response-schemas": "./src/response-schemas.js",
+    "./policy": "./src/policy.js"
   },
   "dependencies": {
     "zod": "^4.4.3"

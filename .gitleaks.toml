@@ -1,0 +1,32 @@
+# LEARN (sprint 13): gitleaks config. Every real gitleaks setup needs an
+# allowlist — a codebase has test fixtures and demo data that LOOK like secrets
+# but aren't (a dummy JWT secret in a test, a demo password in the seed). The
+# skill is telling those apart from a real leak: allowlist the KNOWN-fake ones
+# narrowly (specific strings + test/seed/CI paths), so a real secret in app code
+# still trips the scan. Allowlisting too broadly defeats the tool.
+
+title = "gitjira gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test/demo fixtures and CI env — deliberately fake, not real secrets"
+# Files that are expected to contain fake credentials by design.
+paths = [
+  '''.*\.test\.jsx?$''',
+  '''apps/api/test/.*''',
+  '''apps/web/test/.*''',
+  '''apps/api/prisma/seed.*\.js$''',
+  '''e2e/.*''',
+  '''\.github/workflows/.*''',
+  '''docs/.*''',
+  '''playwright\.config\.js$''',
+]
+# The specific fake values used throughout the suite/seed/CI.
+regexes = [
+  '''correct-horse-battery''',
+  '''demo-password-1''',
+  '''(?:test|ci-test|e2e|perf)-secret''',
+  '''gitjira_dev''',
+]

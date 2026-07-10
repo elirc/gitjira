@@ -16,10 +16,15 @@ process.env.BCRYPT_COST = process.env.BCRYPT_COST ?? '4';
 // or a cached member map from one test leaks into the next — a shared-state
 // flake. CACHE_BACKEND=memory forces the fallback store even if REDIS_HOST is set.
 process.env.CACHE_BACKEND = 'memory';
+// LEARN (sprint 13): rate limiting is OFF by default in tests — the suite logs
+// in many times from one IP and would throttle itself. A dedicated rate-limit
+// test turns it on with __setRateLimitEnabled to exercise the behavior.
+process.env.RATE_LIMIT_DISABLED = '1';
 
 const { __realClient } = await import('../src/lib/prisma.js');
 const { beginRollbackTx, endRollbackTx } = await import('./tx.js');
 const { __clearMemoryCache } = await import('../src/lib/cache.js');
+const { __clearRateLimits } = await import('../src/middleware/rate-limit.js');
 
 // LEARN (sprint 11): isolation is now transaction ROLLBACK, not TRUNCATE.
 // Each test runs inside a transaction that is rolled back afterward — same
@@ -43,6 +48,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   __clearMemoryCache(); // no cached member map may survive into the next test
+  __clearRateLimits(); // nor any rate-limit counters
   if (usesRollback()) {
     await beginRollbackTx();
   } else {

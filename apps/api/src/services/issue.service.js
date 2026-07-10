@@ -1,7 +1,7 @@
 import { prisma } from '../lib/prisma.js';
 import { notFound, conflict } from '../lib/errors.js';
 import { keyBetween } from '@gitjira/shared/fractional-index';
-import { requireMembership } from './project.service.js';
+import { requireMembership, authorize } from './project.service.js';
 import { recordActivity } from './activity.service.js';
 import { autoWatch } from './notification.service.js';
 import { enqueueNotification } from '../jobs/queue.js';
@@ -17,7 +17,7 @@ export async function createIssue(projectKey, actorId, input) {
     include: { columns: { orderBy: { position: 'asc' } } },
   });
   if (!project) throw notFound('Project');
-  await requireMembership(project.id, actorId);
+  await authorize(project.id, actorId, 'issue:create');
 
   const columnId = input.columnId ?? project.columns[0].id;
 
@@ -146,10 +146,14 @@ export async function listIssues(projectKey, actorId, { cursor, limit = 50, ...f
   };
 }
 
-async function loadIssueForActor(projectKey, number, actorId) {
+async function loadIssueForActor(projectKey, number, actorId, action = 'issue:read') {
   const project = await prisma.project.findUnique({ where: { key: projectKey } });
   if (!project) throw notFound('Project');
-  await requireMembership(project.id, actorId);
+  // LEARN (sprint 13): the action is a PARAMETER, so the same loader enforces
+  // read for getIssue and write for update/move/delete — one authz path, the
+  // right action per caller. A VIEWER passes 'issue:read' but is stopped at
+  // 'issue:update'.
+  await authorize(project.id, actorId, action);
 
   const issue = await prisma.issue.findUnique({
     where: { projectId_number: { projectId: project.id, number } },
@@ -165,7 +169,7 @@ export async function getIssue(projectKey, number, actorId) {
 }
 
 export async function updateIssue(projectKey, number, actorId, patch) {
-  const { project, issue } = await loadIssueForActor(projectKey, number, actorId);
+  const { project, issue } = await loadIssueForActor(projectKey, number, actorId, 'issue:update');
 
   // LEARN: optimistic concurrency control. If the client sends the
   // `expectedUpdatedAt` it started editing from, and the issue has changed
@@ -246,7 +250,7 @@ export async function updateIssue(projectKey, number, actorId, patch) {
 }
 
 export async function deleteIssue(projectKey, number, actorId) {
-  const { issue } = await loadIssueForActor(projectKey, number, actorId);
+  const { issue } = await loadIssueForActor(projectKey, number, actorId, 'issue:delete');
   await prisma.issue.delete({ where: { id: issue.id } });
 }
 
@@ -256,7 +260,7 @@ export async function deleteIssue(projectKey, number, actorId) {
 // a NEW way to mutate an issue — every new mutation path needs its own authz
 // check (the recurring theme). See the move test.
 export async function moveIssue(projectKey, number, actorId, { columnId, position }) {
-  const { project, issue } = await loadIssueForActor(projectKey, number, actorId);
+  const { project, issue } = await loadIssueForActor(projectKey, number, actorId, 'issue:move');
 
   // LEARN: columnId is a client-supplied foreign key — an authorization
   // question, not just data (review finding on PR #39). Without this check a

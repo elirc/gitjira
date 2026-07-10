@@ -36,15 +36,21 @@ export async function addAttachment(projectKey, number, actorId, file) {
   });
 }
 
-// LEARN: download by attachment id. Anyone logged in can fetch any attachment
-// by id — we only require authentication here. (This is exactly the kind of
-// object-level check that's easy to forget on a resource added late; sprint 13
-// audits it.)
+// LEARN (sprint 13, IDOR fix — found in the pentest review, NOT the self-audit):
+// download by attachment id must prove object-level authorization, not just
+// authentication. The attack: a member of project A fetches project B's
+// attachment by id. The fix walks attachment -> issue -> project and runs the
+// SAME requireMembership check every other project-scoped read uses. "Logged in"
+// is not "allowed to see THIS object" — that gap is the entire IDOR class.
 export async function getAttachmentForDownload(attachmentId, actorId) {
-  const attachment = await prisma.attachment.findUnique({ where: { id: attachmentId } });
+  const attachment = await prisma.attachment.findUnique({
+    where: { id: attachmentId },
+    include: { issue: { select: { projectId: true } } },
+  });
   if (!attachment) throw notFound('Attachment');
-  // authorization: caller must be logged in (requireAuth middleware handled that)
-  void actorId;
+  // Object-level authz: caller must be a member of the attachment's project.
+  // requireMembership throws 404 (not 403) for non-members — no existence oracle.
+  await requireMembership(attachment.issue.projectId, actorId);
   const filePath = path.join(STORAGE_DIR, attachment.storageKey);
   return { attachment, filePath };
 }

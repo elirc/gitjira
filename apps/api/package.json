@@ -23,20 +23,21 @@
     "bullmq": "^5.79.3",
     "cookie-parser": "^1.4.7",
     "express": "^4.21.2",
+    "helmet": "^8.2.0",
+    "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "pino": "^9.6.0",
     "pino-http": "^10.4.0",
     "prisma": "^6.19.3",
-    "socket.io": "^4.8.3",
-    "ioredis": "^5.10.1"
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
+    "@gitjira/test-factories": "*",
     "pino-pretty": "^13.0.0",
     "socket.io-client": "^4.8.3",
     "supertest": "^7.2.2",
-    "vitest": "^4.1.10",
-    "@gitjira/test-factories": "*"
+    "vitest": "^4.1.10"
   },
   "exports": {
     "./jobs/queue": "./src/jobs/queue.js",

@@ -1,0 +1,20 @@
+# LEARN (sprint 13): dependabot opens PRs for dependency updates — security
+# patches especially. A09/A06 of the OWASP list is "outdated components"; this
+# turns "we'll update someday" into a PR in your queue with the changelog
+# attached. Weekly, grouped, so it's a review not a flood.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-dependencies:
+        dependency-type: development
+      production-dependencies:
+        dependency-type: production
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
