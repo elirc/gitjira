@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0 — Sprint 09 (PR #82)
+
+### Added
+
+- Background jobs: a BullMQ worker (apps/worker) fans out notifications off the request path
+- Assignment + @mention notifications; auto-watch + manual watch; in-app notification bell
+- Idempotent fan-out (dedupe key), retries with backoff, a dead-letter queue
+- docs/concepts/idempotency.md
+
+### Fixed
+
+- Fan-out is idempotent (was: random key duplicated on retry); mark-all-read is time-bounded against concurrent arrivals
+
 ## 0.4.0 — Sprint 08 (PR #74)
 
 ### Added

@@ -53,3 +53,9 @@ Five sprints, five reviewed PRs, v0.1.0. The recurring themes so far: authz foll
 - **Went well:** the activity seam from sprint 05 paid off exactly as designed - real-time plugged in with one function change. Real socket tests (client on a real server) gave genuine confidence.
 - **Was hard:** test isolation bit me - beforeAll setup does not survive the per-test truncate, so socket data had to be created inside each test. Both planted findings self-flagged.
 - **Watch next sprint:** notifications and background jobs - the same seam gets its second consumer (a job queue), and idempotency becomes the theme.
+
+## Sprint 09 — Notifications & Jobs (v0.5.0)
+
+- **Went well:** the activity seam fed a third consumer with zero new plumbing; verifying the worker through real Redis (not just the handler) gave real confidence. The idempotency red→green is the clearest lesson in the repo.
+- **Was hard:** the migration-timestamp trap bit AGAIN (env clock returns an early time), caught only by CI's fresh DB. Worth a helper next time. --no-verify under load kept needing prettier catch-up.
+- **Watch next sprint:** the TypeScript migration - incremental, strangler-fig, no big bang; the migration itself is the senior skill.
