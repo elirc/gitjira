@@ -99,3 +99,13 @@ Terms in the order the codebase introduces them.
 - **Exponential backoff** — increasing delay between retries (1s, 2s, 4s…).
 - **Dead-letter queue** — where jobs go after exhausting retries, for inspection/replay.
 - **Fan-out on write** — compute and store recipients when an event happens (vs on read).
+
+## Sprint 10
+
+- **Strangler-fig migration** — wrap the old, migrate piece by piece, each step shippable; never big-bang.
+- **checkJs / @ts-check** — running TypeScript's checker over JavaScript files; opt-in per file.
+- **JSDoc types** — type annotations in comments; tsc reads them identically to `.ts` syntax.
+- **z.infer** — deriving a static TypeScript type from a runtime Zod schema.
+- **Ratchet** — a check that a metric may only improve (here, type-checked file count).
+- **any vs unknown** — `any` disables checking; `unknown` forces you to narrow before use.
+- **Discriminated union** — a union of types distinguished by a shared literal field (e.g. `kind`).
