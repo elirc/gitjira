@@ -106,5 +106,10 @@ export async function removeMember(projectId, actorId, userId) {
   await prisma.projectMember.delete({
     where: { projectId_userId: { projectId, userId } },
   });
+  // SECURITY (PR #110 review): this invalidation is not optional. requireMembership
+  // reads the member map through the cache, so WITHOUT this line a removed user
+  // keeps passing authz for up to the TTL — a stale cache entry becoming a stale
+  // authorization decision. Every membership mutation MUST invalidate here.
+  await invalidate(cacheKeys.projectMembers(projectId));
   return { removed: true };
 }

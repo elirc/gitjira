@@ -67,7 +67,10 @@ async function storeDel(key) {
 // hit the DB simultaneously (a "stampede" that can knock the DB over exactly
 // when it's busiest). We keep a map of in-flight loads keyed by cache key, so
 // the first miss loads and the other 49 await the SAME promise. One DB hit, not
-// fifty. (Per-process; across instances Redis absorbs the rest.)
+// fifty. NOTE: this is PER-PROCESS on purpose — across N API instances a cold
+// key can still trigger up to N loads, and Redis absorbs the rest once the first
+// instance writes. A cross-instance lock (redlock) is more machinery than a
+// 60s-TTL member map deserves; per-process single-flight is the 99% win.
 const inflight = new Map();
 
 /**
