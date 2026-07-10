@@ -88,3 +88,13 @@ Terms in the order the codebase introduces them.
 - **Optimistic concurrency** — detect conflicting edits with a version check, reject with 409, no locks.
 - **Cache reconciliation** — deciding whether a real-time event should patch the client cache or invalidate-and-refetch.
 - **Subscription leak** — an event listener added on mount but never removed, so it stacks across remounts.
+
+## Sprint 09
+- **Job queue** — a durable list of work; producers enqueue, workers consume (BullMQ on Redis).
+- **Worker** — a separate process that consumes and runs jobs, scaled independently of the API.
+- **At-least-once delivery** — a job is guaranteed to run but may run more than once (retries).
+- **Idempotent** — running twice has the same effect as once; required for at-least-once handlers.
+- **Dedupe key** — a stable, unique key per (event, recipient) that makes duplicate inserts fail.
+- **Exponential backoff** — increasing delay between retries (1s, 2s, 4s…).
+- **Dead-letter queue** — where jobs go after exhausting retries, for inspection/replay.
+- **Fan-out on write** — compute and store recipients when an event happens (vs on read).
