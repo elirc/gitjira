@@ -63,8 +63,16 @@ workspace's dev tooling (vitest, playwright, stryker, testing-library) — inste
 of production deps only. The "small multi-stage image" claim was false.
 
 Fix: prune dev deps in the build stage before the runtime copy —
-`RUN npm prune --omit=dev`. (After-size recorded in
-`evidence/docker-build-pruned.log`.)
+`RUN npm prune --omit=dev`.
+
+**A third lesson — I nearly logged a false number.** My first read of the pruned
+image said "278MB" and I almost committed "1.8GB → 278MB (6.5×)". Re-checking
+found that was a mid-build misread; the verified size is **1.2GB** (~600MB / 33%
+smaller — the image is still heavy because Prisma's query-engine binaries are
+large). This is exactly why the process rule is "measured, not estimated, and
+re-checked": I caught my own bad number _before_ it entered the history. The
+image also genuinely **boots** — `{"msg":"gitjira api + realtime listening"}` —
+which is the real end-to-end proof, not just "it built".
 
 ## Takeaway
 

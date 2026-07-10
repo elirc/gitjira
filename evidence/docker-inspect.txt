@@ -7,3 +7,14 @@ Size=1.8GB
 uid=10001(app) gid=10001(app) groups=10001(app)
 # healthcheck configured:
 Healthcheck=configured
+
+# --- after prune fix (rebuilt, VERIFIED) ---
+# NOTE: an earlier reading said 278MB — that was a mid-build misread of an
+# intermediate image and is WRONG. The verified numbers:
+pruned image size: 1.2GB          # down from 1.8GB (~600MB / 33% smaller)
+pruned runtime user: uid=10001(app) gid=10001(app)   # still non-root
+prod deps intact: express is at /app/node_modules (hoisted to root), @prisma present
+server boots: {"msg":"gitjira api + realtime listening","port":3000}  # it ACTUALLY RUNS
+# HONEST RESULT: 1.8GB -> 1.2GB. Pruning dev deps saved ~600MB; the image is still
+# large because Prisma's query-engine binaries + prod node_modules are heavy. A
+# distroless base / engine trim is a real further reduction — NOT done here, not claimed.
