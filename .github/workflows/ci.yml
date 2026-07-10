@@ -5,13 +5,54 @@ on:
   push:
     branches: [main]
 
-jobs:
-  verify:
-    runs-on: ubuntu-latest
+# LEARN (sprint 11): the pipeline is now a PARALLEL MATRIX of jobs instead of one
+# long serial job. Static checks, unit tests, and integration tests run at the
+# same time, so the slowest single job — not their sum — sets the wall-clock. A
+# failure also points straight at the layer: a red `integration` is a different
+# conversation than a red `static`. E2E is a SEPARATE workflow (e2e.yml), run
+# nightly not per-PR — see ADR 0024.
 
-    # LEARN: a service container is a real Postgres booted next to the job —
-    # integration tests in CI hit the same database engine as production.
-    # Mock-free confidence, ~5 seconds of startup.
+jobs:
+  # Fast, no database: lint, format, types, and the TS coverage ratchet.
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Generate prisma client # tsc needs the generated types
+        run: npx prisma generate
+        working-directory: apps/api
+      - name: Lint
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
+      - name: Typecheck
+        run: npm run typecheck
+      - name: TS coverage ratchet
+        run: npm run ts:ratchet
+
+  # Unit + component tests with coverage gates. No database.
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Shared (domain) tests + coverage gate
+        run: npm test -w @gitjira/shared -- --coverage
+      - name: Web (component) tests + coverage gate
+        run: npm test -w @gitjira/web -- --coverage
+
+  # Integration tests against a real Postgres, with a coverage gate.
+  integration:
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:16-alpine
@@ -26,40 +67,34 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-
     env:
       DATABASE_URL: postgresql://gitjira:gitjira_dev@localhost:5432/gitjira_test
       JWT_SECRET: ci-test-secret
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
-
-      - name: Install
-        run: npm ci
-
+      - run: npm ci
       - name: Generate prisma client
         run: npx prisma generate
         working-directory: apps/api
+      - name: API integration tests + coverage gate
+        run: npm test -w @gitjira/api -- --coverage
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Format check
-        run: npm run format:check
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: TS coverage ratchet
-        run: npm run ts:ratchet
-
-      - name: Test
-        run: npm test
-
+  # Prove the app still builds.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Generate prisma client
+        run: npx prisma generate
+        working-directory: apps/api
       - name: Build
         run: npm run build
