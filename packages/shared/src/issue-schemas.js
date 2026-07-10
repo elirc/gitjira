@@ -38,7 +38,10 @@ export const createIssueSchema = z.object({
   parentId: z.string().optional(),
 });
 
-export const updateIssueSchema = z.object(issueFields).partial();
+export const updateIssueSchema = z
+  .object(issueFields)
+  .partial()
+  .extend({ expectedUpdatedAt: z.string().datetime().optional() });
 
 export const addMemberSchema = z.object({
   userId: z.string().min(1),
