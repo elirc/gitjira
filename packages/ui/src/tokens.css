@@ -1,0 +1,65 @@
+/*
+  LEARN (sprint 14): DESIGN TOKENS are the API between design and code. A
+  component never hardcodes #0052cc or 16px — it references var(--color-primary)
+  or var(--space-4). That indirection is what makes the UI consistent (one place
+  defines "primary") AND makes dark mode a token swap instead of a component
+  rewrite: flip the values under [data-theme='dark'] and every component follows.
+*/
+
+:root {
+  /* Spacing scale (a 4px base — multiples compose predictably). */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Type scale. */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --radius: 6px;
+  --focus-ring: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-primary);
+
+  /* Color scale — LIGHT theme (the default). */
+  --color-bg: #ffffff;
+  --color-surface: #f4f5f7;
+  --color-text: #172b4d;
+  --color-text-muted: #6b778c; /* passes AA (4.6:1) on white bg */
+  --color-primary: #0052cc;
+  --color-primary-text: #ffffff;
+  --color-border: #dfe1e6;
+  --color-danger: #ae2a19;
+}
+
+/* Dark theme: same token NAMES, different values. Set via [data-theme='dark']
+   on <html> (manual toggle) — see the prefers-color-scheme block for the
+   system default. Components don't change at all. */
+:root[data-theme='dark'] {
+  --color-bg: #1d2125;
+  --color-surface: #22272b; /* a raised surface, lighter than bg */
+  --color-text: #e6edf3;
+  --color-text-muted: #7d8590; /* ⚠ see the contrast audit — this pairing is suspect */
+  --color-primary: #579dff;
+  --color-primary-text: #1d2125;
+  --color-border: #2d333b;
+  --color-danger: #ff9995;
+}
+
+/* System-preference default when the user hasn't chosen manually. The manual
+   [data-theme] above wins because it's a more specific selector. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg: #1d2125;
+    --color-surface: #22272b;
+    --color-text: #e6edf3;
+    --color-text-muted: #7d8590;
+    --color-primary: #579dff;
+    --color-primary-text: #1d2125;
+    --color-border: #2d333b;
+    --color-danger: #ff9995;
+  }
+}
