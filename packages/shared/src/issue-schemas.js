@@ -1,3 +1,4 @@
+// @ts-check
 import { z } from 'zod';
 
 export const ISSUE_TYPES = ['EPIC', 'STORY', 'TASK', 'BUG', 'SUBTASK'];
@@ -76,3 +77,7 @@ export const completeSprintSchema = z.object({
 export const assignSprintSchema = z.object({
   sprintId: z.string().nullish(),
 });
+
+/** @typedef {import('zod').infer<typeof createIssueSchema>} CreateIssueInput */
+/** @typedef {import('zod').infer<typeof updateIssueSchema>} UpdateIssueInput */
+/** @typedef {import('zod').infer<typeof createProjectSchema>} CreateProjectInput */

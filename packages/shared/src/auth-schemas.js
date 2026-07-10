@@ -1,3 +1,4 @@
+// @ts-check
 import { z } from 'zod';
 
 // LEARN: one schema, two enforcement points. The web form uses this for
@@ -18,3 +19,11 @@ export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email('Enter a valid email'),
   password: z.string().min(1, 'Password is required'),
 });
+
+// LEARN: z.infer turns a runtime Zod schema into a STATIC TypeScript type. One
+// declaration is now both the validator (runtime) AND the type (compile time) —
+// they can never drift, because they're the same object. Import these with a
+// JSDoc `@typedef {import('...').RegisterInput}` and you get full type checking
+// with zero duplicate type definitions.
+/** @typedef {import('zod').infer<typeof registerSchema>} RegisterInput */
+/** @typedef {import('zod').infer<typeof loginSchema>} LoginInput */

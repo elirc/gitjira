@@ -1,3 +1,4 @@
+// @ts-check
 // LEARN: ordering is deceptively hard. Three ways to store "position":
 //   1. integer 1,2,3… — moving a card between 1 and 2 renumbers everything
 //      after it. O(n) writes per move.
@@ -13,10 +14,19 @@ const DIGITS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const BASE = DIGITS.length; // 62
 const MID = DIGITS[Math.floor(BASE / 2)];
 
+/** @param {string} c */
 const val = (c) => DIGITS.indexOf(c);
 
 // Public API: a, b are existing keys or null (open ends). Returns a NEW key k
 // with a < k < b under string comparison. Throws if a >= b.
+// LEARN: the JSDoc @param tags ARE the types — TypeScript reads them exactly
+// like `.ts` annotations, but the file stays plain JavaScript that runs with no
+// build step. This is "TypeScript in JSDoc": full checking, zero syntax change.
+/**
+ * @param {string | null} a
+ * @param {string | null} b
+ * @returns {string}
+ */
 export function keyBetween(a, b) {
   if (a !== null && b !== null && a >= b) {
     throw new Error(`keyBetween requires a < b, got "${a}" >= "${b}"`);
@@ -32,6 +42,11 @@ export function keyBetween(a, b) {
 //   - digits adjacent? take a's digit and recurse DEEPER with the upper bound
 //     now OPEN (null): having chosen a digit below b's, everything after is
 //     automatically < b, so we only need to stay > a.
+/**
+ * @param {string} a
+ * @param {string | null} b
+ * @returns {string}
+ */
 function midpoint(a, b) {
   if (b !== null) {
     // Emit shared prefix, then solve the smaller problem.
