@@ -3,13 +3,16 @@
 **Status:** accepted · **Sprint:** 08
 
 ## Context
+
 Live board updates need server→client push. Options: raw `ws`, Server-Sent Events, or
 Socket.IO.
 
 ## Decision
+
 Socket.IO, mounted on the existing HTTP server, with one room per project.
 
 ## Consequences
+
 - ✅ Rooms, reconnection with backoff, and handshake middleware come for free — exactly the
   primitives we need.
 - ✅ Two-way (SSE is one-way), so presence and future typing indicators fit the same channel.

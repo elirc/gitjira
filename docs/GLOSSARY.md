@@ -79,6 +79,7 @@ Terms in the order the codebase introduces them.
 - **Check-then-act** — reading state then acting on it; unsafe under concurrency (the DB constraint is the fix).
 
 ## Sprint 08
+
 - **WebSocket** — a persistent two-way connection; either side can send at any time.
 - **Socket.IO** — a library over WebSockets adding rooms, reconnection, and handshake auth.
 - **Room** — a named group of socket connections; broadcasts target a room.
