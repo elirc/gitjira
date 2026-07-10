@@ -1,0 +1,38 @@
+# LEARN (sprint 15): a Fly.io app config (Render/Railway are analogous). Declares
+# how the platform runs the API: the image, health checks, and how instances
+# start. PaaS is chosen over Kubernetes on purpose (ADR 0030) — it keeps the
+# curriculum on the concepts that transfer (release phases, health checks, env)
+# without the k8s learning cliff.
+app = "gitjira-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "apps/api/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+
+# LEARN (sprint 15 review): migrations run in a RELEASE PHASE — ONCE, before any
+# new instance serves — NOT in the per-instance start command. With 2+ instances,
+# a start-command migration means every instance races to migrate; advisory-lock
+# luck at best, partial application or deadlock at worst, discovered mid-deploy.
+# release_command runs a single throwaway machine first; if it FAILS, the deploy
+# aborts and the OLD version keeps serving (no half-migrated state — see runbook).
+[deploy]
+  release_command = "npx prisma migrate deploy --schema apps/api/prisma/schema.prisma"
+
+# The process on every instance now just serves — no migration here.
+[processes]
+  app = "node src/server.js"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  min_machines_running = 2
+
+  [[http_service.checks]]
+    path = "/api/health"
+    interval = "15s"
+    timeout = "2s"

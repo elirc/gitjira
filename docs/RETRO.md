@@ -89,3 +89,62 @@ Five sprints, five reviewed PRs, v0.1.0. The recurring themes so far: authz foll
 - **Went well:** tokens-first was the right call — dark mode fell out as a token flip with zero component changes, which is the cleanest possible proof the abstraction works. Both planted a11y bugs (modal focus-return, dark-theme contrast) were caught exactly as intended by the reviewer USING the app as a keyboard/screen-reader user, and both fixed red→green with tests. Accessible-by-construction components mean the whole app inherits correctness from a few primitives.
 - **Was hard:** contrast is genuinely counterintuitive — a token that passes in one theme says nothing about the other, because the ratio is per resolved-color-pair. Wiring the new @gitjira/ui package into CI (npm ci hoisting for the vite-react plugin) needed an explicit devDep pin. Storybook/axe/i18n were scoped as follow-ups to keep the sprint shippable.
 - **Watch next sprint:** production and v1.0.0 — Docker, deploy, observability (Sentry/metrics), a runbook, a practice incident, and the architecture + final retrospective docs. The last mile.
+
+## Sprint 15 — Production & v1.0.0 (v1.0.0)
+
+- **Went well:** the env-validator "full circle" moment landed — the same Zod pattern that guarded HTTP input in sprint 2 now guards the environment at boot, and it reads as obvious in hindsight, which is the sign of a good pattern. The practice incident proved the sprint-9 designs (graceful degradation, idempotent jobs) actually hold under a real outage, not just in tests. Multi-stage Docker + prod-parity compose closed the "works on my box" gap you can actually run.
+- **Was hard:** "works on one box" vs "works during a deploy" is the whole sprint in one sentence — the migration-race and root-container findings are both invisible until you scale past one instance or think like an attacker. A workspace-scoped `npm install` left the lockfile out of sync and only surfaced in CI's stricter `npm ci`; the fix was a full reconcile (lesson: after adding deps, always run a full install and verify `npm ci` locally).
+- **The end:** fifteen sprints, one reviewed PR each, a real product from walking skeleton to v1.0.0. See the capstone below.
+
+---
+
+# The fifteen-sprint retrospective
+
+## Recurring themes, tallied
+
+The same few ideas showed up again and again — which is the point. Senior
+engineering is a small number of deep principles applied relentlessly.
+
+- **"Authz follows the transport"** — appeared **4 times**: issue CRUD (s03), the
+  move endpoint (s04), the socket room (s08), attachment download (s13, the IDOR).
+  Every new way IN needs its own authorization.
+- **"Check-then-act is a lie under concurrency"** — **3 times**: issue-key
+  allocation (s03), the one-active-sprint rule (s07), notification idempotency
+  (s09). Correctness lives in the database, not in application `if`s.
+- **"Measure before you optimize"** — the spine of s12, and the reason s12 left
+  the already-fast `listIssues` alone and fixed the issue-detail endpoint the
+  numbers actually pointed at.
+- **"The server is the security boundary"** — s13 throughout; UI checks are UX.
+- **"A pattern lands first, then the tooling"** — the test strategy (s11), the
+  permission matrix (s13), the design tokens (s14) all preceded the code that
+  executed them. Decide, then enforce.
+- **"An audit finds what you think to look for"** — s13's IDOR and s14's two a11y
+  bugs all slipped a self-review and were caught by an ADVERSARIAL pass. Layered
+  review is defense in depth for the process.
+
+## Biggest lesson per sprint (one line each)
+
+01 skeleton before features · 02 rotate + detect replay · 03 atomic allocation ·
+04 fractional indexing · 05 serializers at the edge · 06 parse, don't regex ·
+07 state machine as data · 08 authz follows the transport · 09 idempotent,
+off-path · 10 strangler-fig, ratcheted · 11 believable green · 12 measure first ·
+13 two-layer authz + pentest · 14 tokens + accessible-by-construction · 15 works
+during a deploy, not just on a box.
+
+## What we'd do differently
+
+- **Wire CI stricter, earlier.** Several lockfile/format/CRLF papercuts recurred;
+  a stricter local pre-push mirror of CI would have caught them before the push.
+- **Adopt the design system sooner.** Tokens in s14 made everything after cheap;
+  had they existed at s05, the UI churn between would have been smaller.
+- **Property/fuzz tests earlier.** They paid off hugely for fractional-index and
+  JQL; the earlier sprints would have benefited from the same rigor.
+- **Observability from s09, not s15.** The queue work in s09 begged for the
+  metrics that only arrived in s15; we flew blind on the worker for six sprints.
+
+## Definition of done (SPEC §8) — checked
+
+Feature-complete Jira clone ✅ · 15 reviewed PRs with teaching artifacts ✅ ·
+tests + CI gates ✅ · security-hardened + RBAC ✅ · performant at scale ✅ ·
+accessible (WCAG AA) ✅ · deployable + observable + operable ✅ · every decision
+recorded (31 ADRs) ✅ · **v1.0.0** 🎉

@@ -158,3 +158,15 @@ Terms in the order the codebase introduces them.
 - **WCAG AA / contrast ratio** — accessibility conformance level; AA needs 4.5:1 for normal text, per color pairing.
 - **prefers-reduced-motion** — an OS setting to minimize animation; honor it to avoid vestibular harm.
 - **sr-only** — visually hidden but present in the accessibility tree (announced, not seen).
+
+## Sprint 15
+
+- **Multi-stage build** — a Docker build with a heavy build stage and a slim runtime stage; the toolchain never ships.
+- **Release phase** — a deploy step that runs ONCE (e.g. migrations) before new instances serve, avoiding per-instance races.
+- **Expand/contract** — a zero-downtime schema change in stages so old and new code coexist safely.
+- **RED metrics** — Rate, Errors, Duration; the request-stream signals that best reflect user-perceived health.
+- **SLO** — Service Level Objective; a target for a reliability metric (e.g. 99.9% of requests < 300ms).
+- **Runbook** — step-by-step operational procedures for common failures.
+- **Post-mortem** — a blameless write-up after an incident: timeline, impact, root cause, action items.
+- **Blue-green / rolling deploy** — deployment strategies that swap instances without downtime.
+- **Fail fast** — validate config/inputs at boot and crash loudly rather than misbehaving later.
