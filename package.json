@@ -18,7 +18,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "ts:ratchet": "node scripts/ts-ratchet.mjs",
     "test:e2e": "playwright test",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "perf:budget": "node scripts/bundle-budget.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
