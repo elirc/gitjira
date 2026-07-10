@@ -15,7 +15,11 @@ RUN npm ci
 # The worker imports the API's Prisma client + services, so it needs both.
 COPY apps/api ./apps/api
 COPY apps/worker ./apps/worker
-RUN npx prisma generate --schema apps/api/prisma/schema.prisma
+# Same fix as the API image: run prisma via the api workspace script (npx prisma
+# from /app fails — the binary is nested in apps/api/node_modules/.bin).
+RUN npm run db:generate -w @gitjira/api
+# Prune dev deps before the runtime copy (see the API image for the 1.8GB story).
+RUN npm prune --omit=dev
 
 # ---- runtime stage ----
 FROM node:22-slim AS runtime
@@ -29,7 +33,7 @@ COPY --from=build /app/apps/worker ./apps/worker
 COPY --from=build /app/package.json ./package.json
 
 # Non-root user (sprint 15 review): least privilege, same as the API image.
-RUN useradd --system --uid 10001 app && chown -R app /app
+RUN useradd --uid 10001 --create-home --shell /usr/sbin/nologin app && chown -R app /app
 USER app
 
 # LEARN (sprint 15 review): the worker has no HTTP port, but the platform still

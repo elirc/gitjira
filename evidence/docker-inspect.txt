@@ -1,0 +1,9 @@
+# docker build: SUCCEEDED (exit 0) — see evidence/docker-build.log
+# configured user:
+User=app
+# image size:
+Size=1.8GB
+# runtime id (proves the process runs non-root):
+uid=10001(app) gid=10001(app) groups=10001(app)
+# healthcheck configured:
+Healthcheck=configured

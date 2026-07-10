@@ -21,7 +21,17 @@ RUN npm ci
 
 # Now the source, then generate the Prisma client.
 COPY apps/api ./apps/api
-RUN npx prisma generate --schema apps/api/prisma/schema.prisma
+# LEARN (workflow-hardening, real build fix): `npx prisma` from the repo root
+# fails — prisma's binary is nested in apps/api/node_modules/.bin (not hoisted),
+# so from /app it's "prisma: not found" (exit 127). Run the workspace's own
+# db:generate script instead: npm sets cwd + PATH to the api workspace, where
+# prisma resolves and finds ./prisma/schema.prisma automatically.
+RUN npm run db:generate -w @gitjira/api
+# LEARN (workflow-hardening): the first real build produced a 1.8GB image because
+# the runtime copied the WHOLE monorepo node_modules (every workspace's dev
+# tooling — vitest, playwright, stryker…). Prune to production deps so the runtime
+# COPY brings only what actually runs. Before/after size in evidence/.
+RUN npm prune --omit=dev
 
 # ---- runtime stage ----
 FROM node:22-slim AS runtime
@@ -40,7 +50,7 @@ COPY --from=build /app/package.json ./package.json
 # worse incident. Least privilege (the sprint-13 defense-in-depth thread): create
 # an unprivileged user, own the app dir, drop to it. Verify:
 #   docker inspect --format '{{.Config.User}}' <image>  →  app
-RUN useradd --system --uid 10001 app && chown -R app /app
+RUN useradd --uid 10001 --create-home --shell /usr/sbin/nologin app && chown -R app /app
 USER app
 
 EXPOSE 3000
