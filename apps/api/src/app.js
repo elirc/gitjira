@@ -5,6 +5,7 @@ import { requestLogger } from './middleware/request-logger.js';
 import { errorHandler } from './middleware/error-handler.js';
 import { routes } from './routes/index.js';
 import { API_PREFIX } from '@gitjira/shared';
+import { registry, metricsMiddleware } from './lib/metrics.js';
 
 export function createApp() {
   const app = express();
@@ -24,6 +25,16 @@ export function createApp() {
   app.use(express.json());
   app.use(cookieParser());
   app.use(requestLogger);
+  app.use(metricsMiddleware);
+
+  // Prometheus scrape endpoint. Outside API_PREFIX and unauthenticated so a
+  // scraper (or a sidecar) can read it without a token; it exposes only
+  // aggregate counters, never request bodies or user data.
+  app.get('/metrics', async (_req, res) => {
+    res.set('Content-Type', registry.contentType);
+    res.end(await registry.metrics());
+  });
+
   app.use(API_PREFIX, routes);
 
   // LEARN: the error handler is registered LAST. Express identifies it by its
