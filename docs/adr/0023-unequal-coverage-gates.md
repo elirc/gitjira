@@ -18,7 +18,7 @@ regression, not an aspiration that fails the build today.
 | ----------------- | ------------ | --------------- | --------------------------------------------------------------------- |
 | `packages/shared` | domain logic | **90%**         | pure functions, a missed branch is a real bug; cheap to cover fully   |
 | `apps/api`        | integration  | **75%**         | most branches covered by HTTP tests; some error-plumbing is low-value |
-| `apps/web`        | UI           | **45%**         | much of the UI is DOM plumbing better covered by E2E than unit tests  |
+| `apps/web`        | UI           | **44%**         | much of the UI is DOM plumbing better covered by E2E than unit tests  |
 
 ## Consequences
 
