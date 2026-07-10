@@ -67,5 +67,4 @@ export function assertTransition(action, currentState, ctx = {}) {
  * @param {string} action
  * @param {string} currentState
  */
-export const canTransition = (action, currentState) =>
-  TRANSITIONS[action]?.from === currentState;
+export const canTransition = (action, currentState) => TRANSITIONS[action]?.from === currentState;
