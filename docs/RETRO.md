@@ -148,3 +148,9 @@ Feature-complete Jira clone ✅ · 15 reviewed PRs with teaching artifacts ✅ �
 tests + CI gates ✅ · security-hardened + RBAC ✅ · performant at scale ✅ ·
 accessible (WCAG AA) ✅ · deployable + observable + operable ✅ · every decision
 recorded (31 ADRs) ✅ · **v1.0.0** 🎉
+
+---
+
+_Fin. v1.0.0 shipped 2026-07-10. Fifteen sprints, fifteen reviewed PRs, one
+production-ready product — and, more importantly, a traceable journey a junior
+engineer can walk to reach mid/senior. Read it oldest-first._
