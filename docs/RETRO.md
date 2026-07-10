@@ -41,3 +41,9 @@ Five sprints, five reviewed PRs, v0.1.0. The recurring themes so far: authz foll
 - **Went well:** the parser came out clean and well-tested; the raised teaching bar (structured commit bodies, WHY/GOTCHA/TRY tags, a concept doc) makes this the best sprint to study. Both planted findings were flagged by the author before review even started.
 - **Was hard:** Prisma fights generated tsvector columns (spurious ALTERs), and a partial migration failure needed a resolve+manual-index recovery rather than a reset (Prisma blocks reset for AI agents - correctly). Machine load made the pre-commit hooks time out, so some commits used --no-verify and CI (rightly) caught a formatting miss.
 - **Watch next sprint:** the activity-event seam from sprint 05 gets its first consumer (sockets) in sprint 08; sprint 07 is the sprint state machine, where the check-then-act concurrency lesson returns.
+
+## Sprint 07 — Agile Planning (v0.3.0)
+
+- **Went well:** the state machine + partial-index split is the cleanest where-do-rules-live illustration in the repo; the pure domain tests run in milliseconds. Both planted findings were self-flagged before review.
+- **Was hard:** a hand-written migration got a timestamp that sorted before init, so a fresh CI DB failed where the incremental local DB passed - a great real-world reminder of why CI uses a clean database. Also the CRLF/Prettier friction finally earned a .gitattributes.
+- **Watch next sprint:** real-time - the activity-event seam from sprint 05 gets wrapped to emit socket events, and the authz-follows-the-transport theme returns on room joins.

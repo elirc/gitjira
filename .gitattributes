@@ -1,0 +1,5 @@
+# LEARN: force LF line endings for all text files, everywhere. Without this, a
+# Windows checkout gets CRLF and Prettier's format check (which expects LF)
+# fails on CI even though the committed content is fine. One line ends a whole
+# class of "works on my machine" line-ending pain on mixed-OS teams.
+* text=auto eol=lf
