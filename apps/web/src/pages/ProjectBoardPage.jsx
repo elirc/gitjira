@@ -7,6 +7,8 @@ import { Board } from '../components/board/Board.jsx';
 import { SearchBar } from '../components/SearchBar.jsx';
 import { CreateIssueModal } from '../components/CreateIssueModal.jsx';
 import { IssueDetailPanel } from '../components/detail/IssueDetailPanel.jsx';
+import { Presence } from '../components/Presence.jsx';
+import { useLiveProject } from '../lib/useLiveProject.js';
 
 export function ProjectBoardPage() {
   const { key } = useParams();
@@ -14,6 +16,9 @@ export function ProjectBoardPage() {
   const [view, setView] = useState('board');
   const [modalOpen, setModalOpen] = useState(false);
   const createIssue = useCreateIssue(key);
+
+  // Live updates + presence for this project (joins the socket room).
+  const { viewers } = useLiveProject(project?.id);
 
   // LEARN: search state is debounced — the query only fires 250ms after the
   // user stops typing (see useDebounced). The sprint-4 client-side type filter
@@ -58,6 +63,7 @@ export function ProjectBoardPage() {
           <span className="project-key">{project?.key}</span> {project?.name}
         </h1>
         <div className="header-actions">
+          <Presence viewers={viewers} />
           <Link className="chip" to={`/projects/${key}/backlog`}>
             Backlog
           </Link>

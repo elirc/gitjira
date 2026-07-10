@@ -677,3 +677,13 @@ body {
   border: 1px solid var(--border);
   border-radius: 4px;
 }
+
+.presence {
+  display: inline-flex;
+  align-items: center;
+  gap: -6px;
+}
+.presence .assignee-dot {
+  margin-left: -6px;
+  border: 2px solid white;
+}
