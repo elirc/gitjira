@@ -36,4 +36,11 @@ export default [
     files: ['packages/**/*.js', '*.js'],
     languageOptions: { globals: { ...globals.node } },
   },
+  // LEARN: build/CI scripts are Node too. `.mjs` under scripts/ (the ratchet)
+  // needs `process`/`console` as known globals — otherwise no-undef fires. The
+  // `*.js` glob above only matches the repo root, not subdirectories.
+  {
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: { sourceType: 'module', globals: { ...globals.node } },
+  },
 ];
