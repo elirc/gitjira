@@ -3,6 +3,8 @@ import { notFound, conflict } from '../lib/errors.js';
 import { keyBetween } from '@gitjira/shared/fractional-index';
 import { requireMembership } from './project.service.js';
 import { recordActivity } from './activity.service.js';
+import { autoWatch } from './notification.service.js';
+import { enqueueNotification } from '../jobs/queue.js';
 
 // LEARN: the display key "GJ-101" is assembled here from parts, never
 // stored. One source of truth (project.key + issue.number) can't disagree
@@ -78,6 +80,17 @@ export async function createIssue(projectKey, actorId, input) {
     });
     return created;
   });
+
+  // If created already assigned to someone else, notify them (off the request path).
+  if (issue.assigneeId && issue.assigneeId !== actorId) {
+    await autoWatch(null, issue.id, issue.assigneeId);
+    await enqueueNotification({
+      kind: 'issue.assigned',
+      issueId: issue.id,
+      actorId,
+      payload: { key: `${project.key}-${issue.number}`, title: issue.title },
+    });
+  }
 
   return { ...issue, key: `${project.key}-${issue.number}` };
 }
@@ -214,6 +227,20 @@ export async function updateIssue(projectKey, number, actorId, patch) {
 
     return result;
   });
+
+  // LEARN: enqueue notification work AFTER the transaction commits, off the
+  // request path — the person assigning gets an instant response; the worker
+  // does the fan-out. If we enqueued inside the transaction and it rolled back,
+  // we'd notify about a change that never happened.
+  if ('assigneeId' in data && data.assigneeId && data.assigneeId !== issue.assigneeId) {
+    await autoWatch(null, issue.id, data.assigneeId); // assignee auto-watches
+    await enqueueNotification({
+      kind: 'issue.assigned',
+      issueId: issue.id,
+      actorId,
+      payload: { key: `${project.key}-${updated.number}`, title: updated.title },
+    });
+  }
 
   return { ...updated, key: `${project.key}-${updated.number}` };
 }

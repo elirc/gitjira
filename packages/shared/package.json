@@ -11,7 +11,8 @@
     "./query-keys": "./src/query-keys.js",
     "./fractional-index": "./src/fractional-index.js",
     "./activity": "./src/activity.js",
-    "./jql": "./src/jql/index.js"
+    "./jql": "./src/jql/index.js",
+    "./mentions": "./src/mentions.js"
   },
   "dependencies": {
     "zod": "^4.4.3"

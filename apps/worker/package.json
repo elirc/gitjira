@@ -1,0 +1,15 @@
+{
+  "name": "@gitjira/worker",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --env-file=../api/.env --watch src/index.js"
+  },
+  "dependencies": {
+    "@gitjira/api": "*",
+    "bullmq": "^5.34.0"
+  }
+}

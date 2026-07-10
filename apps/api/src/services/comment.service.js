@@ -1,7 +1,22 @@
 import { prisma } from '../lib/prisma.js';
 import { notFound, forbidden } from '../lib/errors.js';
+import { extractMentions } from '@gitjira/shared/mentions';
 import { requireMembership } from './project.service.js';
 import { recordActivity } from './activity.service.js';
+import { autoWatch } from './notification.service.js';
+import { enqueueNotification } from '../jobs/queue.js';
+
+// Resolve @handles (email local-part) to user ids among project members.
+async function resolveMentions(projectId, handles) {
+  if (handles.length === 0) return [];
+  const members = await prisma.projectMember.findMany({
+    where: { projectId },
+    select: { user: { select: { id: true, email: true } } },
+  });
+  return members
+    .filter((m) => handles.includes(m.user.email.split('@')[0].toLowerCase()))
+    .map((m) => m.user.id);
+}
 
 async function loadIssue(projectKey, number, actorId) {
   const project = await prisma.project.findUnique({ where: { key: projectKey } });
@@ -17,8 +32,8 @@ async function loadIssue(projectKey, number, actorId) {
 export async function addComment(projectKey, number, actorId, body) {
   const issue = await loadIssue(projectKey, number, actorId);
 
-  return prisma.$transaction(async (tx) => {
-    const comment = await tx.comment.create({
+  const comment = await prisma.$transaction(async (tx) => {
+    const created = await tx.comment.create({
       data: { issueId: issue.id, authorId: actorId, body },
       include: { author: { select: { id: true, name: true } } },
     });
@@ -28,8 +43,24 @@ export async function addComment(projectKey, number, actorId, body) {
       kind: 'comment.added',
       projectId: issue.projectId,
     });
-    return comment;
+    // commenting auto-watches the issue
+    await autoWatch(tx, issue.id, actorId);
+    return created;
   });
+
+  // Off the request path: notify @mentioned members (and watchers via the
+  // fan-out). Resolving + enqueuing happens after commit — the comment is
+  // already saved, so the user isn't waiting on notification work.
+  const mentionedUserIds = await resolveMentions(issue.projectId, extractMentions(body));
+  await enqueueNotification({
+    kind: 'comment.mention',
+    issueId: issue.id,
+    actorId,
+    mentionedUserIds,
+    payload: { commentId: comment.id },
+  });
+
+  return comment;
 }
 
 export async function editComment(projectKey, number, actorId, commentId, body) {
