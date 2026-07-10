@@ -43,4 +43,10 @@ export default [
     files: ['scripts/**/*.{js,mjs}'],
     languageOptions: { sourceType: 'module', globals: { ...globals.node } },
   },
+  // LEARN: Playwright E2E specs run under Node (fs, process) and import their
+  // own `test`/`expect`, so no test-runner globals are needed here — just Node.
+  {
+    files: ['e2e/**/*.js', 'playwright.config.js'],
+    languageOptions: { sourceType: 'module', globals: { ...globals.node } },
+  },
 ];
