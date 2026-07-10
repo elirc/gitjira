@@ -1,0 +1,17 @@
+{
+  "// LEARN": "Incremental TS adoption WITHOUT a build step. allowJs lets tsc look at .js files; checkJs is OFF globally so we opt IN per file with a `// @ts-check` comment at the top. This is the strangler-fig migration: turn the checker on one file at a time, ratchet the count up, never break the build. Full .ts syntax + a build step is a documented later phase.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["node"]
+  },
+  "include": ["apps/api/src", "apps/worker/src", "packages/shared/src"],
+  "exclude": ["**/node_modules", "**/dist"]
+}

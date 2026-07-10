@@ -1,3 +1,4 @@
+// @ts-check
 import { conflict } from '../lib/errors.js';
 
 // LEARN: a STATE MACHINE modeled as data, not control flow. A sprint is in one
@@ -14,15 +15,20 @@ import { conflict } from '../lib/errors.js';
 
 export const SPRINT_STATE = { PLANNED: 'PLANNED', ACTIVE: 'ACTIVE', COMPLETED: 'COMPLETED' };
 
+/** @typedef {{ issueCount?: number }} TransitionContext */
+/** @typedef {(ctx: TransitionContext) => string | null} Guard */
+/** @typedef {{ from: string, to: string, guards: Guard[] }} Transition */
+
 // WHY a table: the set of legal transitions is now literally readable, and
 // "can I go from X to Y?" is a lookup, not a code path.
+/** @type {Record<string, Transition>} */
 const TRANSITIONS = {
   start: {
     from: SPRINT_STATE.PLANNED,
     to: SPRINT_STATE.ACTIVE,
     guards: [
       // A sprint must have at least one issue to start (stakeholder rule).
-      (ctx) => (ctx.issueCount > 0 ? null : 'Cannot start a sprint with no issues'),
+      (ctx) => ((ctx.issueCount ?? 0) > 0 ? null : 'Cannot start a sprint with no issues'),
     ],
   },
   complete: {
@@ -38,6 +44,12 @@ const TRANSITIONS = {
 // checked here — that's enforced by the database partial unique index, because
 // only the database can make it true under concurrency. This module owns the
 // per-sprint rules; the DB owns the cross-sprint invariant.
+/**
+ * @param {string} action
+ * @param {string} currentState
+ * @param {TransitionContext} [ctx]
+ * @returns {string} the target state
+ */
 export function assertTransition(action, currentState, ctx = {}) {
   const t = TRANSITIONS[action];
   if (!t) throw conflict(`Unknown sprint action "${action}"`);
@@ -51,4 +63,9 @@ export function assertTransition(action, currentState, ctx = {}) {
   return t.to;
 }
 
-export const canTransition = (action, currentState) => TRANSITIONS[action]?.from === currentState;
+/**
+ * @param {string} action
+ * @param {string} currentState
+ */
+export const canTransition = (action, currentState) =>
+  TRANSITIONS[action]?.from === currentState;

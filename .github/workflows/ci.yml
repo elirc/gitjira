@@ -52,6 +52,12 @@ jobs:
       - name: Format check
         run: npm run format:check
 
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: TS coverage ratchet
+        run: npm run ts:ratchet
+
       - name: Test
         run: npm test
 
