@@ -12,6 +12,7 @@ export function TopNav() {
       </Link>
       {user && (
         <span className="nav-user">
+          <NotificationBell />
           {user.name}
           <button className="link-button" onClick={logout}>
             Log out
