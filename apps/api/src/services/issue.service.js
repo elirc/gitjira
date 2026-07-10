@@ -74,6 +74,7 @@ export async function createIssue(projectKey, actorId, input) {
       actorId,
       kind: 'issue.created',
       payload: { title: created.title },
+      projectId: project.id,
     });
     return created;
   });
@@ -152,6 +153,19 @@ export async function getIssue(projectKey, number, actorId) {
 
 export async function updateIssue(projectKey, number, actorId, patch) {
   const { project, issue } = await loadIssueForActor(projectKey, number, actorId);
+
+  // LEARN: optimistic concurrency control. If the client sends the
+  // `expectedUpdatedAt` it started editing from, and the issue has changed
+  // since (someone else edited it), we reject with 409 instead of silently
+  // overwriting their work. This is the cheap, no-merge answer to "two people
+  // edit at once" — a version check, not a lock. The client shows "this
+  // changed, reload." (ADR 0017.)
+  if (patch.expectedUpdatedAt) {
+    const current = issue.updatedAt.toISOString();
+    if (current !== new Date(patch.expectedUpdatedAt).toISOString()) {
+      throw conflict('This issue was changed by someone else — reload and try again');
+    }
+  }
 
   // LEARN: PATCH is partial by design. We build the update from ONLY the
   // fields present in the request — `undefined` means "leave alone", which

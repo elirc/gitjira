@@ -12,6 +12,7 @@ export function IssueDetailPanel({ projectKey, number, onClose }) {
   const [editingDesc, setEditingDesc] = useState(false);
   const [descDraft, setDescDraft] = useState('');
   const [commentBody, setCommentBody] = useState('');
+  const [conflict, setConflict] = useState(false);
 
   // Reset the description draft whenever a different issue loads into the panel.
   useEffect(() => {
@@ -56,6 +57,15 @@ export function IssueDetailPanel({ projectKey, number, onClose }) {
 
       <h2>{issue.title}</h2>
 
+      {conflict && (
+        <div className="conflict-banner">
+          This issue was changed by someone else.{' '}
+          <button className="link-button" onClick={() => window.location.reload()}>
+            Reload
+          </button>
+        </div>
+      )}
+
       <div className="detail-fields">
         <label>
           Priority
@@ -81,7 +91,17 @@ export function IssueDetailPanel({ projectKey, number, onClose }) {
             <div className="detail-actions">
               <button
                 onClick={() => {
-                  patch.mutate({ description: descDraft });
+                  // LEARN: send the version we started editing from. If someone
+                  // else saved since, the server 409s and we tell the user to
+                  // reload instead of silently overwriting their change.
+                  patch.mutate(
+                    { description: descDraft, expectedUpdatedAt: issue.updatedAt },
+                    {
+                      onError: (e) => {
+                        if (e.status === 409) setConflict(true);
+                      },
+                    }
+                  );
                   setEditingDesc(false);
                 }}
               >

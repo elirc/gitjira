@@ -77,3 +77,14 @@ Terms in the order the codebase introduces them.
 - **Backlog** — issues not assigned to any sprint; modeled as the absence of a sprintId, not a status.
 - **Velocity** — completed story points per sprint; the raw material for estimation.
 - **Check-then-act** — reading state then acting on it; unsafe under concurrency (the DB constraint is the fix).
+
+## Sprint 08
+
+- **WebSocket** — a persistent two-way connection; either side can send at any time.
+- **Socket.IO** — a library over WebSockets adding rooms, reconnection, and handshake auth.
+- **Room** — a named group of socket connections; broadcasts target a room.
+- **Handshake** — the one-time connection setup where a socket authenticates.
+- **Presence** — showing who is currently connected/viewing (derived from room membership).
+- **Optimistic concurrency** — detect conflicting edits with a version check, reject with 409, no locks.
+- **Cache reconciliation** — deciding whether a real-time event should patch the client cache or invalidate-and-refetch.
+- **Subscription leak** — an event listener added on mount but never removed, so it stacks across remounts.

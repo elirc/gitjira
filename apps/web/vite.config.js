@@ -10,6 +10,9 @@ export default defineConfig({
     // Production gets the same effect from a reverse proxy.
     proxy: {
       '/api': 'http://localhost:3000',
+      // LEARN: `ws: true` proxies the WebSocket upgrade too, so the socket.io
+      // client can connect same-origin in dev and get forwarded to the API.
+      '/socket.io': { target: 'http://localhost:3000', ws: true },
     },
   },
 });

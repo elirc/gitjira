@@ -22,7 +22,12 @@ export async function addComment(projectKey, number, actorId, body) {
       data: { issueId: issue.id, authorId: actorId, body },
       include: { author: { select: { id: true, name: true } } },
     });
-    await recordActivity(tx, { issueId: issue.id, actorId, kind: 'comment.added' });
+    await recordActivity(tx, {
+      issueId: issue.id,
+      actorId,
+      kind: 'comment.added',
+      projectId: issue.projectId,
+    });
     return comment;
   });
 }
