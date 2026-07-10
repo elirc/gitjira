@@ -20,7 +20,9 @@ primary_region = "iad"
 # release_command runs a single throwaway machine first; if it FAILS, the deploy
 # aborts and the OLD version keeps serving (no half-migrated state — see runbook).
 [deploy]
-  release_command = "npx prisma migrate deploy --schema apps/api/prisma/schema.prisma"
+  # Run via the workspace script — `npx prisma` from the image root can't find
+  # the nested prisma binary (found the hard way by actually building the image).
+  release_command = "npm run db:deploy -w @gitjira/api"
 
 # The process on every instance now just serves — no migration here.
 [processes]

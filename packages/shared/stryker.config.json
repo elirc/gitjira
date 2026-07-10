@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "_comment": "Mutation testing (workflow-hardening): mutate the pure, well-tested modules and see if the tests actually KILL the mutants. A high mutation score means the tests assert behavior, not just execute lines. Scoped to pure logic (no DB) so it runs without infrastructure.",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "reporters": ["clear-text", "progress"],
+  "mutate": ["src/fractional-index.js", "src/activity.js"],
+  "coverageAnalysis": "off",
+  "timeoutMS": 20000
+}

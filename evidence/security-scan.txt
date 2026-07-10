@@ -1,0 +1,50 @@
+=== npm audit (real) ===
+found 0 vulnerabilities
+
+=== npm audit --production/json summary ===
+vulnerabilities: {"info":0,"low":0,"moderate":0,"high":0,"critical":0,"total":0}
+
+=== npm outdated (dependency currency / debt) ===
+Package                          Current   Wanted  Latest  Location                                       Depended by
+@commitlint/cli                   19.8.1   19.8.1  21.2.1  node_modules/@commitlint/cli                   gitjira-app
+@commitlint/config-conventional   19.8.1   19.8.1  21.2.0  node_modules/@commitlint/config-conventional   gitjira-app
+@eslint/js                        9.39.4   9.39.4  10.0.1  node_modules/@eslint/js                        gitjira-app
+@prisma/client                    6.19.3   6.19.3   7.8.0  apps/api/node_modules/@prisma/client           api@npm:@gitjira/api@1.0.0
+@vitejs/plugin-react               4.7.0    4.7.0   6.0.3  node_modules/@vitejs/plugin-react              ui@npm:@gitjira/ui@1.0.0
+@vitejs/plugin-react               4.7.0    4.7.0   6.0.3  node_modules/@vitejs/plugin-react              web@npm:@gitjira/web@1.0.0
+bcryptjs                           2.4.3    2.4.3   3.0.3  packages/test-factories/node_modules/bcryptjs  test-factories@npm:@gitjira/test-factories@1.0.0
+bullmq                            5.79.3   5.80.0  5.80.0  node_modules/bullmq                            api@npm:@gitjira/api@1.0.0
+bullmq                            5.79.3   5.80.0  5.80.0  node_modules/bullmq                            worker@npm:@gitjira/worker@1.0.0
+concurrently                       9.2.3    9.2.3  10.0.3  node_modules/concurrently                      gitjira-app
+eslint                            9.39.4   9.39.4  10.6.0  node_modules/eslint                            gitjira-app
+express                           4.22.2   4.22.2   5.2.1  node_modules/express                           api@npm:@gitjira/api@1.0.0
+globals                          15.15.0  15.15.0  17.7.0  node_modules/globals                           gitjira-app
+ioredis                           5.10.1   5.11.1  5.11.1  node_modules/ioredis                           api@npm:@gitjira/api@1.0.0
+jsdom                             25.0.1   25.0.1  29.1.1  packages/ui/node_modules/jsdom                 ui@npm:@gitjira/ui@1.0.0
+lint-staged                       15.5.2   15.5.2  16.4.0  node_modules/lint-staged                       gitjira-app
+pino                              9.14.0   9.14.0  10.3.1  node_modules/pino                              api@npm:@gitjira/api@1.0.0
+pino-http                         10.5.0   10.5.0  11.0.0  node_modules/pino-http                         api@npm:@gitjira/api@1.0.0
+prisma                            6.19.3   6.19.3   7.8.0  apps/api/node_modules/prisma                   api@npm:@gitjira/api@1.0.0
+react                             18.3.1   18.3.1  19.2.7  node_modules/react                             ui@npm:@gitjira/ui@1.0.0
+react                             18.3.1   18.3.1  19.2.7  node_modules/react                             web@npm:@gitjira/web@1.0.0
+react-dom                         18.3.1   18.3.1  19.2.7  node_modules/react-dom                         web@npm:@gitjira/web@1.0.0
+react-router-dom                  6.30.4   6.30.4  7.18.1  node_modules/react-router-dom                  web@npm:@gitjira/web@1.0.0
+vite                               6.4.3    6.4.3   8.1.4  node_modules/vite                              web@npm:@gitjira/web@1.0.0
+=== gitleaks available locally? ===
+
+gitleaks: not installed locally; runs in CI (.github/workflows/secrets.yml), last run green. UNVERIFIED locally.
+
+--- Analysis (a senior reading the outdated list, not just running it) ---
+- 0 known CVEs (npm audit clean) — good, but "no CVEs" != "current".
+- Real blocker worth knowing: eslint 9.39.4 -> 10.6.0 is available, but
+  eslint-plugin-react's peer range does not yet include eslint 10, so bumping
+  eslint now breaks `npm ci` with ERESOLVE. (This is the exact conflict that bit
+  the Sprint 15 lockfile.) Lesson: you upgrade a tool when its ECOSYSTEM is ready,
+  not when the number changes. Blocked until eslint-plugin-react ships v10 support.
+- Major upgrades on deck (breaking, each its own future PR with changelog +
+  fallout fixes): express 4->5, react 18->19 + react-router 6->7, prisma 6->7,
+  vite 6->8. DEFERRED this round on purpose: each is a real migration and doing
+  one badly is worse than not doing it. Not claimed as done.
+- Safe patch/minor drift (ioredis 5.10->5.11, bullmq 5.79->5.80) intentionally
+  NOT bumped this round to avoid re-triggering the cross-platform lockfile issue
+  on this Windows checkout; queued for a Linux/CI-generated lock.

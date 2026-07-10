@@ -13,3 +13,10 @@ coverage/
 
 # Runtime file uploads (never commit user/test files)
 apps/api/uploads/
+
+# raw tool logs (noisy); the .md/.txt evidence quotes the relevant parts
+evidence/*.log
+
+# mutation-testing artifacts
+.stryker-tmp/
+reports/mutation/
