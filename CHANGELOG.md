@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.10.0 — Sprint 14 (PR #131)
+
+### Added
+
+- Design tokens (packages/ui/src/tokens.css) + @gitjira/ui: accessible Button and Modal (role=dialog, focus trap, Escape)
+- Dark mode (light/dark/system, persisted) via token flip — no component changes
+- WCAG 2.1 AA pass: visible focus, reduced-motion, sr-only labels; contrast audit (both themes); ADR 0028/0029
+
+### Fixed
+
+- **A11y:** modal now returns focus to the trigger on close (WCAG 2.4.3)
+- **A11y:** dark-theme muted text meets AA contrast (was 3.9:1 on the surface)
+
 ## 0.9.0 — Sprint 13 (PR #119)
 
 ### Added
