@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0 — Sprint 10 (PR #89)
+
+### Added
+
+- Incremental TypeScript: `tsconfig` (allowJs + strict, per-file `// @ts-check` opt-in), `npm run typecheck`, CI Typecheck job — no build step, code stays runnable JavaScript
+- `z.infer` types exported from the shared Zod schemas so validation and static types can't drift
+- `scripts/ts-ratchet.mjs`: a coverage ratchet that fails CI if the type-checked file count drops (migration progress is monotonic)
+- ADR 0020 (checkJs+JSDoc over big-bang), ADR 0021 (inferred types over codegen), `docs/concepts/incremental-migration.md` (the strangler fig)
+
+### Fixed
+
+- `describeActivity` was typed `any` (checked nothing); replaced with a discriminated union on `kind`. The union surfaced an unnarrowed payload access (reading `.from` on variants without it, `TS2339`) — fixed by narrowing per-case, with a 7-case regression test
+
 ## 0.5.0 — Sprint 09 (PR #82)
 
 ### Added
