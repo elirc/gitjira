@@ -28,6 +28,8 @@ model User {
   activityEvents ActivityEvent[]
   attachments    Attachment[]
   savedFilters   SavedFilter[]
+  watchers       Watcher[]
+  notifications  Notification[]
 }
 
 model Project {
@@ -161,6 +163,7 @@ model Issue {
   sprint         Sprint?         @relation(fields: [sprintId], references: [id])
   sprintId       String?
   storyPoints    Int?
+  watchers       Watcher[]
 
   @@unique([projectId, number])
   @@index([projectId, columnId])
@@ -247,4 +250,37 @@ model Sprint {
   issues  Issue[]
 
   @@index([projectId])
+}
+
+model Watcher {
+  issueId String
+  userId  String
+
+  issue Issue @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([issueId, userId])
+  @@index([userId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  kind      String
+  issueId   String?
+  actorId   String?
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  // LEARN: the idempotency key. A job may run more than once (at-least-once
+  // delivery), so the fan-out derives a stable key per (recipient, event) and
+  // stores it UNIQUE. A retried job that tries to insert the same key hits the
+  // constraint — which we treat as "already delivered", not an error. This is
+  // how you make a non-idempotent-looking operation idempotent.
+  dedupeKey String @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

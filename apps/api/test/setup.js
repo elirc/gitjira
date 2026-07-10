@@ -4,6 +4,7 @@ process.env.DATABASE_URL =
   process.env.DATABASE_URL ?? 'postgresql://gitjira:gitjira_dev@localhost:5432/gitjira_test';
 process.env.JWT_SECRET = process.env.JWT_SECRET ?? 'test-secret';
 process.env.LOG_LEVEL = 'silent';
+process.env.DISABLE_QUEUE = '1'; // tests run the handler directly, no Redis
 
 const { prisma } = await import('../src/lib/prisma.js');
 
