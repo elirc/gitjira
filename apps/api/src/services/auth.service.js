@@ -5,7 +5,13 @@ import { ApiError, conflict, unauthenticated } from '../lib/errors.js';
 // LEARN: bcrypt cost factor 12 ≈ 250ms of deliberate slowness per hash.
 // Slow is the feature: it turns "leaked table + GPU" from an afternoon
 // into centuries. See ADR 0004 for the cost-factor reasoning.
-const BCRYPT_COST = 12;
+// LEARN (sprint 11): the cost is env-configurable so TESTS can drop it to ~4.
+// This is a legitimate test/prod difference (Django and Rails ship the same
+// idea): the security margin is irrelevant to a throwaway test user, and cost
+// 12 × dozens of registrations was making the auth suite time out under load —
+// a real flake. Production reads no env var and stays at 12; only the test
+// setup lowers it. NEVER lower it in a real environment.
+const BCRYPT_COST = Number(process.env.BCRYPT_COST) || 12;
 
 // Kept as an alias so existing imports read naturally; the error contract
 // (sprint 03) unified all domain errors under ApiError.

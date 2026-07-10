@@ -1,3 +1,8 @@
+// Opts out of transaction-rollback isolation: this suite races real
+// connections / tests transaction+constraint behavior, which a single shared
+// transaction cannot reproduce (see test/setup.js + ADR 0022).
+globalThis.__NO_ROLLBACK__ = true;
+
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app, makeUser, makeProject } from './helpers.js';
