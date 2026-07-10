@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.0 — Sprint 15 (PR #141) 🎉
+
+### Added
+
+- Multi-stage Dockerfiles (non-root, healthchecked) for api/worker/web + prod-parity compose
+- Fail-fast env validation at boot (Zod); /metrics with RED metrics (prom-client)
+- Deploy pipeline: release-phase migrations, staging auto + prod gated
+- RUNBOOK.md, ARCHITECTURE.md, README overhaul (study path), practice-incident post-mortem, fifteen-sprint RETRO; ADR 0030/0031
+
+### Fixed
+
+- Containers run as a non-root user; worker gains a Redis-aware healthcheck
+- Migrations run once in a release phase (was: raced per-instance)
+
+**v1.0.0 — 15 sprints, walking skeleton to production.**
+
 ## 0.10.0 — Sprint 14 (PR #131)
 
 ### Added
