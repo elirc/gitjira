@@ -66,7 +66,10 @@ export async function completeSprint(projectKey, actorId, sprintId, { moveUnfini
   });
 
   // Complete the sprint.
-  await prisma.sprint.update({ where: { id: sprint.id }, data: { state: nextState, endAt: new Date() } });
+  await prisma.sprint.update({
+    where: { id: sprint.id },
+    data: { state: nextState, endAt: new Date() },
+  });
 
   // GOTCHA (planted): the bulk move of unfinished issues happens OUTSIDE any
   // transaction, one update per issue in a loop. If the process dies mid-loop,
@@ -88,7 +91,9 @@ export async function assignIssueToSprint(projectKey, actorId, number, sprintId)
   if (!issue) throw notFound('Issue');
   // sprintId null = move to backlog. Validate the sprint belongs to the project.
   if (sprintId) {
-    const sprint = await prisma.sprint.findFirst({ where: { id: sprintId, projectId: project.id } });
+    const sprint = await prisma.sprint.findFirst({
+      where: { id: sprintId, projectId: project.id },
+    });
     if (!sprint) throw notFound('Sprint');
   }
   return prisma.issue.update({ where: { id: issue.id }, data: { sprintId } });

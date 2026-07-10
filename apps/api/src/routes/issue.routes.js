@@ -27,7 +27,11 @@ issueRoutes.get('/:number', asyncHandler(issues.getOne));
 issueRoutes.get('/:number/detail', asyncHandler(issues.detail));
 issueRoutes.patch('/:number', validate(updateIssueSchema), asyncHandler(issues.update));
 issueRoutes.patch('/:number/move', validate(moveIssueSchema), asyncHandler(issues.move));
-issueRoutes.patch('/:number/sprint', validate(assignSprintSchema), asyncHandler(sprintCtl.assignIssue));
+issueRoutes.patch(
+  '/:number/sprint',
+  validate(assignSprintSchema),
+  asyncHandler(sprintCtl.assignIssue)
+);
 issueRoutes.delete('/:number', asyncHandler(issues.remove));
 
 // comments

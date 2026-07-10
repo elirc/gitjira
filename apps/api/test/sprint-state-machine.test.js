@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { assertTransition, canTransition, SPRINT_STATE } from '../src/domain/sprint-state-machine.js';
+import {
+  assertTransition,
+  canTransition,
+  SPRINT_STATE,
+} from '../src/domain/sprint-state-machine.js';
 
 // LEARN: THIS is the showcase for testing business logic without HTTP. No
 // supertest, no database, no bcrypt — just the domain rules as pure functions.
@@ -8,15 +12,21 @@ import { assertTransition, canTransition, SPRINT_STATE } from '../src/domain/spr
 // them becomes.
 describe('sprint state machine', () => {
   it('starts a PLANNED sprint that has issues', () => {
-    expect(assertTransition('start', SPRINT_STATE.PLANNED, { issueCount: 3 })).toBe(SPRINT_STATE.ACTIVE);
+    expect(assertTransition('start', SPRINT_STATE.PLANNED, { issueCount: 3 })).toBe(
+      SPRINT_STATE.ACTIVE
+    );
   });
 
   it('refuses to start a sprint with no issues', () => {
-    expect(() => assertTransition('start', SPRINT_STATE.PLANNED, { issueCount: 0 })).toThrow(/no issues/);
+    expect(() => assertTransition('start', SPRINT_STATE.PLANNED, { issueCount: 0 })).toThrow(
+      /no issues/
+    );
   });
 
   it('refuses to start a sprint that is already active', () => {
-    expect(() => assertTransition('start', SPRINT_STATE.ACTIVE, { issueCount: 3 })).toThrow(/must be PLANNED/);
+    expect(() => assertTransition('start', SPRINT_STATE.ACTIVE, { issueCount: 3 })).toThrow(
+      /must be PLANNED/
+    );
   });
 
   it('completes an ACTIVE sprint', () => {

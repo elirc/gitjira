@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { requireAuth } from '../middleware/require-auth.js';
 import { validate } from '../middleware/validate.js';
 import { asyncHandler } from '../middleware/async-handler.js';
-import { createSprintSchema, completeSprintSchema, assignSprintSchema } from '@gitjira/shared/issue-schemas';
+import { createSprintSchema, completeSprintSchema } from '@gitjira/shared/issue-schemas';
 import * as sprints from '../controllers/sprint.controller.js';
 
 // mergeParams to see :key from the project router.
