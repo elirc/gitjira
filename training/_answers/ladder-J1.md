@@ -3,7 +3,7 @@
 ## Placement
 
 - `apps/api/src/services/health.service.js`: add `checkReadiness({ checks, timeoutMs })`. It's pure orchestration: it runs the named checks in parallel, each wrapped in a timeout, and returns `{ ready, checks }`. That makes it unit-testable with fake checks.
-- `apps/api/src/lib/`: the dependency probes live next to what they probe. `prisma.js` gets `pingDb = () => prisma.$queryRaw\`SELECT 1\``. For Redis, use a dedicated tiny client with `lazyConnect`, `enableOfflineQueue: false`, `connectTimeout`/`commandTimeout`about 500 ms, then`PING`. Don't reuse the BullMQ connection: its offline queue would make the probe _wait_, not fail.
+- `apps/api/src/lib/`: the dependency probes live next to what they probe. `prisma.js` gets a `pingDb()` that runs `SELECT 1` through `prisma.$queryRaw`. For Redis, use a dedicated tiny client (`lazyConnect`, `enableOfflineQueue: false`, `connectTimeout` and `commandTimeout` about 500 ms) and send `PING`. Don't reuse the BullMQ connection: its offline queue would make the probe _wait_, not fail.
 - `controllers/health.controller.js` + `routes/health.routes.js`: `GET /ready` → 200 or 503. Set `Cache-Control: no-store`.
 - `fly.toml`: point `[[http_service.checks]]` at `/api/health/ready`. Keep the Dockerfile `HEALTHCHECK` on `/api/health`. The container runtime's health check is a _restart_ signal (liveness). Restarting a healthy process because Postgres is failing over makes things worse.
 
