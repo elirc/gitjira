@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+const subject = await import(process.argv.includes('--reference') ? '../../_answers/b.mjs' : './exercise.mjs');
+const {createGate:g}=subject;
+test('same-key overlap shares identity and one loader',async()=>{let release,calls=0;const run=g(()=>{calls++;return new Promise(r=>{release=r;});});const a=run('A'),b=run('A');assert.equal(a,b);await Promise.resolve();assert.equal(calls,1);release(7);assert.deepEqual(await Promise.all([a,b]),[7,7]);});
+test('different keys do not share work',async()=>{const run=g(k=>k);assert.notEqual(run('A'),run('B'));assert.equal(await run('A'),'A');});
+test('success is not cached after settlement',async()=>{let n=0;const run=g(()=>++n);assert.equal(await run('A'),1);assert.equal(await run('A'),2);});
+test('rejection releases slot',async()=>{let n=0;const run=g(()=>{if(++n===1)throw new Error('boom');return n;});await assert.rejects(run('A'),/boom/);assert.equal(await run('A'),2);});
+test('synchronous throw is returned as rejection',async()=>{const run=g(()=>{throw new Error('sync');});let p;assert.doesNotThrow(()=>{p=run('X');});await assert.rejects(p,/sync/);});
+test('loader value is preserved',async()=>{const value={ok:true};assert.equal(await g(()=>value)('A'),value);});

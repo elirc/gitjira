@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+const subject = await import(process.argv.includes('--reference') ? '../../_answers/a.mjs' : './exercise.mjs');
+const {applyIssuePatch:p}=subject;const issue=Object.freeze({id:'I',title:'Old',assigneeId:'U7',storyPoints:8});
+test('title-only preserves unrelated data',()=>assert.deepEqual(p(issue,{title:' New '}),{...issue,title:'New'}));
+test('null clears while absence preserves',()=>{assert.equal(p(issue,{assigneeId:null}).assigneeId,null);assert.equal(p(issue,{}).assigneeId,'U7');});
+test('zero and null points are different accepted values',()=>{assert.equal(p(issue,{storyPoints:0}).storyPoints,0);assert.equal(p(issue,{storyPoints:null}).storyPoints,null);});
+test('invalid fields reject',()=>{for(const patch of [{title:' '},{storyPoints:101},{storyPoints:1.5},{assigneeId:undefined},{priority:'HIGH'}])assert.throws(()=>p(issue,patch),TypeError);});
+test('empty patch returns a new equivalent object',()=>{const r=p(issue,{});assert.deepEqual(r,issue);assert.notEqual(r,issue);});
+test('frozen patch and original are unchanged',()=>{p(issue,Object.freeze({title:'X'}));assert.equal(issue.title,'Old');});

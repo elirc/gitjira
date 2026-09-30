@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { createServer } from 'node:http';
 import { io as ioClient } from 'socket.io-client';
 import request from 'supertest';
@@ -10,19 +10,26 @@ import { makeUser } from './helpers.js';
 // NOTE: the shared beforeEach (test/setup.js) truncates tables before EACH
 // test, so we create the user + project INSIDE each test, not in beforeAll —
 // beforeAll data wouldn't survive the truncation.
-let httpServer, url;
+let httpServer, url, socketServer;
+const clients = new Set();
 const app = createApp();
 
 beforeAll(async () => {
   httpServer = createServer(app);
-  initSocketServer(httpServer);
+  socketServer = initSocketServer(httpServer);
   await new Promise((r) => httpServer.listen(0, r));
   url = `http://localhost:${httpServer.address().port}`;
 });
-afterAll(() => new Promise((r) => httpServer.close(r)));
+afterEach(() => {
+  for (const client of clients) client.close();
+  clients.clear();
+});
+afterAll(() => new Promise((resolve) => socketServer.close(resolve)));
 
 function connect(token) {
-  return ioClient(url, { auth: { token }, transports: ['websocket'], forceNew: true });
+  const client = ioClient(url, { auth: { token }, transports: ['websocket'], forceNew: true });
+  clients.add(client);
+  return client;
 }
 async function setupProject(auth) {
   await request(app)
@@ -49,8 +56,9 @@ describe('socket server', () => {
 
     const sock = connect(ana.token);
     await new Promise((resolve) => sock.on('connect', resolve));
+    const joined = new Promise((resolve) => sock.once('presence', resolve));
     sock.emit('join-project', { projectId: project.id });
-    await new Promise((r) => setTimeout(r, 120)); // membership check + join settle
+    await joined;
 
     const received = new Promise((resolve) => sock.on('activity', resolve));
     emitToProject(project.id, 'activity', { kind: 'issue.moved', issueId: 'i1' });
@@ -71,14 +79,14 @@ describe('socket room authorization (review finding)', () => {
     const benSock = connect(ben.token);
     await new Promise((r) => benSock.on('connect', r));
 
-    let benGotError = false;
+    const denied = new Promise((resolve) => benSock.once('join-error', resolve));
     let benGotActivity = false;
-    benSock.on('join-error', () => (benGotError = true));
     benSock.on('activity', () => (benGotActivity = true));
 
     benSock.emit('join-project', { projectId: project.id });
-    await new Promise((r) => setTimeout(r, 120));
-    expect(benGotError).toBe(true); // refused because not a member
+    expect(await denied).toMatchObject({ projectId: project.id });
+    const serverSocket = socketServer.sockets.sockets.get(benSock.id);
+    expect(serverSocket.rooms.has(`project:${project.id}`)).toBe(false);
 
     emitToProject(project.id, 'activity', { kind: 'issue.moved', issueId: 'x' });
     await new Promise((r) => setTimeout(r, 80));

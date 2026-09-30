@@ -223,10 +223,10 @@ export function useSprintAction(projectKey) {
       onSuccess: invalidate,
     }),
     assign: useMutation({
-      mutationFn: ({ number, sprintId }) =>
+      mutationFn: ({ number, sprintId, expectedUpdatedAt }) =>
         api(`/projects/${projectKey}/issues/${number}/sprint`, {
           method: 'PATCH',
-          body: JSON.stringify({ sprintId }),
+          body: JSON.stringify({ sprintId, expectedUpdatedAt }),
         }),
       onSuccess: invalidate,
     }),

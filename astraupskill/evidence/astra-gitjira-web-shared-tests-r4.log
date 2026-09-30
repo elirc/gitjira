@@ -1,0 +1,26 @@
+
+> @gitjira/web@1.0.0 test
+> vitest run --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
+
+
+ RUN  v4.1.10 C:/Users/Owner/Desktop/AstraOrganized2/astra-remaining-improvements/stage/5be7edf43612/apps/web
+
+
+ Test Files  7 passed (7)
+      Tests  17 passed (17)
+   Start at  13:45:46
+   Duration  441.89s (transform 15.57s, setup 95.55s, import 56.41s, tests 37.45s, environment 223.30s)
+
+
+> @gitjira/shared@1.0.0 test
+> vitest run --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
+
+
+ RUN  v4.1.10 C:/Users/Owner/Desktop/AstraOrganized2/astra-remaining-improvements/stage/5be7edf43612/packages/shared
+
+
+ Test Files  4 passed (4)
+      Tests  35 passed (35)
+   Start at  13:53:19
+   Duration  16.44s (transform 2.67s, setup 0ms, import 4.77s, tests 2.08s, environment 4ms)
+

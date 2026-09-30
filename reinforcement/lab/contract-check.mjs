@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+const subject = await import(process.argv.includes('--reference') ? '../_answers/reference.mjs' : './exercise.mjs');
+const {affectedKeys:a}=subject;
+const open=Object.freeze(['projects','GJ','issues',{status:'open'}]);
+const closed=Object.freeze(['projects','GJ','issues',{status:'closed'}]);
+const detail=Object.freeze(['projects','GJ','issues',12]);
+test('all filtered lists and the changed detail are affected',()=>assert.deepEqual(a([open,closed,detail],'GJ',12),[open,closed,detail]));
+test('other project and other detail remain untouched',()=>assert.deepEqual(a([open,['projects','OTHER','issues',{}],['projects','GJ','issues',13]],'GJ',12),[open]));
+test('malformed keys and unrelated families are ignored',()=>assert.deepEqual(a([null,'issues',[],['projects','GJ','members',{}],['projects','GJ','issues',null],['projects','GJ','issues',[]]],'GJ',12),[]));
+test('numeric detail is not a string match',()=>assert.deepEqual(a([['projects','GJ','issues','12'],detail],'GJ',12),[detail]));
+test('order and identity are preserved without mutating input',()=>{const keys=Object.freeze([detail,open]);const r=a(keys,'GJ',12);assert.notEqual(r,keys);assert.equal(r[0],detail);assert.equal(r[1],open);});
+test('empty collection and no match work',()=>{assert.deepEqual(a([],'GJ',12),[]);assert.deepEqual(a([open],'NONE',12),[]);});

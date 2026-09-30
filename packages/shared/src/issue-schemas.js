@@ -76,6 +76,7 @@ export const completeSprintSchema = z.object({
 });
 export const assignSprintSchema = z.object({
   sprintId: z.string().nullish(),
+  expectedUpdatedAt: z.string().datetime().optional(),
 });
 
 /** @typedef {import('zod').infer<typeof createIssueSchema>} CreateIssueInput */

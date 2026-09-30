@@ -1,0 +1,24 @@
+{
+  "project": "gitjira-app",
+  "id": "5be7edf43612",
+  "command": [
+    "python",
+    "scripts/test-local.py",
+    "--",
+    "--maxWorkers=1",
+    "--testTimeout=60000",
+    "--hookTimeout=60000"
+  ],
+  "cwd": "C:\\Users\\Owner\\Desktop\\AstraOrganized2\\astra-remaining-improvements\\stage\\5be7edf43612",
+  "environmentOverrides": {
+    "PYTHONIOENCODING": "utf-8"
+  },
+  "startedAt": "2026-09-19T22:57:21.621605+00:00",
+  "status": "complete",
+  "log": "astra-gitjira-api-r4.log",
+  "pid": 3836,
+  "exitCode": 0,
+  "passed": true,
+  "finishedAt": "2026-09-19T23:31:49.094805+00:00",
+  "elapsedSeconds": 2067.46
+}

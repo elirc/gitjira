@@ -1,0 +1,98 @@
+Running: C:\Program Files\PostgreSQL\18\bin\initdb.exe -D C:\Users\Owner\AppData\Local\Temp\gitjira-test-8pngcd_t\data -U astra_test -A trust --no-locale --no-sync -E UTF8
+The files belonging to this database system will be owned by user "Owner".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are enabled.
+
+creating directory C:/Users/Owner/AppData/Local/Temp/gitjira-test-8pngcd_t/data ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... windows
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... America/Los_Angeles
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+
+Sync to disk skipped.
+The data directory might become corrupt if the operating system crashes.
+
+Success. You can now start the database server using:
+
+    ^"C^:^\Program^ Files^\PostgreSQL^\18^\bin^\pg^_ctl^" -D ^"C^:^\Users^\Owner^\AppData^\Local^\Temp^\gitjira^-test^-8pngcd^_t^\data^" -l logfile start
+
+Running: C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe -D C:\Users\Owner\AppData\Local\Temp\gitjira-test-8pngcd_t\data -l C:\Users\Owner\AppData\Local\Temp\gitjira-test-8pngcd_t\postgres.log -o -p 55767 -h 127.0.0.1 -w start
+waiting for server to start........... done
+server started
+Running: npm.cmd run test -w @gitjira/api -- --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
+
+> @gitjira/api@1.0.0 test
+> vitest run --maxWorkers=1 --testTimeout=60000 --hookTimeout=60000
+
+
+ RUN  v4.1.10 C:/Users/Owner/Desktop/AstraOrganized2/astra-remaining-improvements/stage/5be7edf43612/apps/api
+
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "gitjira_test", schema "public" at "127.0.0.1:55767"
+
+10 migrations found in prisma/migrations
+
+Applying migration `20260709184518_init`
+Applying migration `20260709191134_issues_and_columns`
+Applying migration `20260709194359_issue_position_fractional`
+Applying migration `20260709200748_comments_activity_attachments_subtasks`
+Applying migration `20260709201707_add_subtask_parent`
+Applying migration `20260709210254_add_fulltext_search`
+Applying migration `20260709211924_saved_filters`
+Applying migration `20260709220000_sprints`
+Applying migration `20260709230000_notifications`
+Applying migration `20260710000000_perf_indexes`
+
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.19.3 -> 8.0.0-rc.15                 │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260709184518_init/
+    └─ migration.sql
+  └─ 20260709191134_issues_and_columns/
+    └─ migration.sql
+  └─ 20260709194359_issue_position_fractional/
+    └─ migration.sql
+  └─ 20260709200748_comments_activity_attachments_subtasks/
+    └─ migration.sql
+  └─ 20260709201707_add_subtask_parent/
+    └─ migration.sql
+  └─ 20260709210254_add_fulltext_search/
+    └─ migration.sql
+  └─ 20260709211924_saved_filters/
+    └─ migration.sql
+  └─ 20260709220000_sprints/
+    └─ migration.sql
+  └─ 20260709230000_notifications/
+    └─ migration.sql
+  └─ 20260710000000_perf_indexes/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+
+ Test Files  23 passed (23)
+      Tests  95 passed (95)
+   Start at  16:02:00
+   Duration  1771.26s (transform 28.42s, setup 97.93s, import 522.25s, tests 392.19s, environment 112ms)
+
+Running: C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe -D C:\Users\Owner\AppData\Local\Temp\gitjira-test-8pngcd_t\data -m fast -w stop
+waiting for server to shut down..... done
+server stopped
+Owned PostgreSQL cluster stopped.

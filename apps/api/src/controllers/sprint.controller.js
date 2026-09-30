@@ -20,7 +20,7 @@ export async function assignIssue(req, res) {
     req.params.key,
     req.user.id,
     Number(req.params.number),
-    req.body.sprintId ?? null
+    req.body
   );
   res.json({ issue });
 }

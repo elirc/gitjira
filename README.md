@@ -83,3 +83,7 @@ Recurring themes tallied across the project live in **[RETRO.md](docs/RETRO.md)*
 | `npm run lint` / `npm run format` | ESLint / Prettier              |
 | `npm test`                        | Test suite (arrives sprint 02) |
 | `npm run build`                   | Production builds              |
+
+## Source-based improvement course
+
+[Start the course](astraupskill/README.md). It complements the existing project and learning documentation with a focused trace, regression, and practice sequence.

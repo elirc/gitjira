@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+const subject = await import(process.argv.includes('--reference') ? '../_interviewer/reference.mjs' : './exercise.mjs');
+const {orderIssues:f}=subject;const i=(id,dependsOn=[])=>({id,dependsOn});
+test('prerequisite comes first',()=>assert.deepEqual(f([i('b',['a']),i('a')]),['a','b']));
+test('available-node ties use code-unit order',()=>assert.deepEqual(f([i('z'),i('b'),i('a',['b'])]),['b','a','z']));
+test('repeated dependency counts once',()=>assert.deepEqual(f([i('b',['a','a']),i('a')]),['a','b']));
+test('missing dependency rejects',()=>assert.throws(()=>f([i('a',['x'])]),{name:'RangeError',message:'Missing dependency'}));
+test('cycle and self-cycle reject',()=>{assert.throws(()=>f([i('a',['b']),i('b',['a'])]),{name:'RangeError',message:'Cycle'});assert.throws(()=>f([i('a',['a'])]),RangeError);});
+test('empty graph is a complete empty plan',()=>assert.deepEqual(f([]),[]));
+test('frozen dependency arrays remain unchanged',()=>{const x=Object.freeze([Object.freeze(i('b',Object.freeze(['a']))),Object.freeze(i('a',Object.freeze([])))]);assert.deepEqual(f(x),['a','b']);assert.deepEqual(x[0].dependsOn,['a']);});

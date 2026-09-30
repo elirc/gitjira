@@ -75,6 +75,12 @@ export function BacklogPage() {
         <span className="project-key">{project.key}</span> Backlog
       </h1>
 
+      {actions.assign.error && (
+        <p role="alert" className="error-banner">
+          {actions.assign.error.message}
+        </p>
+      )}
+
       <div className="create-sprint">
         <input
           placeholder="New sprint name"
@@ -123,7 +129,11 @@ function IssueList({ list, sprints, actions }) {
           <select
             value={issue.sprintId ?? ''}
             onChange={(e) =>
-              actions.assign.mutate({ number: issue.number, sprintId: e.target.value || null })
+              actions.assign.mutate({
+                number: issue.number,
+                sprintId: e.target.value || null,
+                expectedUpdatedAt: issue.updatedAt,
+              })
             }
           >
             <option value="">Backlog</option>

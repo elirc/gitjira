@@ -26,6 +26,9 @@ describe('issue-key allocation under concurrency', () => {
       )
     );
 
+    for (const result of results) {
+      expect(result.status, JSON.stringify(result.body)).toBe(201);
+    }
     const numbers = results.map((r) => r.body.issue.number).sort((a, b) => a - b);
     expect(new Set(numbers).size).toBe(N); // no collisions
     expect(numbers).toEqual(Array.from({ length: N }, (_, i) => i + 1)); // exactly 1..N, no gaps

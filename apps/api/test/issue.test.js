@@ -72,6 +72,10 @@ describe('issue CRUD', () => {
       .get('/api/projects/GJ/issues?limit=2')
       .set('Authorization', ana.auth);
     expect(page1.body.issues).toHaveLength(2);
+    for (const issue of page1.body.issues) {
+      expect(typeof issue.updatedAt).toBe('string');
+      expect(new Date(issue.updatedAt).toISOString()).toBe(issue.updatedAt);
+    }
     expect(page1.body.nextCursor).toBeTruthy();
 
     const page2 = await request(app)

@@ -117,7 +117,7 @@ export async function listIssues(projectKey, actorId, { cursor, limit = 50, ...f
     ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     // LEARN: project ONLY what the table renders (review finding on PR #27).
-    // No `description` (up to 5000 chars/row), no position/updatedAt/
+    // No `description` (up to 5000 chars/row), no position/
     // reporterId the list never shows. `select` and `include` don't mix, so
     // the assignee relation is selected explicitly too. Payload dropped from
     // ~1.4 KB/issue to ~0.2 KB/issue on the seeded data.
@@ -132,6 +132,8 @@ export async function listIssues(projectKey, actorId, { cursor, limit = 50, ...f
       columnId: true,
       position: true,
       sprintId: true,
+      // Backlog assignment sends this version for the atomic stale-write check.
+      updatedAt: true,
       storyPoints: true,
       assignee: { select: { id: true, name: true, avatarUrl: true } },
     },

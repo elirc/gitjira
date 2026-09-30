@@ -1,0 +1,37 @@
+{
+  "project": "GitJira",
+  "assumption_status": "hypothetical teaching load, not measured",
+  "calculations": [
+    {
+      "label": "Illustrative board/detail read rate",
+      "kind": "readRps",
+      "args": {
+        "active": 2000,
+        "readsPerMinute": 3
+      },
+      "expected": 100,
+      "unit": "requests/s"
+    },
+    {
+      "label": "Fanout payload for one subscribed project",
+      "kind": "fanout",
+      "args": {
+        "updatesPerSecond": 10,
+        "subscribers": 100,
+        "payloadBytes": 500
+      },
+      "expected": 500000,
+      "unit": "bytes/s"
+    },
+    {
+      "label": "Mean concurrent read work under a stable 200ms average",
+      "kind": "inFlight",
+      "args": {
+        "requestsPerSecond": 100,
+        "meanSeconds": 0.2
+      },
+      "expected": 20,
+      "unit": "requests"
+    }
+  ]
+}

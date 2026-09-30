@@ -1,0 +1,15 @@
+{
+  "project": "gitjira-app",
+  "id": "5be7edf43612",
+  "command": ["node", "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js", "run", "lint"],
+  "cwd": "C:\\Users\\Owner\\Desktop\\AstraOrganized2\\astra-remaining-improvements\\stage\\5be7edf43612",
+  "environmentOverrides": {},
+  "startedAt": "2026-09-20T20:45:40.278660+00:00",
+  "status": "complete",
+  "log": "astra-gitjira-lint-r3.log",
+  "pid": 33836,
+  "exitCode": 0,
+  "passed": true,
+  "finishedAt": "2026-09-20T20:47:35.610406+00:00",
+  "elapsedSeconds": 115.33
+}
