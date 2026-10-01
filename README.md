@@ -1,6 +1,6 @@
 # GitJira — a local learning edition
 
-A working JavaScript issue tracker rebuilt through Astra and Sol design challenges and executable review, structured as a junior-to-senior learning project for CRUD web application development.
+A working JavaScript issue tracker rebuilt through Astra and Sol design challenges and executable review, structured as a junior-to-senior learning project for CRUD web application development. This is part one of a three-project course — see the [curriculum overview](../CURRICULUM.md) for how it connects to Stockade and Relay.
 
 Suggested path:
 
