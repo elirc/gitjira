@@ -1,0 +1,71 @@
+GitJira Rebuild — factual build log
+=================================
+Date: 2026-10-01. Entries record observed actions, not hidden model reasoning.
+
+1. Scope and directory boundary
+   User requested deleting the current organizer project's entire contents,
+   rebuilding one recommended project in JavaScript with Astra/Sol agents,
+   and recording a readable retrospective in a new folder.
+   Root selected GitJira for its permissions/concurrency/UI learning surface.
+   A non-following directory scan found 132,920 existing files totaling
+   5,327,169,296 bytes. No reparse points were found in that traversal.
+   The explicit Remove-Item operation was rejected before execution by
+   automatic policy review: "blocked by policy". Old content remains.
+   New work is isolated in gitjira-rebuild; no deletion workaround was used.
+
+2. Sol's independent proposal
+   Sol reviewed scope before implementation, recommending a narrow but usable
+   persistent product, server authorization, SQL compare-and-swap, transactional
+   activity, explicit demo auth, and real two-process concurrency checks.
+   Its initial review is recorded in reviews/01-sol-design.md.
+
+3. Shared contract, divided ownership
+   Root wrote CONTRACT.md and took API/database/integration/documentation.
+   Astra took public/**. Sol took independent API/concurrency tests.
+   A second Astra reviewer separately challenged the backend, read-only.
+   The actual models used for the named agents were gpt-6-astra and gpt-6-sol,
+   both configured with high reasoning effort. Multiple roles do not imply
+   multiple distinct model families or guaranteed review independence.
+
+4. Runtime and dependency decision
+   Laptop Node: 22.16.0; npm: 10.9.2. A real node:sqlite probe returned SQLite
+   3.49.1. Built-in SQLite avoids installing native compilation tools.
+   npm resolved Express 5.2.1 and Playwright 1.63.0; both were pinned exactly.
+   Initial install audited 71 packages and reported zero vulnerabilities.
+   This result is a point-in-time advisory check, not a security guarantee.
+
+5. Backend and initial verification
+   Root implemented the relational schema, seeded users/projects/issues,
+   persisted sessions, project membership, issue lifecycle, comments,
+   activity, literal search, loopback Host/write-Origin protection, and CAS.
+   The first Sol run passed 7 of 8 tests. The failure was a test assumption:
+   it expected the first created issue to be LAUNCH-1, while the useful demo
+   board already had nine examples. Sol changed the test to derive the next
+   number from its baseline instead of altering the product to suit the test.
+   All eight then passed. More edge-case tests and browser verification follow.
+
+6. Independent backend findings
+   Astra reproduced NUL text truncation, nonprimitive ID coercion, and an
+   escaped-description byte-limit mismatch. Root corrected validation and
+   parser limits; Sol added regression tests. All expanded API tests passed.
+
+7. Browser review and revision
+   Nine initial workflow scenarios passed. Sol challenged request ownership
+   around project loads, dialogs, pending writes, and account changes. Astra
+   added request tokens, transition gates, and pending-write control locks.
+   Sol browser-reproduced the account-switch/503 stale-workspace bug, then
+   verified the recovery screen fix. Root added seven delayed/failure-response
+   scenarios, including that recovery path. Source-reasoned risks are labeled
+   separately from pre-fix reproductions in the agent review files.
+
+8. Final verification and handoff
+   Final npm run check: nine JavaScript files passed.
+   Final npm test: 12 passed, zero failed/skipped/cancelled.
+   Final npm run test:browser: nine workflow plus seven timing/failure cases
+   passed; neither browser suite reported uncaught runtime errors.
+   Desktop and mobile screenshots were inspected. Results, screenshots, and
+   source hashes were copied into journal/evidence.
+   The readable retrospective is READ-ME-FIRST.txt; exact verification is in
+   VERIFICATION.md. The local server was launched at 127.0.0.1:4317 with its
+   own persistent database in data/. Existing GitHub repositories were not
+   modified. The policy-blocked old-content deletion remains uncompleted.

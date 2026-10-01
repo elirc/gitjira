@@ -1,0 +1,77 @@
+Final npm test completion chunk. Initial output and first two passing tests were returned in the preceding tool result.
+Exit code: 0
+
+# Subtest: escaped 10,000-character descriptions round-trip while NUL text and nonprimitive IDs fail validation
+ok 3 - escaped 10,000-character descriptions round-trip while NUL text and nonprimitive IDs fail validation
+  ---
+  duration_ms: 438.1601
+  type: 'test'
+  ...
+# Subtest: project membership is enforced for reads and writes, including guessed issue IDs
+ok 4 - project membership is enforced for reads and writes, including guessed issue IDs
+  ---
+  duration_ms: 368.7473
+  type: 'test'
+  ...
+# Subtest: issue lifecycle persists comments and activity, and filtering treats search as literal text
+ok 5 - issue lifecycle persists comments and activity, and filtering treats search as literal text
+  ---
+  duration_ms: 173.7627
+  type: 'test'
+  ...
+# Subtest: stale edits fail with current server state and cannot create an activity event
+ok 6 - stale edits fail with current server state and cannot create an activity event
+  ---
+  duration_ms: 107.9717
+  type: 'test'
+  ...
+# Subtest: invalid values are rejected and owner membership rules preserve an owner
+ok 7 - invalid values are rejected and owner membership rules preserve an owner
+  ---
+  duration_ms: 244.5046
+  type: 'test'
+  ...
+# Subtest: project creation validates keys and gives only its creator owner access
+ok 8 - project creation validates keys and gives only its creator owner access
+  ---
+  duration_ms: 112.1326
+  type: 'test'
+  ...
+# Request failed: forced member failure
+# Subtest: removing a member revokes project access and unassigns issues with versioned activity atomically
+ok 9 - removing a member revokes project access and unassigns issues with versioned activity atomically
+  ---
+  duration_ms: 111.2526
+  type: 'test'
+  ...
+# Request failed: forced activity failure
+# Request failed: forced activity failure
+# Request failed: forced activity failure
+# Subtest: activity insert failure rolls back create, edit, comment, and issue numbering
+ok 10 - activity insert failure rolls back create, edit, comment, and issue numbering
+  ---
+  duration_ms: 118.4333
+  type: 'test'
+  ...
+# Subtest: issue and session persist after reopening the same SQLite file
+ok 11 - issue and session persist after reopening the same SQLite file
+  ---
+  duration_ms: 146.4916
+  type: 'test'
+  ...
+# Subtest: two independent processes accept one versioned edit and survive a restart
+ok 12 - two independent processes accept one versioned edit and survive a restart
+  ---
+  duration_ms: 5501.4144
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6033.434
+
