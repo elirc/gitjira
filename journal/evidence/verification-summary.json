@@ -1,0 +1,13 @@
+﻿{
+    "RecordedAt":  "2026-10-01T15:48:16.8993881Z",
+    "Node":  "22.16.0",
+    "Express":  "5.2.1",
+    "Playwright":  "1.63.0",
+    "ApiTestsPassed":  12,
+    "BrowserWorkflowPassed":  9,
+    "BrowserRacePassed":  7,
+    "SyntaxFilesPassed":  9,
+    "Failed":  0,
+    "UncaughtBrowserErrors":  0,
+    "RequestedOldContentDeletion":  "Rejected before execution: blocked by policy"
+}

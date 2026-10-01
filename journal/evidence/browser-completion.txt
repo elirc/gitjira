@@ -1,0 +1,21 @@
+Final npm run test:browser completion chunk. Initial output and first three passing workflow scenarios were returned in the preceding tool result.
+Exit code: 0
+
+PASS combined search filters, list view and activity view
+PASS two browser contexts conflict, preserve draft, then explicitly reload winner
+PASS owner team management and visible last-owner rejection
+PASS viewer sees read-only UI and cannot forge a write
+PASS new project workflow, empty state and outsider isolation
+PASS archive, mobile layout, keyboard dialog close, and logout
+9/9 browser scenarios passed; no uncaught browser errors.
+(node:8440) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS delayed old issue response cannot replace a newly opened issue
+PASS queued search cannot invalidate a project load
+PASS delayed team response cannot populate a different project dialog
+PASS pending issue write blocks close and duplicate submit until acknowledged
+PASS pending membership change blocks dialog dismissal until role is refreshed
+PASS pending project creation cannot close a later draft
+PASS failed workspace load after switching accounts removes the previous workspace
+7/7 delayed-response scenarios passed; no uncaught browser errors.
+

@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-10-01T15:44:43.455Z",
+  "results": [
+    {
+      "name": "delayed old issue response cannot replace a newly opened issue",
+      "status": "passed"
+    },
+    {
+      "name": "queued search cannot invalidate a project load",
+      "status": "passed"
+    },
+    {
+      "name": "delayed team response cannot populate a different project dialog",
+      "status": "passed"
+    },
+    {
+      "name": "pending issue write blocks close and duplicate submit until acknowledged",
+      "status": "passed"
+    },
+    {
+      "name": "pending membership change blocks dialog dismissal until role is refreshed",
+      "status": "passed"
+    },
+    {
+      "name": "pending project creation cannot close a later draft",
+      "status": "passed"
+    },
+    {
+      "name": "failed workspace load after switching accounts removes the previous workspace",
+      "status": "passed"
+    }
+  ],
+  "runtimeErrors": []
+}

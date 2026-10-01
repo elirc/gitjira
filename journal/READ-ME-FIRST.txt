@@ -1,0 +1,288 @@
+GITJIRA, REBUILT: A SMALL SYSTEM WITH REAL DISAGREEMENTS
+=====================================================
+A retrospective for Eli — 1 October 2026
+
+This is the story of an actual build, written afterward so you can follow the
+engineering choices without watching every tool call. Astra and Sol really
+participated. The objections, bugs, tests, and fixes below came from that work.
+This is a condensed engineering narrative, not a fictional meeting transcript
+or a reconstruction of hidden model reasoning.
+
+The result is a usable local issue tracker: projects, a board and list, search,
+filters, assignments, comments, activity, team roles, and conflict recovery.
+It uses JavaScript in the browser and server, Express, and SQLite. It is a
+complete local learning edition, not feature parity with your original GitJira.
+
+Run npm start from gitjira-rebuild and open http://127.0.0.1:4317.
+The parent README.md gives setup details and the product's exact boundaries.
+
+One practical fact comes first. You asked to clear the old organizer project.
+Deletion was explicitly attempted, but automatic approval review rejected it
+with "blocked by policy." Old files remain outside this new folder. We did not
+use another mechanism to bypass the rejection. No existing GitHub repository
+was changed by this build.
+
+
+1. PICK THE LEARNING SURFACE BEFORE PICKING THE LIBRARIES
+--------------------------------------------------------
+
+GitJira gave us the clearest first experiment among the three candidates. Its
+screens are familiar, so we can spend more attention on the relationship between
+a button, a permission, an HTTP request, and a database write.
+
+Root acted as integrator and backend builder. An Astra agent built the browser
+application. Sol challenged the design and wrote independent tests. A second
+Astra agent reviewed the backend without editing it. Sol later crossed over to
+challenge Astra's UI. The named agents used gpt-6-astra and gpt-6-sol with high
+reasoning effort. These are two model families in several roles; more agents
+do not automatically mean more independent judgments.
+
+Sol's first objection established the standard: a polished board could look
+finished while losing edits or allowing a viewer to write through the API.
+The review asked for explicit invariants before the interface was complete.
+
+An invariant is a promise that must hold across different actions. Here the
+important promises were: nonmembers cannot read a project's data; viewers
+cannot write; stale edits cannot overwrite newer ones; a mutation and its
+activity record succeed together; and every project keeps an owner.
+
+CONTRACT.md made those promises concrete with endpoints, fields, errors,
+sample users, and file ownership. The UI builder and test writer could proceed
+without guessing the API. Parallel work became an exercise in implementing
+one agreed boundary rather than creating three incompatible products.
+
+Before reading on, predict what should happen when two people open version 4
+of an issue and both save. "The latest edit wins" leaves open whether the
+second person knowingly replaced the first person's work.
+
+
+2. A SMALL STACK STILL HAS COSTS
+-------------------------------
+
+We selected Express, SQLite, and ordinary browser JavaScript. React and
+PostgreSQL were viable alternatives. React could help organize a larger UI;
+PostgreSQL offers a better path to a hosted, multi-machine service. Neither
+was necessary to prove this local workflow.
+
+The laptop already had Node 22.16.0. A direct runtime probe verified that its
+built-in SQLite module worked, returning SQLite 3.49.1. Using it avoided
+reinstalling native compiler tooling removed during your laptop cleanup.
+
+The cost is real: DatabaseSync blocks the Node event loop while SQL executes,
+and this Node version labels the API experimental. We accepted that for a small
+local app. A two-process correctness test would not establish that the same
+architecture handles a busy public service.
+
+We also selected polling instead of WebSockets. A live transport brings
+reconnection, missed-message recovery, subscription authorization, and extra
+deployment choices. Explicit writes plus periodic reads were enough here.
+You can later replace polling with server-sent events and make the new
+obligations the subject of a focused review.
+
+Using vanilla JavaScript did not eliminate state complexity. It made it more
+visible. That became important when Sol challenged request completion order.
+A shorter dependency list is not the same thing as a race-free application.
+
+
+3. PUT EACH GUARANTEE WHERE IT CAN BE ENFORCED
+--------------------------------------------
+
+The database holds users, sessions, projects, memberships, issues, comments,
+and activity. Foreign keys protect references. A unique project-and-number
+pair protects issue keys. Constraints restrict valid statuses and roles.
+
+The server checks membership instead of trusting hidden buttons. A viewer
+gets a read-only interface, but a forged PATCH still receives 403. Guessing an
+issue ID in another project yields 404. The HTTP tests check those promises
+independently of what the browser chooses to display.
+
+Demo login intentionally lets you select any of four sample people. It teaches
+authorization, not identity verification. The server binds to loopback and
+rejects unexpected Host values and cross-origin writes. Sessions use random
+tokens and HttpOnly, SameSite cookies. The passwordless account selector still
+must be replaced before public deployment.
+
+For edits, the crucial SQL condition is the version predicate. The client
+sends the version it read. SQL changes the issue only if that version still
+matches, then increments it. The loser receives 409 and the current issue.
+No automatic retry quietly substitutes a fresh version into the old draft.
+
+BEGIN IMMEDIATE takes SQLite's write lock before the mutation's read/check
+work. Authorization, version checks, the mutation, and its activity insertion
+share that transaction. If another process removes membership, it cannot
+commit between this operation's permission check and write.
+
+Removing a member also unassigns their active issues and advances the affected
+versions. Otherwise, someone could save a stale assignment after that person
+left. The assignment changes and their activity entries are atomic too.
+
+Carry this question into your next project: which guarantees belong in the
+UI, which in the API, and which require cooperation from the database?
+
+
+4. THE FIRST FAILURE WAS A TEST ASSUMPTION
+-----------------------------------------
+
+Sol wrote tests from the contract instead of copying root's implementation.
+The first run passed seven of eight. The failure expected the first new issue
+to be LAUNCH-1. The app seeded nine useful examples, so LAUNCH-10 was correct.
+
+Sol changed the test to derive the next number from its baseline. We did not
+remove useful seed data to satisfy the assertion. A failing test is evidence
+of disagreement; it does not automatically prove the application is wrong.
+
+The suite expanded around failure modes. Sol installed a SQLite trigger that
+deliberately rejected activity inserts. An issue creation had to fail without
+leaving an issue behind or consuming its number. Editing, commenting, and
+membership removal received related rollback checks.
+
+This is stronger than checking that the happy path calls two functions. The
+test makes the second half fail and inspects what was actually persisted.
+
+For concurrency, Sol launched two independent Node processes against one
+database file. Both tried saving the same version. Exactly one succeeded;
+one received 409; the winner remained; only one update event appeared.
+Concurrent creates received distinct consecutive issue numbers. The servers
+were stopped, another process opened the file, and the winner and session
+still worked.
+
+These are bounded facts. We did not simulate power loss, thousands of writers,
+or sustained throughput. Two real processes prove more than two promises in
+one synchronous event loop, but less than a production capacity study.
+
+
+5. ASTRA FOUND THREE BUGS AFTER THE FIRST GREEN SUITE
+----------------------------------------------------
+
+The second Astra agent reviewed the backend independently and ran HTTP probes
+against an in-memory database. It found three concrete input problems.
+
+First, a title containing an embedded null character was accepted, but the
+returned text was truncated at that character by the SQLite/driver path.
+A leading null could cause a 500. The product accepted data it could not safely
+round-trip. Root changed the shared text validator to reject null characters
+with 400. Sol added regression cases for user text.
+
+Second, the ID helper converted arbitrary JSON through String/Number. An array
+containing 1 became a valid ID; an object with a malformed toString property
+could yield 500. In a deliberately passwordless demo this was not a new
+privilege escalation, but it broke the input contract. The helper now accepts
+only number or string primitives before performing integer checks.
+
+Third, a valid 10,000-character description could need roughly 60 KB on the
+wire when JSON-escaped. The parser limit was 32 KB. The field validator and
+transport disagreed about what "valid" meant. Root raised the bounded parser
+limit to 128 KB. Sol verified both the escaped text round-trip and rejection
+of a request beyond the new cap.
+
+This was useful adversarial review because the reviewer supplied a specific
+input, an observed result, and a violated promise. It did not stop at "improve
+validation." Another agent turned each finding into a repeatable test.
+
+The pre-fix observations remain in reviews/04-astra-backend.md. The regressions
+are in tests/api.test.js. A green final build does not erase the mistakes that
+made the review useful.
+
+
+6. THE BROWSER HAD A DIFFERENT KIND OF CONCURRENCY
+-------------------------------------------------
+
+Astra built native dialogs, board/list/activity views, team controls, and
+explicit conflict recovery. The first browser journeys worked: create an
+issue, reload it, comment, move it, and switch to a viewer who cannot edit.
+
+The two-browser conflict journey worked too. Avery and Sam opened one issue,
+Sam saved, and Avery's stale save was rejected. Avery's draft stayed visible.
+Save was disabled until Avery explicitly loaded current server state, with a
+clear explanation that loading would replace the current fields.
+
+Sol then inspected how requests could finish out of order. Initially, full
+project loads and partial refreshes shared one generation counter. A delayed
+search timer could start a refresh after a project switch. It could invalidate
+the full load without possessing enough data to finish the new screen.
+
+Astra cleared pending search timers during transitions and prevented partial
+refresh while a full project load was active. Issue and team dialogs gained
+their own request identities. An old response for issue A cannot populate a
+dialog that has since been reopened for issue B.
+
+For mutations, Astra chose to lock the dialog until acknowledgment. Save,
+comment, membership change, and project creation disable relevant controls
+and prevent Escape dismissal while pending. This is a tradeoff: it avoids an
+old completion closing or modifying a new draft, but holds the dialog during
+the local request. The browser reports success after the server commits.
+
+These timing concerns initially came from source inspection, not all from
+observed pre-fix failures. Root then wrote delayed-response browser checks
+that forward real requests and hold their responses. They release an old
+issue/team response after a different dialog opens, hold project loading past
+the search debounce, and attempt dismissal during pending writes. The final
+code passes those specific scenarios.
+
+Sol did reproduce another transition bug before it was fixed. After switching
+from Avery to Taylor, an injected project-list request failure left Avery's
+workspace visible although the server session belonged to Taylor. Astra
+replaced that stale view with a recovery screen showing the correct account.
+Sol reran the isolated proof: Retry loaded Taylor's Research lab. Root added
+that failure/recovery case to the final suite as well.
+
+The connection between database and browser design is worth noticing. A row
+version identifies the stored state a write may replace. A request token
+identifies the current screen a response may update. Asynchronous work needs
+an owner in both places; neither mechanism substitutes for the other.
+
+
+7. READ THE FINAL EVIDENCE AT ITS ACTUAL STRENGTH
+------------------------------------------------
+
+The completed code passed 12 API/process tests, nine browser workflow
+scenarios, seven delayed/failure-response browser scenarios, and syntax checks
+on nine JavaScript files. Both browser suites recorded no uncaught browser
+errors. Desktop and mobile screenshots were inspected. npm's install-time
+advisory check reported zero known vulnerabilities for the installed tree.
+
+The 12 API tests contain multiple assertions; that count is not a coverage
+percentage. The npm result is a point-in-time report, not a security guarantee.
+Chromium testing is not cross-browser certification. Labels, focusable
+controls, native dialogs, and keyboard Escape were checked, but we did not
+perform a comprehensive assistive-technology audit.
+
+This edition has no production identity provider, invitation email, uploads,
+sprints, notification jobs, external GitHub integration, or restore screen
+for archived issues. The API returns the small project's issue collection;
+activity shows the newest 100 events. The design is intended to be runnable
+and understandable on your laptop. ARCHITECTURE.md explains when these
+boundaries should change.
+
+VERIFICATION.md records the exact checks. The reviews folder preserves each
+agent's explicit conclusions. The evidence folder contains results and
+screenshots. BUILD-LOG.txt records the sequence without fictional dialogue.
+
+
+8. TURN OBSERVATION INTO YOUR OWN DESIGN JUDGMENT
+------------------------------------------------
+
+Start the app and create a stale edit in two tabs. Before saving, predict the
+database version, HTTP response, and fields that should remain in each dialog.
+Then read tests/concurrency.test.js and the PATCH handler in src/app.js. Follow
+one promise across browser, API, and database.
+
+Next, choose one architectural change: real authentication, PostgreSQL,
+recoverable archive, or a transactional outbox for notifications. Do one at a
+time so disagreements have a clear object.
+
+Ask the builder for two viable designs and the conditions under which its
+preferred design would be wrong. Ask the reviewer for a concrete failure
+scenario, not generic concerns. Have the verifier turn it into a test or
+measurement. Rotate roles on the next feature so one model does not always
+defend its own previous choices.
+
+Write your own prediction before reading their proposals. You do not need to
+predict every bug. The useful learning is explaining why an objection changed
+the code, why an alternative was deferred, and what evidence would make you
+revisit the decision.
+
+This rebuild made choices reviewable by tying them to observable behavior:
+one winner, one conflict, no partial write, no stale workspace, and a draft
+still present when its save was rejected. Carry that standard into the next
+rebuild.

@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-10-01T15:44:33.062Z",
+  "results": [
+    {
+      "name": "login, seeded board, accessible columns and desktop layout",
+      "status": "passed",
+      "durationMs": 1339
+    },
+    {
+      "name": "create issue, assign, reload and preserve literal user text",
+      "status": "passed",
+      "durationMs": 1334
+    },
+    {
+      "name": "edit status and comment without losing the edit draft",
+      "status": "passed",
+      "durationMs": 961
+    },
+    {
+      "name": "combined search filters, list view and activity view",
+      "status": "passed",
+      "durationMs": 1074
+    },
+    {
+      "name": "two browser contexts conflict, preserve draft, then explicitly reload winner",
+      "status": "passed",
+      "durationMs": 3206
+    },
+    {
+      "name": "owner team management and visible last-owner rejection",
+      "status": "passed",
+      "durationMs": 1391
+    },
+    {
+      "name": "viewer sees read-only UI and cannot forge a write",
+      "status": "passed",
+      "durationMs": 770
+    },
+    {
+      "name": "new project workflow, empty state and outsider isolation",
+      "status": "passed",
+      "durationMs": 891
+    },
+    {
+      "name": "archive, mobile layout, keyboard dialog close, and logout",
+      "status": "passed",
+      "durationMs": 1190
+    }
+  ],
+  "runtimeErrors": []
+}
