@@ -87,3 +87,7 @@ Recurring themes tallied across the project live in **[RETRO.md](docs/RETRO.md)*
 ## Source-based improvement course
 
 [Start the course](astraupskill/README.md). It complements the existing project and learning documentation with a focused trace, regression, and practice sequence.
+
+## Local learning rebuild (October 2026)
+
+A self-contained local rebuild of this project lives in [rebuild/](rebuild/README.md): an Express + SQLite + vanilla-JS issue tracker centered on optimistic concurrency and draft-preserving conflict recovery. Built through Astra/Sol adversarial review and expanded into part 1 of a three-project upskilling curriculum — see [CURRICULUM.md](CURRICULUM.md). It runs standalone (Node 22.16+, `npm ci && npm start` inside `rebuild/`) and is fully isolated from the main codebase in this repository.
