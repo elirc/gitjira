@@ -37,7 +37,7 @@
     "@gitjira/test-factories": "*",
     "pino-pretty": "^13.0.0",
     "socket.io-client": "^4.8.3",
-    "supertest": "^7.2.2",
+    "supertest": "^7.3.0",
     "vitest": "^4.1.10"
   },
   "exports": {
