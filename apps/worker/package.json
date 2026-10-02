@@ -10,6 +10,6 @@
   },
   "dependencies": {
     "@gitjira/api": "*",
-    "bullmq": "^5.34.0"
+    "bullmq": "^6.3.9"
   }
 }
