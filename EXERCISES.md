@@ -44,6 +44,10 @@ failing test the scarier result?
 file, and explain why the UI conflict box alone could not preserve the
 guarantee.
 
+A completed run of this exercise, with real captured output, is in
+[journal/worked-examples/break-the-cas.md](journal/worked-examples/break-the-cas.md) —
+do your own run first, then compare how you observed and reported against it.
+
 **1.2 Break the transaction boundary.** In `src/database.js`, change
 `BEGIN IMMEDIATE` to `BEGIN`.
 *Predict first:* which suite notices — the in-process API tests or the

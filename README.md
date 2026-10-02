@@ -2,12 +2,12 @@
 
 A working JavaScript issue tracker rebuilt through Astra and Sol design challenges and executable review, structured as a junior-to-senior learning project for CRUD web application development. This is part one of a three-project course — see the [curriculum overview](../CURRICULUM.md) for how it connects to Stockade and Relay.
 
-Suggested path:
+Suggested path (expanded in the [learning path](journal/LEARNING-PATH.md)):
 
 1. Read the [retrospective](journal/READ-ME-FIRST.txt) for the decisions, disagreements, fixes, and evidence.
 2. Run the app (below) and take the [code tour](CODE-TOUR.md) — one promise traced from a button click to a SQL predicate and back.
-3. Work the [exercises](EXERCISES.md): break the guarantees and watch the tests catch you, then extend the system, then move a boundary.
-4. Study the review findings as diffs in [journal/diffs](journal/diffs/backend-fixes.md).
+3. Work the [exercises](EXERCISES.md): break the guarantees and watch the tests catch you, then extend the system, then move a boundary. A [worked example](journal/worked-examples/break-the-cas.md) models the break-and-observe loop once with real output.
+4. Study the review findings as diffs in [journal/diffs](journal/diffs/backend-fixes.md), and the design boundaries in the [architecture clinic](journal/ARCHITECTURE-CLINIC.md).
 
 ## Run
 
