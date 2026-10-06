@@ -1,6 +1,8 @@
 # GitJira on-ramp: 9 warm-ups before `training/`
 
-All line numbers refer to committed `main` at `0c1a640`. The working tree differs in 11 files, so read with
+All line numbers refer to commit `0c1a640`. Current `main` differs from it in 12 application/test/script files (the
+sprint/backlog work committed in `4dba9ab`; list them with `git diff --name-only 0c1a640 4dba9ab -- apps packages scripts`),
+so read with
 `git show 0c1a640:<path>` or use a worktree (see `learn/README.md`). For every exercise, **write your prediction before you
 run anything.** Sealed answers are in `learn/_answers/00-onramp.md`. Open them only after you've written yours.
 
@@ -108,7 +110,7 @@ Files: `apps/api/src/controllers/issue.controller.js` (`parseLimit`), `services/
 
 File: `packages/shared/src/mentions.js`. There's no test for it today (`packages/shared/test/` has none). A
 characterization test records what the code **does**, not what it should do. See
-[04 characterization tests](../../opusorganize/apprenticeship/curriculum/04-characterization-tests.md).
+[04 characterization tests](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/04-characterization-tests.md).
 
 1. Predict `extractMentions(text)` for each input. Write the predictions down _before_ running anything:
    - `'Hey @Ana and @ana, please look'`

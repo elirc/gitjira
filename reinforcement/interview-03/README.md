@@ -19,7 +19,7 @@ This is an additive third block. Keep the [original foundations](../README.md) a
 
 Each round has six project scenarios. That makes **48 scenario/round combinations**, not 48 unrelated production incidents. Revisit the same situation from different engineering roles: an algorithm can be correct while its UI ownership, API scope, or verification claim is wrong. Interviewer guidance is kept in a separate folder; close it until after your attempt.
 
-Use the [coding challenge](coding/README.md), [study plan](STUDY-PLAN.md), [project defense](PROJECT-DEFENSE.md), and [scorecard](SCORECARD.md). The three complete mocks are [frontend](mocks/frontend.md), [full stack](mocks/full-stack.md), and [project defense](mocks/project-defense.md). The [all-project interview route](../../../opusorganize/junior-reinforcement/interview-03/README.md) explains how to choose projects without trying to finish everything in one sitting.
+Use the [coding challenge](coding/README.md), [study plan](STUDY-PLAN.md), [project defense](PROJECT-DEFENSE.md), and [scorecard](SCORECARD.md). The three complete mocks are [frontend](mocks/frontend.md), [full stack](mocks/full-stack.md), and [project defense](mocks/project-defense.md). The [all-project interview route](https://github.com/elirc/opusorganize/blob/main/junior-reinforcement/interview-03/README.md) explains how to choose projects without trying to finish everything in one sitting.
 
 ## Six scenarios
 

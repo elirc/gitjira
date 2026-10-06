@@ -1,6 +1,6 @@
 # GitJira architecture, rebuilt from the code
 
-Base: committed `main` @ `0c1a640`. Read files with `git show HEAD:<path>`. The working tree has uncommitted work in `sprint.service.js`, `issue.service.js`, `BacklogPage.jsx`, `hooks.js` and a few tests, so it doesn't match what's below.
+Base: commit `0c1a640`. Read files with `git show 0c1a640:<path>`. Current `main` includes later work (`4dba9ab`, 2026-09-30) in `sprint.service.js`, `issue.service.js`, `BacklogPage.jsx`, `hooks.js` and a few tests, so it doesn't match the line numbers below.
 Every claim has a path and line. If you find a claim that the code contradicts, fix it here. That counts as part of the exercise.
 
 `docs/ARCHITECTURE.md` exists too. It's accurate at the level of the diagram, but it says nothing about the gaps listed under "Surprises" below.

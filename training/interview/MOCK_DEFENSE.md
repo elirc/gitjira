@@ -37,7 +37,7 @@ You are a senior backend engineer interviewing a candidate about **GitJira**, a 
 
 Total **/18**. 0 = buzzword only. 1 = correct idea, vague mechanism. 2 = correct mechanism with a file or step. 3 = mechanism + numbers + trade-off + when it stops being right.
 
-Then give exactly **3 study pointers**, each naming a file in this repo or a page in `C:\Users\Owner\Desktop\opusorganize\apprenticeship\curriculum\` (for example `01-transactional-outbox.md`, `02-idempotency.md`, `03-concurrency-races.md`) and the specific question the candidate couldn't answer.
+Then give exactly **3 study pointers**, each naming a file in this repo or a page in `apprenticeship/curriculum/` of the companion repo elirc/opusorganize (for example `01-transactional-outbox.md`, `02-idempotency.md`, `03-concurrency-races.md`) and the specific question the candidate couldn't answer.
 
 ---
 

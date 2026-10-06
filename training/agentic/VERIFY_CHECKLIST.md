@@ -1,6 +1,6 @@
 # Verifying AI output in GitJira
 
-Use this on any agent-written change here, including your own. Tick each box or write why it doesn't apply. Background: [curriculum 05](../../../opusorganize/apprenticeship/curriculum/05-verify-before-trust.md).
+Use this on any agent-written change here, including your own. Tick each box or write why it doesn't apply. Background: [curriculum 05](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/05-verify-before-trust.md).
 
 ## 1. Run it, and check what "it" was
 

@@ -6,6 +6,11 @@ help and where I will quietly let you down, because that candour is the useful
 part. If you only remember one thing: **your leverage is direction, verification,
 and taste — not typing.**
 
+> **Status note (2026-10-06):** frozen record, committed 2026-07-10 in `0c1a640` right after PR #143 merged. The
+> concrete incidents it cites come from sprints 01–15 and the workflow-hardening round only. The later additions on
+> `main` (`rebuild/`, `astraupskill/`, `learn/`, `training/`, `reinforcement/`) are not covered. Product details and
+> limits described here are as of July 2026 and may have changed since.
+
 ---
 
 ## The mental model

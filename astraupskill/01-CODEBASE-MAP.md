@@ -4,15 +4,26 @@ The backlog page forms sprint assignment requests. Its current issue timestamp a
 
 loadProject finds the project and calls authorize. A nonmember receives the existing concealed-project 404 response. A member whose role lacks the requested action receives the policy's denial. Those checks must precede mutation; destination identifiers supplied by the client do not establish ownership.
 
-The serializable helper surrounds start, completion, and assignment work. It retries Prisma P2034 conflicts at most three attempts, then returns a domain conflict. The sprint state machine still defines valid lifecycle transitions, and the database's partial unique index still enforces one active sprint per project.
+The serializable helper surrounds start, completion, and assignment work. It retries Prisma P2034 conflicts for at most three attempts, then returns a domain conflict. The sprint state machine still defines valid lifecycle transitions, and the database's partial unique index still enforces one active sprint per project.
 
 The sprint test file opts out of the usual transaction rollback proxy. Competing operations need separate real transactions to exercise isolation and constraints. Its setup creates project members, workflow columns, issues, and sprints inside the isolated database. When debugging, follow the request through the controller into this service, then compare the persisted issue and sprint with the response. A status assertion alone can miss stranded work.
 
 The issue-list projection now includes updatedAt, so the backlog actually receives the token it sends. The stale-assignment regression obtains that token from the list endpoint before racing its requests; a service-only test using a creation response would miss this wiring gap.
 
+## The request path, hop by hop
+
+| Hop | File:line | What happens |
+| --- | --- | --- |
+| 1 | `apps/web/src/pages/BacklogPage.jsx` ~131–136 | `onChange` calls `actions.assign.mutate({ number, sprintId, expectedUpdatedAt: issue.updatedAt })` |
+| 2 | `apps/web/src/lib/hooks.js` ~226–229 | the mutation PATCHes `{ sprintId, expectedUpdatedAt }` as JSON |
+| 3 | `apps/api/src/routes/issue.routes.js` 30–34 | `PATCH /:number/sprint` → `validate(assignSprintSchema)` → `sprintCtl.assignIssue` |
+| 4 | `packages/shared/src/issue-schemas.js` 77–80 | `sprintId: z.string().nullish()`, `expectedUpdatedAt: z.string().datetime().optional()` |
+| 5 | `apps/api/src/controllers/sprint.controller.js` 18–26 | converts `:number` with `Number(...)`, passes `req.body` through |
+| 6 | `apps/api/src/services/sprint.service.js` 7–12, 130–165 | `loadProject` (authorize `sprint:manage`), then the conditional `updateMany` inside `serializable` |
+
 ## Source excerpt
 
-From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js).
+From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js), lines 7–28: the two helpers every lifecycle write goes through.
 
 ```js
 async function loadProject(projectKey, actorId, action = 'sprint:read') {
@@ -37,69 +48,27 @@ async function serializable(work) {
     }
   }
 }
-
-export async function listSprints(projectKey, actorId) {
-  const project = await loadProject(projectKey, actorId);
-  return prisma.sprint.findMany({
-    where: { projectId: project.id },
-    orderBy: { createdAt: 'asc' },
-    include: { _count: { select: { issues: true } } },
-  });
-}
-
-export async function createSprint(projectKey, actorId, { name, goal }) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  return prisma.sprint.create({ data: { projectId: project.id, name, goal } });
-}
-
-export async function startSprint(projectKey, actorId, sprintId) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  return serializable(async (tx) => {
-    const sprint = await tx.sprint.findFirst({
-      where: { id: sprintId, projectId: project.id },
-      include: { _count: { select: { issues: true } } },
-    });
-    if (!sprint) throw notFound('Sprint');
-
-    // Per-sprint guards live in the state machine (must be PLANNED, must have issues).
-    const nextState = assertTransition('start', sprint.state, { issueCount: sprint._count.issues });
-
-    // LEARN: the state machine's guards passed, but the "one active sprint per
-    // project" rule is the DB partial unique index — and under concurrency it is
-    // the ONLY thing that can enforce it (two starts can both pass the guard).
-    // So we must catch the DB's "no": a unique violation is Prisma error P2002.
-    // We translate it into a clean 409 instead of leaking a raw 500 (review
-    // finding). Check-then-act is a lie under concurrency; the constraint is
-    // the truth, and catching its rejection is how you honor it.
-    try {
-      return await tx.sprint.update({
-        where: { id: sprint.id },
-        data: { state: nextState, startAt: new Date() },
-      });
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        throw conflict('Another sprint is already active in this project');
-      }
-      throw e;
-    }
-  });
-}
 ```
 
-## Source excerpt
+`startSprint` (lines 44–75), `completeSprint` (77–128) and `assignIssueToSprint` (130–165) all call `serializable`. `listSprints`, `createSprint` and `sprintReport` do not.
 
-From [apps/api/src/services/issue.service.js](../apps/api/src/services/issue.service.js).
+From [apps/api/src/services/issue.service.js](../apps/api/src/services/issue.service.js), lines 133–137, inside the `listIssues` projection:
 
 ```js
-// Backlog assignment sends this version for the atomic stale-write check.
+      sprintId: true,
+      // Backlog assignment sends this version for the atomic stale-write check.
       updatedAt: true,
       storyPoints: true,
-      assignee: { select: { id: true, name: true, avatarUrl: true } },
-    },
-  });
-
-  const hasMore = rows.length > limit;
 ```
+
+## Map exercises (read-only)
+
+1. **Goal:** list every service function that runs inside the serializable boundary.
+   **Check:** `git grep -n "return serializable(" -- apps/api/src/services/sprint.service.js` prints three lines (46, 81, 137), one each for `startSprint`, `completeSprint` and `assignIssueToSprint`.
+2. **Goal:** find where the sprint suite opts out of rollback isolation, and the code that honors the opt-out.
+   **Check:** `apps/api/test/sprint.test.js:8` sets `globalThis.__NO_ROLLBACK__ = true`. `apps/api/test/setup.js:39` reads it (`usesRollback`), and the comment at lines 34–38 explains why: rollback isolation cannot test the transaction behavior it depends on.
+3. **Goal:** prove the wiring gap the list-projection change closed.
+   **Check:** `diff astraupskill/snapshots/apps__api__src__services__issue.service.js.original.txt apps/api/src/services/issue.service.js` shows `updatedAt: true` (with its comment) added to the list `select`. Without that line, `issue.updatedAt` in `BacklogPage.jsx` would be `undefined`, and `JSON.stringify` drops undefined fields. The service's `expectedUpdatedAt ? … : {}` spread (sprint.service.js:156) would then skip the stale check on every request, and no error would show it. The old backlog (`git show 0c1a640:apps/web/src/pages/BacklogPage.jsx`, line 126) sent no token at all.
 
 ## Course navigation
 

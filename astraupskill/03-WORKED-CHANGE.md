@@ -10,7 +10,7 @@ Read the excerpt and mark every database statement. Identify which predicates sc
 
 ## Source excerpt
 
-From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js).
+From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js), lines 77–128.
 
 ```js
 export async function completeSprint(projectKey, actorId, sprintId, { moveUnfinishedTo }) {
@@ -65,25 +65,16 @@ export async function completeSprint(projectKey, actorId, sprintId, { moveUnfini
     return { sprint: persisted, movedCount: moved.count };
   });
 }
-
-export async function assignIssueToSprint(
-  projectKey,
-  actorId,
-  number,
-  { sprintId = null, expectedUpdatedAt }
-) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  return serializable(async (tx) => {
-    const issue = await tx.issue.findUnique({
-      where: { projectId_number: { projectId: project.id, number } },
-    });
-    if (!issue) throw notFound('Issue');
-    // sprintId null = move to backlog. Validate the sprint belongs to the project.
-    if (sprintId) {
-      const sprint = await tx.sprint.findFirst({
-        where: { id: sprintId, projectId: project.id },
-      });
 ```
+
+## Worked-change exercises (read-only)
+
+1. **Goal:** classify every predicate in the excerpt.
+   **Check:** project scope is `projectId: project.id` on lines 82, 92, 104 and 115. Lifecycle is `assertTransition` (85), `target.state !== 'PLANNED'` (96) and `state: 'ACTIVE'` (115). Unfinished work is `columnId: { notIn: doneColumnIds }` (121). The bulk move (line 121) has no project filter of its own. Explain why `sprintId: sprint.id` already scopes it.
+2. **Goal:** show that every rejection happens before the first write.
+   **Check:** every `throw` before line 114 (lines 83, 85, 89, 95, 97) runs before `tx.sprint.updateMany`. The regression `rejects cross-project completion destinations without changing source state` (`apps/api/test/sprint.test.js` lines 181–217) proves it from the outside: after the 404, the source sprint is still `ACTIVE` and the issue is still assigned to it.
+3. **Goal:** list what the pre-change version got wrong.
+   **Check:** run `diff astraupskill/snapshots/apps__api__src__services__sprint.service.js.original.txt apps/api/src/services/sprint.service.js` and read the old `completeSprint`. You should find four gaps. (a) The sprint state and unfinished count were read *outside* the transaction. (b) `sprint.update` had no `state: 'ACTIVE'` guard, so two completions could both succeed. (c) `moveUnfinishedTo` was never checked, so a foreign or completed sprint id was accepted. (d) `movedCount` came from a `count()` taken before the move, not from the move's own result.
 
 ## Course navigation
 

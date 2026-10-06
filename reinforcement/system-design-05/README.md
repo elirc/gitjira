@@ -16,7 +16,7 @@ This track adds a focused system-design route to the [existing reinforcement pac
 | 6      | [Timed interview](06-interview-lab.md)                | A coherent forty-five-minute design            |
 | Review | [Separate reference notes](_answers/REFERENCE.md)     | Compare guarantees, not diagram size           |
 
-The [shared design guide](../../../opusorganize/junior-reinforcement/system-design-05/DESIGN-METHOD.md) covers requirements, consistency, ownership, caches, queues, storage, recovery, and communication. The [all-project route](../../../opusorganize/junior-reinforcement/system-design-05/README.md) gives the progression across all ten cases.
+The [shared design guide](https://github.com/elirc/opusorganize/blob/main/junior-reinforcement/system-design-05/DESIGN-METHOD.md) covers requirements, consistency, ownership, caches, queues, storage, recovery, and communication. The [all-project route](https://github.com/elirc/opusorganize/blob/main/junior-reinforcement/system-design-05/README.md) gives the progression across all ten cases.
 
 ## What the inspected source establishes
 

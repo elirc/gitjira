@@ -26,7 +26,7 @@ The estimate is 9–12 additional hours per project, excluding dependency setup 
 - [packages/shared/src/issue-schemas.js](../../packages/shared/src/issue-schemas.js)
 - [learn/00-onramp.md](../../learn/00-onramp.md)
 
-Use current symbols, not old line numbers. Record the commit and any relevant uncommitted source before application work. A new worktree from HEAD does not contain those uncommitted changes. The [shared expansion route](../../../opusorganize/junior-reinforcement/expansion-02/README.md) connects all ten projects.
+Use current symbols, not old line numbers. Record the commit and any relevant uncommitted source before application work. A new worktree from HEAD does not contain those uncommitted changes. The [shared expansion route](https://github.com/elirc/opusorganize/blob/main/junior-reinforcement/expansion-02/README.md) connects all ten projects.
 
 ## Two separate levels of proof
 

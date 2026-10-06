@@ -1,13 +1,13 @@
 # Agentic exercise: ship ladder M3 (Redis as a soft dependency) with an implementer and an adversarial reviewer
 
 **Ticket:** [`ladder/M3-redis-soft-dependency.md`](../ladder/M3-redis-soft-dependency.md). Do the ticket's "Explain before touching" questions first. This exercise is about _how_ you ship it with agents, not a replacement for thinking.
-**Time:** about 4 h. **Base:** a worktree off `main` (never the main working tree; it has uncommitted user work).
+**Time:** about 4 h. **Base:** a worktree off `0c1a640`, the commit every `training/` line number refers to.
 
 ```bash
-git -C C:\Users\Owner\Desktop\gitjira-app worktree add ..\gitjira-m3 -b training/m3-redis-soft HEAD
+git worktree add ../gitjira-m3 -b training/m3-redis-soft 0c1a640   # run from the root of your clone
 ```
 
-Background you should not re-derive here: [curriculum 01 (outbox)](../../../opusorganize/apprenticeship/curriculum/01-transactional-outbox.md), [02 (idempotency)](../../../opusorganize/apprenticeship/curriculum/02-idempotency.md), [05 (verify before trust)](../../../opusorganize/apprenticeship/curriculum/05-verify-before-trust.md). (Absolute path: `C:\Users\Owner\Desktop\opusorganize\apprenticeship\curriculum\`.)
+Background you should not re-derive here: [curriculum 01 (outbox)](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/01-transactional-outbox.md), [02 (idempotency)](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/02-idempotency.md), [05 (verify before trust)](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/05-verify-before-trust.md). (Private companion repo elirc/opusorganize.)
 
 ## Step 1: you write the spec and the design note (45 min, no agent)
 

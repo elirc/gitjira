@@ -11,7 +11,7 @@ Suggested path (expanded in the [learning path](journal/LEARNING-PATH.md)):
 
 ## Run
 
-Requires Node **22.16 or newer** with `node:sqlite`. Tested on this laptop with Node 22.16.0. That version prints an experimental SQLite warning; it is expected.
+Requires Node **22.16 or newer** with `node:sqlite`. Tested on the build machine with Node 22.16.0. That version prints an experimental SQLite warning; it is expected.
 
 ```powershell
 cd C:\Users\Owner\Desktop\astrafinalorganize\gitjira-rebuild
@@ -48,7 +48,7 @@ npm test
 npm run test:browser
 ```
 
-Browser tests use Playwright Chromium. A compatible browser is already available on this laptop. On a fresh machine, run `npx playwright install chromium` first. `PLAYWRIGHT_CHROMIUM_EXECUTABLE` can select an existing compatible executable. Tests create isolated temporary databases, not your `data` database. See [verification](journal/VERIFICATION.md) for the exact checks and limits.
+Browser tests use Playwright Chromium. The build machine already had a compatible browser. On a fresh machine, run `npx playwright install chromium` first. `PLAYWRIGHT_CHROMIUM_EXECUTABLE` can select an existing compatible executable. Tests create isolated temporary databases, not your `data` database. See [verification](journal/VERIFICATION.md) for the exact checks and limits.
 
 Test runs regenerate `test-results/`; that folder is disposable output. The copies under `journal/evidence/` are the preserved record of the original build and are not overwritten. `.github/workflows/ci.yml` runs these same checks on GitHub when this folder is pushed as its own repository (see exercise 3.5).
 

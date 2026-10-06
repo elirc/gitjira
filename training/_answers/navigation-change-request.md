@@ -45,7 +45,7 @@ On `connection`, the server joins `user:<socket.data.user.id>` (`socket-server.j
 - `apps/web/src/lib/useNotificationStream.js` (new): subscribe to both events and invalidate. Mount it once in `TopNav` or `NotificationBell`.
 - `apps/web/src/lib/hooks.js`: raise `refetchInterval` to 60-120 s but keep it as a fallback.
 
-Don't touch the WIP files (`sprint.service.js`, `BacklogPage.jsx`, and `hooks.js` beyond the one `refetchInterval` line). Coordinate that line with the owner, since `hooks.js` has uncommitted edits.
+Don't touch the WIP files (`sprint.service.js`, `BacklogPage.jsx`, and `hooks.js` beyond the one `refetchInterval` line). Coordinate that line with the owner, since `hooks.js` also changed on `main` in `4dba9ab`.
 
 ## 7. Data
 

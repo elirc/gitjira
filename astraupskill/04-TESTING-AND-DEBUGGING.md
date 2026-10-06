@@ -6,11 +6,11 @@ The completion race sends two completion requests and requires a single winner w
 
 The nonmember test expects the service's intentional 404 and reads the issue afterward to prove the denied request changed neither sprint nor version. This is stronger than accepting any error status. Separate socket tests now await presence or join-error events instead of guessing that a short sleep was enough; clients close after each test even when an assertion fails.
 
-The local helper creates and removes its own PostgreSQL cluster and streams command output into the recorded log. Resource-sensitive timeouts are supplied on the command line for this machine. Failed commands remain visible in campaign evidence. Inspect their actual assertions before deciding whether a failure concerns application behavior, test synchronization, or environment capacity.
+The local helper creates and removes its own PostgreSQL cluster and streams command output into the recorded log. Resource-sensitive timeouts were supplied on the command line for the recording machine (see the `command` arrays in `evidence/*.json`). Failed attempts were kept in the original campaign records, which are not in this repository; only the accepted runs are in `evidence/`. Inspect their actual assertions before deciding whether a failure concerns application behavior, test synchronization, or environment capacity.
 
 ## Source excerpt
 
-From [apps/api/test/sprint.test.js](../apps/api/test/sprint.test.js).
+From [apps/api/test/sprint.test.js](../apps/api/test/sprint.test.js), lines 114–153: the shared-token race and the nonmember denial.
 
 ```js
   it('allows exactly one assignment with a shared stale-write token', async () => {
@@ -53,37 +53,30 @@ From [apps/api/test/sprint.test.js](../apps/api/test/sprint.test.js).
     expect(stored.sprintId).toBeNull();
     expect(stored.updatedAt.toISOString()).toBe(i1.updatedAt);
   });
-
-  it('rejects assignment to a completed sprint', async () => {
-    const { ana, i1, i2 } = await setup();
-    const sprint = (await createSprint(ana)).body.sprint;
-    await request(app)
-      .patch(`/api/projects/GJ/issues/${i2.number}/sprint`)
-      .set('Authorization', ana.auth)
-      .send({ sprintId: sprint.id, expectedUpdatedAt: i2.updatedAt })
-      .expect(200);
-    await request(app)
-      .post(`/api/projects/GJ/sprints/${sprint.id}/start`)
-      .set('Authorization', ana.auth)
-      .expect(200);
-    await request(app)
-      .post(`/api/projects/GJ/sprints/${sprint.id}/complete`)
-      .set('Authorization', ana.auth)
-      .send({ moveUnfinishedTo: 'backlog' })
-      .expect(200);
-
-    const rejected = await request(app)
-      .patch(`/api/projects/GJ/issues/${i1.number}/sprint`)
-      .set('Authorization', ana.auth)
-      .send({ sprintId: sprint.id, expectedUpdatedAt: i1.updatedAt });
-
-    expect(rejected.status).toBe(409);
-  });
-
-  it('rejects cross-project completion destinations without changing source state', async () => {
-    const { ana, i1 } = await setup();
-    const source = (await createSprint(ana, { name: 'Source' })).body.sprint;
 ```
+
+## Which test proves which sentence
+
+| Claim in this chapter | Test in `apps/api/test/sprint.test.js` | Lines |
+| --- | --- | --- |
+| strict advancement with a future clock | `strictly advances the assignment token when the wall clock has not advanced` | 96–112 |
+| shared stale token → one 200, one 409 | `allows exactly one assignment with a shared stale-write token` | 114–136 |
+| nonmember → 404, no mutation | `denies a nonmember sprint assignment` | 138–153 |
+| no assignment into a completed sprint | `rejects assignment to a completed sprint` | 155–179 |
+| cross-project destination leaves source untouched | `rejects cross-project completion destinations without changing source state` | 181–217 |
+| one winner among concurrent completions | `allows only one concurrent completion to move unfinished issues` | 219–242 |
+| assignment racing completion never strands | `never strands a concurrent assignment in a sprint being completed` | 244–275 |
+
+The browser side has one component test, `apps/web/test/backlog-stale-assignment.test.jsx`. It answers the PATCH with a mocked 409 and asserts two things: the alert text (lines 67–69) and the exact request body `{ sprintId, expectedUpdatedAt }` (line 70).
+
+## Debugging exercises (read-only)
+
+1. **Goal:** reconcile the course's test count with the evidence.
+   **Check:** `grep -c "^  it(" apps/api/test/sprint.test.js apps/api/test/issue.test.js` prints 13 and 4. That makes 17, the same as the `Tests  17 passed` line in `astraupskill/evidence/astra-gitjira-list-sprint-tests-r6.log`.
+2. **Goal:** explain why the nonmember test reads through `__realClient` and not through the API.
+   **Check:** line 150 queries `__realClient.issue.findUnique` directly. The outsider's API reads would return 404 just like the write did. Reading the row directly is the only way to show that neither `sprintId` nor `updatedAt` changed (lines 151–152).
+3. **Goal:** find the deliberately long waits in the web test and say what they protect against.
+   **Check:** `{ timeout: 30000 }` at lines 64 and 67. [VERIFICATION](VERIFICATION.md) explains them: Testing Library's one-second default flaked on a slow host. The assertions themselves were not weakened.
 
 ## Course navigation
 

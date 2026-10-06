@@ -8,82 +8,26 @@ This course follows the service and its real PostgreSQL regressions. Read the ma
 
 Tests run in a helper-owned temporary PostgreSQL cluster. The verification chapter records accepted commands and distinguishes them from failed attempts. No deployed service, external queue, or browser interaction is certified by the API checks. Existing project documentation remains useful background; these chapters focus on the specific state transitions changed in this improvement.
 
-## Source excerpt
+## Where the change lives
 
-From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js).
+The whole improvement is one commit on `main`, `4dba9ab` (2026-09-30), on top of `0c1a640`. Run `git diff --stat 0c1a640 4dba9ab -- apps packages scripts` to list the 12 files it touched. The ones this course reads:
 
-```js
-async function serializable(work) {
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      return await prisma.$transaction(work, {
-        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-      });
-    } catch (error) {
-      const retryable =
-        error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034';
-      if (retryable && attempt < 2) continue;
-      if (retryable) throw conflict('Sprint changed during this request; refresh and try again');
-      throw error;
-    }
-  }
-}
+| File | What changed | Read in |
+| --- | --- | --- |
+| `apps/api/src/services/sprint.service.js` | `serializable()` retry helper (lines 14–28); `completeSprint` (77–128); `assignIssueToSprint` (130–165) | 01, 02, 03, 06 |
+| `apps/api/src/services/issue.service.js` | issue-list projection now selects `updatedAt` (lines 135–136) | 01 |
+| `packages/shared/src/issue-schemas.js` | `assignSprintSchema` accepts `expectedUpdatedAt` (lines 77–80) | 01 |
+| `apps/web/src/pages/BacklogPage.jsx` | the backlog `<select>` sends `expectedUpdatedAt: issue.updatedAt` (around line 135) | 01 |
+| `apps/api/test/sprint.test.js` | seven new regressions (lines 96–275) ahead of the two older race tests in the `sprint concurrency + atomicity` block | 04, 05, 07 |
+| `apps/web/test/backlog-stale-assignment.test.jsx` | component test: the stale 409 reaches the user as an alert | 04 |
+| `scripts/test-local.py` | throwaway PostgreSQL cluster for the API suite | VERIFICATION |
 
-export async function listSprints(projectKey, actorId) {
-  const project = await loadProject(projectKey, actorId);
-  return prisma.sprint.findMany({
-    where: { projectId: project.id },
-    orderBy: { createdAt: 'asc' },
-    include: { _count: { select: { issues: true } } },
-  });
-}
+`astraupskill/snapshots/` keeps pre-change copies of the ten changed source and test files (plus the old `README.md`), so you can diff before against after without checking out `0c1a640`.
 
-export async function createSprint(projectKey, actorId, { name, goal }) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  return prisma.sprint.create({ data: { projectId: project.id, name, goal } });
-}
+## Check your setup (no install needed)
 
-export async function startSprint(projectKey, actorId, sprintId) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  return serializable(async (tx) => {
-    const sprint = await tx.sprint.findFirst({
-      where: { id: sprintId, projectId: project.id },
-      include: { _count: { select: { issues: true } } },
-    });
-    if (!sprint) throw notFound('Sprint');
-
-    // Per-sprint guards live in the state machine (must be PLANNED, must have issues).
-    const nextState = assertTransition('start', sprint.state, { issueCount: sprint._count.issues });
-
-    // LEARN: the state machine's guards passed, but the "one active sprint per
-    // project" rule is the DB partial unique index — and under concurrency it is
-    // the ONLY thing that can enforce it (two starts can both pass the guard).
-    // So we must catch the DB's "no": a unique violation is Prisma error P2002.
-    // We translate it into a clean 409 instead of leaking a raw 500 (review
-    // finding). Check-then-act is a lie under concurrency; the constraint is
-    // the truth, and catching its rejection is how you honor it.
-    try {
-      return await tx.sprint.update({
-        where: { id: sprint.id },
-        data: { state: nextState, startAt: new Date() },
-      });
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        throw conflict('Another sprint is already active in this project');
-      }
-      throw e;
-    }
-  });
-}
-
-export async function completeSprint(projectKey, actorId, sprintId, { moveUnfinishedTo }) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  const destination = moveUnfinishedTo === 'backlog' ? null : (moveUnfinishedTo ?? null);
-
-  return serializable(async (tx) => {
-    const sprint = await tx.sprint.findFirst({ where: { id: sprintId, projectId: project.id } });
-    if (!sprint) throw notFound('Sprint');
-```
+- **Goal:** confirm you are reading the code this course describes.
+  **Check:** `git grep -n "async function serializable" -- apps/api/src/services/sprint.service.js` prints line 14. If it prints nothing, you are on a commit older than `4dba9ab`.
 
 ## Course navigation
 

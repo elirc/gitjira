@@ -115,6 +115,23 @@
 
 - Room joins require membership (was: any authed user); useLiveProject cleans up its listeners
 
+## 0.3.0 — Sprint 07 (PR #66)
+
+_Entry reconstructed on 2026-10-06 from PR #66's commits and the v0.3.0 release notes; the sprint itself never added one._
+
+### Added
+
+- Sprint model with one-active-per-project enforced by a partial unique index; the backlog is the absence of a `sprintId` (no Backlog table)
+- Sprint lifecycle as an explicit state machine (`apps/api/src/domain/sprint-state-machine.js`): transitions as data, guards as pure functions
+- Sprint CRUD, start/complete endpoints, and a committed-vs-completed points report; backlog page with planning and lifecycle controls
+- ADRs 0014 (sprint state machine) and 0015 (partial unique index for the active sprint), `docs/concepts/state-machines.md`, sprint-07 brief
+
+### Fixed
+
+- Concurrent sprint starts: the unique violation (Prisma `P2002`) now maps to a 409 instead of leaking a 500
+- Sprint completion and the roll-over of unfinished issues run in one transaction (no completed sprint with stranded issues)
+- The sprints migration was renamed so it sorts after the init migration
+
 ## 0.2.0 — Sprint 06 (PR #57)
 
 ### Added

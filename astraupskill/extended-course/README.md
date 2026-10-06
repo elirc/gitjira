@@ -55,4 +55,4 @@ Continue from the [original starter course](../README.md). Read the source-linke
 - [Review notes: actual-source lab and final review](answers/13-final-workshop.md)
 - [Review notes: dependencies, repair and evidence](answers/14-dependencies-repair-and-evidence.md)
 
-The Python lab in `labs` uses synthetic state and no network or application database. Its guide describes the model limitations. Current execution and preservation evidence is recorded in the workspace nine-project expansion report.
+The Python lab in `labs` uses synthetic state and no network or application database. Its guide describes the model limitations. The execution evidence for this extended route was recorded outside this repository and is not included here. Both labs were re-run from this directory on 2026-10-06 with no install. `python labs/sprint_model.py` printed `7 sprint-model properties passed`. `node labs/fractional_contract.mjs`, which imports the real `packages/shared/src/fractional-index.js`, printed `"checks":6004,"inserted":2000`. Treat a matching line as your **Check** for lessons 7 and 27.

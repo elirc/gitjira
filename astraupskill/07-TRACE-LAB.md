@@ -12,7 +12,7 @@ Use the actual test requests below to annotate your timeline. Avoid inserting ar
 
 ## Source excerpt
 
-From [apps/api/test/sprint.test.js](../apps/api/test/sprint.test.js).
+From [apps/api/test/sprint.test.js](../apps/api/test/sprint.test.js), lines 244–302: the two race tests to annotate.
 
 ```js
   it('never strands a concurrent assignment in a sprint being completed', async () => {
@@ -74,18 +74,14 @@ From [apps/api/test/sprint.test.js](../apps/api/test/sprint.test.js).
     const statuses = [r1.status, r2.status].sort();
     expect(statuses, JSON.stringify([r1.body, r2.body])).toEqual([200, 409]);
   });
-
-  it('completing a sprint moves unfinished issues atomically (none stranded)', async () => {
-    const ana = await makeUser('spa@t.dev');
-    await makeProject(ana.auth, 'GJ');
-    const mk = (body) =>
-      request(app).post('/api/projects/GJ/issues').set('Authorization', ana.auth).send(body);
-    const i1 = (await mk({ title: 'x' })).body.issue;
-    const sprint = (await createSprint({ auth: ana.auth }, { name: 'S1' })).body.sprint;
-    await request(app)
-      .patch(`/api/projects/GJ/issues/${i1.number}/sprint`)
-      .set('Authorization', ana.auth)
 ```
+
+## Check your timeline
+
+- **Goal:** make sure your two-column timeline matches what the test actually asserts.
+  **Check:** in `never strands…` completion must return 200 (line 268), the assignment may return 200 or 409 (line 269), and the final `sprintId` must be `null` (line 274). If your timeline ever ends with issue 2 still on the completed sprint, find the service line that prevents it: the `COMPLETED` check at `sprint.service.js:148`, or the serialization conflict surfaced by `serializable()`.
+- **Goal:** explain why `concurrent starts…` expects 409 and not a serialization retry.
+  **Check:** the two starts update *different* sprint rows (`s1`, `s2`), so the partial unique index is what rejects the second one. That raises `P2002`, which `startSprint` maps to 409 at lines 68–71. Your timeline should show the constraint as the deciding step. If Postgres reports a serialization failure (`P2034`) first, `serializable()` retries, and the retry either hits the same constraint or runs out of attempts. Both paths end in a 409.
 
 ## Course navigation
 

@@ -4,8 +4,9 @@ This folder is the on-ramp to `training/`. `training/` was written for someone w
 fluently. `learn/` gets you there first. Then it walks you through `training/` in an order that builds skill, and it shows
 which parts you do yourself and which parts you hand to a coding agent and then check.
 
-Central concept pages live in `C:\Users\Owner\Desktop\opusorganize\apprenticeship\curriculum\`. The links below are
-relative to this folder (`../../opusorganize/apprenticeship/curriculum/`).
+Central concept pages live in the private companion repo
+[elirc/opusorganize](https://github.com/elirc/opusorganize/tree/main/apprenticeship/curriculum), under
+`apprenticeship/curriculum/`. The links below point there.
 
 ## What this app is, and why it's in the portfolio
 
@@ -16,8 +17,9 @@ GitJira is a Jira clone. It's an npm-workspaces monorepo with four parts:
 - a React + TanStack Query SPA (`apps/web/src/`);
 - shared Zod, JQL and policy code (`packages/shared/src/`).
 
-It has 209 commits, 31 ADRs (`docs/adr/`) and a real CI and deploy pipeline (`.github/workflows/ci.yml`, `deploy.yml`,
-`fly.toml`). It's one of the portfolio's **two flagships**. `opusorganize/portfolio-audit/PRIORITY_ROADMAP.md` (Wave 1) says to
+At the base commit `0c1a640` it has 209 commits (223 on `main` as of 2026-10-06), 31 ADRs (`docs/adr/`) and a real CI
+and deploy pipeline (`.github/workflows/ci.yml`, `deploy.yml`, `fly.toml`). It's one of the portfolio's **two flagships**.
+`portfolio-audit/PRIORITY_ROADMAP.md` in elirc/opusorganize (Wave 1) says to
 take it to production on AWS and keep it alive there. That makes it your "I shipped and operated a real TypeScript app" story.
 
 ## Prerequisites (do these first, or in parallel with sessions 1 and 2)
@@ -25,24 +27,26 @@ take it to production on AWS and keep it alive there. That makes it your "I ship
 | #   | Fundamental                                                                          | Where to learn it                                                                                                                                                                 | How you know you have it                                                                   |
 | --- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | P1  | How an Express request flows: router, middleware, controller, service, error handler | Read `apps/api/src/app.js`, `routes/index.js`, `middleware/validate.js`, `middleware/async-handler.js`, `middleware/error-handler.js` (every file has `LEARN:` comments)          | You can do onramp exercise 2 without notes                                                 |
-| P2  | SQL basics: joins, indexes, what a query plan is                                     | [10 query plans and indexes](../../opusorganize/apprenticeship/curriculum/10-query-plans-and-indexes.md) + `apps/api/prisma/migrations/20260710000000_perf_indexes/migration.sql` | You can say which index `listIssues` uses (onramp 5)                                       |
-| P3  | React effects and cleanup, TanStack Query invalidation                               | [12 frontend performance](../../opusorganize/apprenticeship/curriculum/12-frontend-performance.md) + `apps/web/src/lib/useLiveProject.js`, `useDebounced.js`                      | Onramp 8                                                                                   |
-| P4  | Schema changes that don't break the running version                                  | [07 zero-downtime migrations](../../opusorganize/apprenticeship/curriculum/07-zero-downtime-migrations.md) + ADR `docs/adr/0031-*`                                                | You can explain why `fly.toml`'s `release_command` runs before the new code serves traffic |
-| P5  | Metrics you can trust: counters, histograms, label cardinality, SLOs                 | [09 telemetry correctness](../../opusorganize/apprenticeship/curriculum/09-telemetry-correctness.md) + `apps/api/src/lib/metrics.js`                                              | You can explain why the file uses a route _pattern_ and not the raw URL                    |
-| P6  | Checking code you didn't write, whether an agent or a person wrote it                | [05 verify before trust](../../opusorganize/apprenticeship/curriculum/05-verify-before-trust.md)                                                                                  | You've read `training/agentic/VERIFY_CHECKLIST.md` once end to end                         |
+| P2  | SQL basics: joins, indexes, what a query plan is                                     | [10 query plans and indexes](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/10-query-plans-and-indexes.md) + `apps/api/prisma/migrations/20260710000000_perf_indexes/migration.sql` | You can say which index `listIssues` uses (onramp 5)                                       |
+| P3  | React effects and cleanup, TanStack Query invalidation                               | [12 frontend performance](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/12-frontend-performance.md) + `apps/web/src/lib/useLiveProject.js`, `useDebounced.js`                      | Onramp 8                                                                                   |
+| P4  | Schema changes that don't break the running version                                  | [07 zero-downtime migrations](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/07-zero-downtime-migrations.md) + ADR `docs/adr/0031-*`                                                | You can explain why `fly.toml`'s `release_command` runs before the new code serves traffic |
+| P5  | Metrics you can trust: counters, histograms, label cardinality, SLOs                 | [09 telemetry correctness](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/09-telemetry-correctness.md) + `apps/api/src/lib/metrics.js`                                              | You can explain why the file uses a route _pattern_ and not the raw URL                    |
+| P6  | Checking code you didn't write, whether an agent or a person wrote it                | [05 verify before trust](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/05-verify-before-trust.md)                                                                                  | You've read `training/agentic/VERIFY_CHECKLIST.md` once end to end                         |
 
-Background you'll need later (link, don't study up front): [08 realtime fan-out](../../opusorganize/apprenticeship/curriculum/08-realtime-fanout.md),
-[13 release safety](../../opusorganize/apprenticeship/curriculum/13-release-safety.md),
-[14 load and back-pressure](../../opusorganize/apprenticeship/curriculum/14-load-backpressure-timeouts.md),
-[06 caching](../../opusorganize/apprenticeship/curriculum/06-caching-correctness.md) (for M3).
+Background you'll need later (link, don't study up front): [08 realtime fan-out](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/08-realtime-fanout.md),
+[13 release safety](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/13-release-safety.md),
+[14 load and back-pressure](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/14-load-backpressure-timeouts.md),
+[06 caching](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/06-caching-correctness.md) (for M3).
 
 ## Ground rules for every session
 
-- **Never work in the main working tree.** It holds the owner's uncommitted sprint work (`sprint.service.js`,
-  `issue.service.js`, `hooks.js`, `BacklogPage.jsx`, `astraupskill/`). Use a worktree off `0c1a640`:
-  `git -C C:\Users\Owner\Desktop\gitjira-app worktree add ..\gj-learn -b learn/scratch 0c1a640`.
-- `node_modules` was removed on 2026-09-24 to free disk space. Run `npm ci` once at the root of your worktree before
-  anything that runs. The API tests need Postgres (`docker compose up -d`). Web and shared tests need nothing (on this laptop:
+- **Work in a worktree off `0c1a640`, not on `main`.** Every line number in `learn/` and `training/` refers to
+  `0c1a640`. The sprint/backlog work that was still uncommitted when these notes were written (`sprint.service.js`,
+  `issue.service.js`, `hooks.js`, `BacklogPage.jsx`, `astraupskill/`) landed on `main` in `4dba9ab` (2026-09-30), so
+  `main` no longer matches those line numbers. From the root of your clone:
+  `git worktree add ../gj-learn -b learn/scratch 0c1a640`.
+- Run `npm ci` once at the root of your worktree before anything that runs. The API tests need Postgres
+  (`docker compose up -d`). Web and shared tests need nothing (on a slow machine:
   `npm test -w @gitjira/web -- --pool=threads --maxWorkers=1`).
 - Spoilers: don't open `training/_answers/`, `learn/_answers/`, `docs/process/AUDIT-2026-07.md` or `docs/RETRO.md` before
   the matching exercise.
@@ -133,7 +137,7 @@ and what you give to an agent and then verify.
 ### Session 9: incident 003, then S2 expand/contract design (90 min)
 
 - **Files:** `training/incidents/003-deploy-story-points.md`, `training/ladder/S2-labels-expand-contract.md`, and
-  [07](../../opusorganize/apprenticeship/curriculum/07-zero-downtime-migrations.md).
+  [07](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/07-zero-downtime-migrations.md).
 - **Do by hand:** everything. The migration reasoning _is_ the skill. Read the branch's `migration.sql`, not only
   `schema.prisma`.
 - **Exit:** you can list the expand/contract steps for `storyPoints → estimate` as separate deploys, and say which old
@@ -150,7 +154,7 @@ and what you give to an agent and then verify.
 ### Session 11: incidents 001 and 005 (frontend and realtime) (90 min)
 
 - **Files:** `training/incidents/001-board-cpu-storm.md`, `005-live-board-goes-stale.md`, and
-  [08](../../opusorganize/apprenticeship/curriculum/08-realtime-fanout.md).
+  [08](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/08-realtime-fanout.md).
 - **Do by hand:** the render-count reasoning for 001, and the reconnect timeline for 005.
 - **Delegate:** a render-count test harness for 001 (you specify: fake socket, count `join-project` emits).
 - **Exit:** a test that counts `join-project` emits fails on the 001 branch and passes on your fix.

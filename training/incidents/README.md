@@ -12,7 +12,14 @@ Five incidents, each a realistic bug committed on its own branch on top of commi
 
 ## How to work an incident
 
-Never check out an incident branch in your main working tree (it has uncommitted work). Use a worktree:
+> **Status note (2026-10-06):** the five `training/incidents/*` branches were never pushed to GitHub
+> (`git ls-remote origin` lists no `training/` refs), so a fresh clone does not have them and the
+> `git show`/`git worktree add <branch>` commands below fail there. Recreate each branch yourself: make a worktree
+> off `0c1a640` (`git worktree add -b training/incidents/001-board-cpu-storm ../gj-inc-001 0c1a640`), hand-apply the
+> "suspect PR" diff shown in the brief (it shows the core of the change, with `...` for unchanged context), and commit
+> it as the suspect PR. The PR numbers in the briefs are part of the scenario, not real GitHub PRs.
+
+Never check out an incident branch in your main checkout. Use a worktree:
 
 ```bash
 git worktree add ../gj-inc-001 training/incidents/001-board-cpu-storm

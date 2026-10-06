@@ -2,6 +2,13 @@
 
 **Branch:** `chore/workflow-hardening` · **Date:** 2026-07-10
 
+> **Status note (2026-10-06):** this is a frozen record. The branch merged to `main` as PR #143 (merge
+> commit `7ac8b6b`). Every repo path in §1 still exists on `main`, and nothing under `evidence/` or `docs/process/`
+> has changed since. "`Desktop/gitjira`, the planning repo" means the author's local planning folder, which is not
+> part of this repository. The in-repo copy of the playbook is `docs/process/WORKFLOW-IMPROVEMENTS.md`, also published in
+> elirc/gitjira-answer-key. The §4 items were still undone as of this note. Later work on `main` (`rebuild/`,
+> `astraupskill/`, `learn/`, `training/`, `reinforcement/`) came after this round, so this file does not cover it.
+
 This round _implements_ the `WORKFLOW-IMPROVEMENTS.md` playbook by **using it** on
 real work: every commit went through the git hooks (no `--no-verify`), every
 "done" claim was executed with committed evidence, and the previously-missing

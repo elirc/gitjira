@@ -1,6 +1,6 @@
 # Ladder: GitJira at production pressure
 
-All tickets target committed `main` (`0c1a640`). Do each one on its own branch in a worktree (`git worktree add ../gj-J1 -b ladder/J1 0c1a640`). The owner's uncommitted work touches `sprint.service.js`, `issue.service.js`, `hooks.js` and `BacklogPage.jsx`, so rebase carefully if you ever bring a ladder change back to `main`.
+All tickets target commit `0c1a640`. Do each one on its own branch in a worktree (`git worktree add ../gj-J1 -b ladder/J1 0c1a640`). `main` has moved since: `4dba9ab` (2026-09-30) changed `sprint.service.js`, `issue.service.js`, `hooks.js` and `BacklogPage.jsx`, so rebase carefully if you ever bring a ladder change forward to `main`.
 
 This lab deliberately skips what the archive already trains well: authz, idempotency keys, the outbox, check-then-act races. When a ticket needs one of those, it links the central page in `apprenticeship/curriculum/` instead. The ladder leans into what's thin: **deployment, zero-downtime migrations, observability and SLOs, React rendering, BullMQ failure modes, and Socket.IO at more than one instance.**
 

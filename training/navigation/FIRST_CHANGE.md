@@ -38,10 +38,10 @@ When your change touches those, write a test with `globalThis.__NO_ROLLBACK__ = 
 - Before merging, run `prisma migrate diff --from-migrations ... --to-schema-datamodel ...` and read the SQL Prisma generated.
 - Only the API deploys (`.github/workflows/deploy.yml`). A change the worker needs won't reach production by that path.
 
-**6. The working tree isn't `main`.**
+**6. `main` has moved past the base commit.**
 
-- The owner has uncommitted work in progress in `apps/api/src/services/sprint.service.js`, `issue.service.js`, `apps/web/src/pages/BacklogPage.jsx`, `apps/web/src/lib/hooks.js`, and related tests (serializable sprint transactions, `astraupskill/`).
-- Do your changes in a `git worktree` off `main`. Never stash or reset theirs.
+- When this was written, the owner had uncommitted work in `apps/api/src/services/sprint.service.js`, `issue.service.js`, `apps/web/src/pages/BacklogPage.jsx`, `apps/web/src/lib/hooks.js`, and related tests (serializable sprint transactions, `astraupskill/`). It landed on `main` in `4dba9ab` (2026-09-30).
+- Do your changes in a `git worktree` off `0c1a640` so the line numbers in `training/` match.
 
 **7. Don't trust these docs as evidence.**
 

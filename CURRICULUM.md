@@ -1,8 +1,10 @@
 > This is the curriculum overview for the three-project rebuild course, copied into this repository so links from [rebuild/](rebuild/README.md) resolve. The three parts live on GitHub as [elirc/gitjira](https://github.com/elirc/gitjira), [elirc/stockade](https://github.com/elirc/stockade), and [elirc/relay](https://github.com/elirc/relay), each under `rebuild/`.
+>
+> It is **not** the overview of the main GitJira app. That course is the 15-sprint study path in [README.md](README.md): one merged PR per sprint (#8, #17, #27, #39, #49, #57, #66, #74, #82, #89, #100, #110, #119, #131, #141), plus the follow-up fix #30 and the workflow-hardening PR #143, with tags `sprint-01`…`sprint-15` and releases v0.1.0…v1.0.0. The rebuild under `rebuild/` was added later (October 2026) and shares no code with `apps/` or `packages/`.
 
 # The rebuild curriculum: three systems, one course
 
-Three local learning projects live in this repository, built on 1 October 2026
+Three local learning projects, one per repository, built on 1 October 2026
 through Astra/Sol adversarial builds and expanded into a junior-to-senior
 curriculum for CRUD web application development. Each asks one sharp question,
 answers it with a runnable system, and proves the answer with tests you can
@@ -80,6 +82,31 @@ All three follow the same conventions:
    exercises.
 4. One boundary change at a time, so disagreements have a clear object.
 
+## Warm-up: the same guarantee in both GitJiras (no install needed)
+
+This repository holds two implementations of "a stale writer must not
+overwrite a newer edit". Comparing them before the code tour shows you what the
+rebuild simplified.
+
+1. **Goal:** find the rebuild's compare-and-swap and name its version token.
+   Run `git grep -n "AND version=?" -- rebuild/src`.
+   **Check:** two hits in `rebuild/src/app.js`: the issue edit (around line
+   278) and the archive (around line 296). Each `UPDATE` matches the version
+   the client read and writes `version=version+1` in the same statement. When
+   `result.changes !== 1`, the handler fails with `409 VERSION_CONFLICT` and
+   sends back the current issue.
+2. **Goal:** find the main app's equivalent for backlog sprint assignment and
+   name *its* token. Read `apps/api/src/services/sprint.service.js` lines
+   152–162.
+   **Check:** the token is `updatedAt`, not an integer. The `updateMany`
+   predicate includes `updatedAt: new Date(expectedUpdatedAt)` only when the
+   browser sent one. The new value is
+   `Math.max(Date.now(), issue.updatedAt.getTime() + 1)`, so it always moves
+   forward even if the clock does not. Zero rows changed means a 409. Write
+   one sentence on what the main app gives up by making the token optional.
+   (The browser sends it from `apps/web/src/pages/BacklogPage.jsx`, around
+   line 135.)
+
 ## Suggested path through the course
 
 1. **GitJira** — take the [code tour](rebuild/CODE-TOUR.md), then
@@ -121,7 +148,8 @@ exclude:
   "production" adds: when a real site ships through Plasmic codegen, AWS
   Amplify, and third-party tracking, which promises move out of your code,
   and how do you still verify them? Includes PR-history archaeology on its
-  story-per-PR main branch. Start at its `upskill/LEARNING-PATH.md`.
+  story-per-PR main branch. Start at its `upskill/LEARNING-PATH.md` — on the
+  `upskill-course` branch, not `main` (checked 2026-10-06).
 - [elirc/bootlocalopusv2](https://github.com/elirc/bootlocalopusv2)
   (bootlocalopus) — the grading engine itself: running someone else's
   untrusted code and grading it honestly without the grader lying, hanging,
@@ -177,5 +205,5 @@ Review it with the builder/challenger/verifier protocol, one boundary at a
 time. The design document, challenged and revised, is the deliverable; the
 build is optional and large.
 
-Everything runs locally on this laptop: Node 22.16+, Express, `node:sqlite`,
-Playwright Chromium. No external service is contacted by any project.
+Everything runs locally: Node 22.16+, Express, `node:sqlite`, Playwright
+Chromium. No external service is contacted by any project.

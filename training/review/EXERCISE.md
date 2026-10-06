@@ -1,6 +1,6 @@
 # Blind code review: GitJira at v1.0.0 (60 minutes)
 
-**Target:** committed `main` @ `0c1a640`. Review it in a clean worktree so the owner's uncommitted work doesn't mix in:
+**Target:** commit `0c1a640`. Review it in a clean worktree so later commits on `main` (the `4dba9ab` sprint/backlog work and `astraupskill/`) don't mix in:
 
 ```bash
 git worktree add ../gj-review 0c1a640 && cd ../gj-review

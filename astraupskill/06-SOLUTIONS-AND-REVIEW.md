@@ -12,7 +12,7 @@ The retry helper permits three attempts only for P2034. After exhaustion it repo
 
 ## Source excerpt
 
-From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js).
+From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js), lines 14–28: the retry helper the last paragraph reviews.
 
 ```js
 async function serializable(work) {
@@ -30,77 +30,16 @@ async function serializable(work) {
     }
   }
 }
-
-export async function listSprints(projectKey, actorId) {
-  const project = await loadProject(projectKey, actorId);
-  return prisma.sprint.findMany({
-    where: { projectId: project.id },
-    orderBy: { createdAt: 'asc' },
-    include: { _count: { select: { issues: true } } },
-  });
-}
-
-export async function createSprint(projectKey, actorId, { name, goal }) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  return prisma.sprint.create({ data: { projectId: project.id, name, goal } });
-}
-
-export async function startSprint(projectKey, actorId, sprintId) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  return serializable(async (tx) => {
-    const sprint = await tx.sprint.findFirst({
-      where: { id: sprintId, projectId: project.id },
-      include: { _count: { select: { issues: true } } },
-    });
-    if (!sprint) throw notFound('Sprint');
-
-    // Per-sprint guards live in the state machine (must be PLANNED, must have issues).
-    const nextState = assertTransition('start', sprint.state, { issueCount: sprint._count.issues });
-
-    // LEARN: the state machine's guards passed, but the "one active sprint per
-    // project" rule is the DB partial unique index — and under concurrency it is
-    // the ONLY thing that can enforce it (two starts can both pass the guard).
-    // So we must catch the DB's "no": a unique violation is Prisma error P2002.
-    // We translate it into a clean 409 instead of leaking a raw 500 (review
-    // finding). Check-then-act is a lie under concurrency; the constraint is
-    // the truth, and catching its rejection is how you honor it.
-    try {
-      return await tx.sprint.update({
-        where: { id: sprint.id },
-        data: { state: nextState, startAt: new Date() },
-      });
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        throw conflict('Another sprint is already active in this project');
-      }
-      throw e;
-    }
-  });
-}
-
-export async function completeSprint(projectKey, actorId, sprintId, { moveUnfinishedTo }) {
-  const project = await loadProject(projectKey, actorId, 'sprint:manage');
-  const destination = moveUnfinishedTo === 'backlog' ? null : (moveUnfinishedTo ?? null);
-
-  return serializable(async (tx) => {
-    const sprint = await tx.sprint.findFirst({ where: { id: sprintId, projectId: project.id } });
-    if (!sprint) throw notFound('Sprint');
-
-    const nextState = assertTransition('complete', sprint.state);
-
-    if (destination) {
-      if (destination === sprint.id) {
-        throw conflict('Unfinished issues cannot stay in the completed sprint');
-      }
-      const target = await tx.sprint.findFirst({
-        where: { id: destination, projectId: project.id },
-        select: { state: true },
-      });
-      if (!target) throw notFound('Destination sprint');
-      if (target.state !== 'PLANNED') {
-        throw conflict('Unfinished issues can only move to a planned sprint');
-      }
 ```
+
+## Verify the solutions against source (read-only)
+
+- **Goal:** confirm "three attempts, P2034 only, then a conflict".
+  **Check:** the loop bound is `attempt < 3` (line 15). Retry happens only when `retryable && attempt < 2` (line 23). `retryable` requires both `PrismaClientKnownRequestError` and `code === 'P2034'` (lines 21–22). On the third failure line 24 throws the domain `conflict`, and any other error is rethrown unchanged (line 25).
+- **Goal:** confirm the future-clock answer is exact, not approximate.
+  **Check:** `apps/api/test/sprint.test.js:111` uses `toBe(captured.getTime() + 1)`, an exact equality. A version of line 152 that used plain `Date.now()` would fail it by about 60,000 ms.
+- **Goal:** confirm the assignment-versus-completion answer is checked on final state, not on the response.
+  **Check:** `apps/api/test/sprint.test.js` lines 268–274 accept either 200 or 409 for the assignment. They then read the issue's detail and require `sprintId` to be `null`.
 
 ## Course navigation
 

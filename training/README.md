@@ -2,9 +2,9 @@
 
 GitJira is a Jira clone: an npm-workspaces monorepo with an Express + Prisma/Postgres API with Socket.IO, a BullMQ worker, a React + TanStack Query SPA, and shared Zod, JQL and policy code. It is very well documented (31 ADRs, a runbook, a threat model), well tested, and strong on authz and idempotency. Its weak spots are what only shows up **in production**: more than one machine, a deploy, a reconnect, Redis being down, a real dataset. That's where this lab points you.
 
-**Base commit:** `main` @ `0c1a640`. All exercises target the **committed** code. The working tree holds the owner's uncommitted sprint and backlog work (`apps/api/src/services/sprint.service.js`, `issue.service.js`, `apps/web/src/lib/hooks.js`, `BacklogPage.jsx`, `astraupskill/`, …). Leave it alone, and use `git worktree` for everything.
+**Base commit:** `0c1a640`. All exercises and line numbers target that commit. When this lab was written the owner's sprint and backlog work (`apps/api/src/services/sprint.service.js`, `issue.service.js`, `apps/web/src/lib/hooks.js`, `BacklogPage.jsx`, `astraupskill/`, …) was uncommitted; it landed on `main` in `4dba9ab` (2026-09-30), so `main` now differs from the base in those files. Use `git worktree add <dir> 0c1a640` for everything.
 
-**What's already covered elsewhere, so this lab doesn't re-teach it:** authz, the transactional outbox, idempotency keys, check-then-act races. When an exercise needs them, it links `apprenticeship/curriculum/01..05` (in `Desktop\opusorganize\apprenticeship\curriculum\`).
+**What's already covered elsewhere, so this lab doesn't re-teach it:** authz, the transactional outbox, idempotency keys, check-then-act races. When an exercise needs them, it links `apprenticeship/curriculum/01..05` in the private companion repo [elirc/opusorganize](https://github.com/elirc/opusorganize/tree/main/apprenticeship/curriculum).
 
 ## Suggested order (about 55 hours; S-rung designs are design-only)
 
@@ -29,7 +29,7 @@ If you only have one weekend: do 1, J1, INC-003, and M3 via the agentic exercise
 
 - `ladder/`: 10 tickets (3 junior, 4 mid, 3 senior), each gated by "Explain before touching."
 - `review/`: the 60-minute blind review and the comparison template (29 model findings, sealed).
-- `incidents/`: 5 on-call briefs. The bugs live on branches `training/incidents/001-board-cpu-storm`, `002-missing-notifications`, `003-deploy-story-points`, `004-dashboards-flatline` and `005-live-board-goes-stale`.
+- `incidents/`: 5 on-call briefs. The bugs were authored on local branches `training/incidents/001-board-cpu-storm`, `002-missing-notifications`, `003-deploy-story-points`, `004-dashboards-flatline` and `005-live-board-goes-stale`; those branches were never pushed to GitHub (checked with `git ls-remote` on 2026-10-06), so recreate each one from the diff in its brief (see [incidents/README.md](incidents/README.md)).
 - `navigation/`: evidence-cited architecture, first-change onboarding, 4 "Why?" trade-off drills, and one change request.
 - `agentic/`: a scripted spec → implementer → adversarial reviewer → verify → explain workflow (on M3), plus a GitJira-specific AI-output checklist.
 - `interview/`: 5 STAR scaffolds, 20 questions, a system-design prompt, a mock-defense script, 24 flashcards.
@@ -41,7 +41,7 @@ If you only have one weekend: do 1, J1, INC-003, and M3 via the agentic exercise
   - `docs/process/AUDIT-2026-07.md`: it admits the fabricated drill, which gives away review R25.
   - `docs/RETRO.md`.
   - The GitHub PR review threads, and the `docs/sprints/sprint-NN.md` exercises. They contain the course's planted bugs, which are already fixed on `main` and not reused here.
-  - `astraupskill/` (untracked): the owner's worked change on sprint completion races, which overlaps review R19.
+  - `astraupskill/` (committed in `4dba9ab`, after the base): the owner's worked change on sprint completion races, which overlaps review R19.
 - **Read as claims, not facts:**
   - `docs/RUNBOOK.md`: its Redis-down section is contradicted by the code; see ladder M3.
   - `docs/postmortems/2026-07-10-redis-outage.md`: narrated, never run.

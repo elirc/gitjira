@@ -68,4 +68,4 @@ These model chapters are intentionally available in each project pack for a self
 
 The actual boundary to investigate is shared schemas, API session handling, and cache/query ownership. Current source determines what the app does; a teaching model may introduce a simplified field, policy, or serialized execution order. Keep source reading, model execution, and application verification distinct. Human mastery remains unassessed until the learner produces their own explanation and evidence.
 
-Return to the [all-project guided route](../../../opusorganize/junior-reinforcement/guided-04/README.md) for shared navigation and the measured content/preservation report.
+Return to the [all-project guided route](https://github.com/elirc/opusorganize/blob/main/junior-reinforcement/guided-04/README.md) for shared navigation and the measured content/preservation report.

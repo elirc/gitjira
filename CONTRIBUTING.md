@@ -26,7 +26,10 @@ part of what the repo teaches.
 
 - Pre-commit: lint-staged (ESLint + Prettier on staged files). Pre-commit must stay fast.
 - commit-msg: commitlint.
-- CI: install → lint → format check → test → build. Red CI blocks merge, no exceptions.
+- CI (`.github/workflows/ci.yml`, on every PR and push to `main`): a static job (lint → format check → typecheck →
+  TS-coverage ratchet), a unit job (shared, ui and web tests with coverage gates), an integration job (API tests
+  against a Postgres service container, with a coverage gate), and a build job (build → bundle-size budget).
+  Red CI blocks merge, no exceptions. Playwright E2E runs nightly in `e2e.yml`, not per PR (ADR 0024); `secrets.yml` runs gitleaks.
 
 ## Sprint rituals
 

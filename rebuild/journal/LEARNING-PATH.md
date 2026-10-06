@@ -49,7 +49,7 @@ Labels: "implemented" refers to this local edition, not production scope;
 [VERIFICATION.md](VERIFICATION.md) and [evidence/](evidence/), which later
 additions never rewrite.
 
-When you finish, go to [Stockade](../../stockade-rebuild/README.md). GitJira's
+When you finish, go to [Stockade](https://github.com/elirc/stockade/blob/main/rebuild/README.md). GitJira's
 question was about losing *edits*; Stockade's is about promising the same
 *physical unit* twice — the same compare-and-swap idea, pointed at inventory,
 plus request identity that must survive lost responses and shared cookies.

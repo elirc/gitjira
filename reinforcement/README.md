@@ -33,7 +33,7 @@ If setup blocks app work, finish the dependency-free lab and source-reading task
 
 ## Concepts to revisit when stuck
 
-- [06-caching-correctness.md](../../opusorganize/apprenticeship/curriculum/06-caching-correctness.md)
-- [04-characterization-tests.md](../../opusorganize/apprenticeship/curriculum/04-characterization-tests.md)
+- [06-caching-correctness.md](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/06-caching-correctness.md)
+- [04-characterization-tests.md](https://github.com/elirc/opusorganize/blob/main/apprenticeship/curriculum/04-characterization-tests.md)
 
-The [shared practice protocol](../../opusorganize/junior-reinforcement/PRACTICE_PROTOCOL.md) explains evidence, Git hygiene, and when to use an agent. Keep answers closed until your own attempt is written. Your personal learning status starts **not assessed**.
+The [shared practice protocol](https://github.com/elirc/opusorganize/blob/main/junior-reinforcement/PRACTICE_PROTOCOL.md) explains evidence, Git hygiene, and when to use an agent. Keep answers closed until your own attempt is written. Your personal learning status starts **not assessed**.

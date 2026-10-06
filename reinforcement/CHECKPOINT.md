@@ -25,7 +25,7 @@ Target: 8/10 and no zero in source understanding or model correctness. This is a
 
 - Tomorrow: answer the first two questions in five minutes without opening files.
 - In seven days: reproduce one edge-case test from memory and explain why it matters.
-- In three weeks: apply the idea to a different project in the [ten-project path](../../opusorganize/junior-reinforcement/README.md). Name one assumption that changes.
+- In three weeks: apply the idea to a different project in the [ten-project path](https://github.com/elirc/opusorganize/blob/main/junior-reinforcement/README.md). Name one assumption that changes.
 
 ## Record
 

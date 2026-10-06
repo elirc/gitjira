@@ -10,7 +10,7 @@ Authorization and destination validation remain independent of these concurrency
 
 ## Source excerpt
 
-From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js).
+From [apps/api/src/services/sprint.service.js](../apps/api/src/services/sprint.service.js), lines 130–165: assignment uses all three mechanisms at once.
 
 ```js
 export async function assignIssueToSprint(
@@ -49,34 +49,16 @@ export async function assignIssueToSprint(
     return tx.issue.findUnique({ where: { id: issue.id } });
   });
 }
-
-// Sprint report: committed vs completed story points.
-export async function sprintReport(projectKey, actorId, sprintId) {
-  const project = await loadProject(projectKey, actorId);
-  const sprint = await prisma.sprint.findFirst({ where: { id: sprintId, projectId: project.id } });
-  if (!sprint) throw notFound('Sprint');
-
-  const doneColumnIds = (
-    await prisma.workflowColumn.findMany({
-      where: { projectId: project.id, category: 'DONE' },
-      select: { id: true },
-    })
-  ).map((c) => c.id);
-
-  const issues = await prisma.issue.findMany({
-    where: { sprintId: sprint.id },
-    select: { storyPoints: true, columnId: true, number: true, title: true },
-  });
-
-  const committed = issues.reduce((sum, i) => sum + (i.storyPoints ?? 0), 0);
-  const completed = issues
-    .filter((i) => doneColumnIds.includes(i.columnId))
-    .reduce((sum, i) => sum + (i.storyPoints ?? 0), 0);
-  const unfinished = issues.filter((i) => !doneColumnIds.includes(i.columnId));
-
-  return { sprint, committed, completed, total: issues.length, unfinished };
-}
 ```
+
+## Concept checks (read-only)
+
+1. **Goal:** in the excerpt, label which lines are isolation, which are ownership/lifecycle guards, and which are the optimistic version check.
+   **Check:** isolation is the `serializable(` call (line 137). Guards are the project-scoped sprint lookup and the `COMPLETED` rejection (lines 143–150). The version check is the `updatedAt` term in the `updateMany` predicate (line 156) plus `changed.count === 0` → 409 (lines 160–162). If you can delete any one of the three and still name a test that fails, you have them separated correctly. The tests are listed in [04](04-TESTING-AND-DEBUGGING.md).
+2. **Goal:** compute the next token when the stored timestamp is ahead of the clock.
+   **Check:** `apps/api/test/sprint.test.js` lines 96–112 set `updatedAt` to `Date.now() + 60_000` and expect exactly `captured.getTime() + 1` (line 111). `Math.max(Date.now(), previous + 1)` (line 152) picks the second argument because the wall clock is a minute behind.
+3. **Goal:** compare this with the *other* writer that uses `expectedUpdatedAt`, and judge which is stronger.
+   **Check:** `updateIssue` in `apps/api/src/services/issue.service.js` (lines 173–186) reads the issue, compares timestamps in JavaScript, and only then runs an `update` whose `where` is just `{ id }` (lines 210–212). The compare is not in the write predicate, so two requests can both pass it. Assignment puts the token in the `updateMany` predicate instead. Extended lesson [08](extended-course/08-compare-the-issue-writers.md) works through this difference.
 
 ## Course navigation
 

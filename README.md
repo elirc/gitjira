@@ -16,10 +16,10 @@ on one page, then read the PRs oldest-first.
 git clone https://github.com/elirc/gitjira.git
 cd gitjira
 npm install          # one install for all workspaces
-npm run dev          # boots API (:3000) and web (:5173) together
 docker compose up -d # postgres + redis
 npm run db:migrate -w @gitjira/api   # apply migrations
 npm run db:seed -w @gitjira/api      # demo data (ana@gitjira.dev / demo-password-1)
+npm run dev          # boots API (:3000) and web (:5173) together
 ```
 
 Open http://localhost:5173 — the footer shows a live health check from the API.
@@ -40,19 +40,22 @@ Open http://localhost:5173 — the footer shows a live health check from the API
 1. Read the merged PRs oldest-first, **commit by commit** — each commit message explains
    its reasoning; `// LEARN:` comments explain patterns in place.
 2. Read the review conversations. The disagreements teach more than the approvals.
-3. After each sprint, read its pinned **Snapshot issue** and answer the checkpoint questions.
-4. Do the exercises in `docs/sprints/sprint-NN.md` on your own branches.
+3. After each sprint, read its pinned **Snapshot issue** (sprints 03–15; issues #31…#142) and answer the checkpoint questions.
+4. Do the exercises in `docs/sprints/sprint-NN.md` on your own branches. Briefs exist for sprints 01–11 only; for
+   12–15 use the "For the junior" section of `docs/state/sprint-NN.md` and the sprint's ADRs.
 
 ## Study path — 15 sprints, 15 skills
 
-Each sprint is one merged PR. Read them in order; the skill in bold is the one to
+Each sprint is one merged PR (#8, #17, #27, #39, #49, #57, #66, #74, #82, #89, #100, #110, #119, #131, #141).
+Two more PRs sit between them: #30 (a post-sprint-03 fix that clamps `?limit`) and #143 (workflow hardening,
+after v1.0.0; see [workflowoutcome.md](workflowoutcome.md)). Read them in order; the skill in bold is the one to
 walk away with.
 
 | Sprint                  | Release | Skill to internalize                                                                     |
 | ----------------------- | ------- | ---------------------------------------------------------------------------------------- |
 | 01 Foundation           | —       | **Walking skeleton** — end-to-end thin slice before features                             |
 | 02 Data & Auth          | —       | **Refresh-token rotation + replay detection**; validation at the boundary                |
-| 03 Projects & Issues    | v0.1    | **Check-then-act is a lie under concurrency** (atomic key allocation)                    |
+| 03 Projects & Issues    | —       | **Check-then-act is a lie under concurrency** (atomic key allocation)                    |
 | 04 Kanban board         | —       | **Fractional indexing** — one-row moves; optimistic UI                                   |
 | 05 Detail & comments    | v0.1    | Serializers; the MVP release                                                             |
 | 06 Search & JQL         | v0.2    | **Hand-written tokenizer/parser**; parameterized raw SQL                                 |
@@ -86,7 +89,7 @@ Recurring themes tallied across the project live in **[RETRO.md](docs/RETRO.md)*
 
 ## Source-based improvement course
 
-[Start the course](astraupskill/README.md). It complements the existing project and learning documentation with a focused trace, regression, and practice sequence.
+[Start the course](astraupskill/README.md). It complements the existing project and learning documentation with a focused trace, regression, and practice sequence on sprint assignment vs. completion (the change landed on `main` in `4dba9ab`). Its API tests run through `python scripts/test-local.py`, which starts a throwaway PostgreSQL cluster and needs local PostgreSQL binaries (`--postgres-bin` or `PG_BIN`).
 
 ## Local learning rebuild (October 2026)
 
